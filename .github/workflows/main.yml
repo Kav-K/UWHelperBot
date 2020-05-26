@@ -42,7 +42,9 @@ jobs:
           cd /home/bot
           kill -9 $(cat bot.pid)
           rm bot.pid
-          python3 bot.py &
+          python3 bot.py </dev/null &>/dev/null &
+          logout
+          exit
         host: bot.kaveenk.com
         user: root
         pass: ${{ secrets.SSH_PASS}}
