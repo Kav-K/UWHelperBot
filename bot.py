@@ -49,7 +49,7 @@ async def on_message(message):
 
     if content_array[0] == '!upcoming':
         if (message.channel.name in banned_channels):
-            await message.channel.send("To keep chat clean, you can only use this command in here! Please go to <#707029428043120721>")
+            await message.channel.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
             return
 
         dateMap = {}
