@@ -1,6 +1,8 @@
 import asyncio
 import json
+import os
 import random
+import sys
 import urllib.request
 from datetime import datetime
 from datetime import timedelta
@@ -542,5 +544,35 @@ async def on_message(message):
                         response_message = response_message + 'None'
                     await message.channel.send(response_message)
 
+#Write PID
+pid = str(os.getpid())
+pidfile = "bot.pid"
 
-client.run(TOKEN)
+def writePID():
+    print('writing file')
+    f = open(pidfile, 'w')
+    f.write(pid)
+    f.close()
+
+if os.path.isfile(pidfile):
+    print("Process ID file already exists")
+    sys.exit(1)
+else:
+    writePID()
+
+
+
+
+
+
+#run
+try:
+    client.run(TOKEN)
+except KeyboardInterrupt:
+    print("Caught keyboard interrupt, killing and removing PID")
+    os.remove(pidfile)
+except:
+    print("Removing PID file")
+    os.remove(pidfile)
+finally:
+    sys.exit(0)
