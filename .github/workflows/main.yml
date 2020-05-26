@@ -31,7 +31,7 @@ jobs:
       with:
         host: bot.kaveenk.com
         username: root
-        password: testtest
+        password: ${{ secrets.SSH_PASS }}
         port: 22
         source: "bot.py"
-        target: "/home/bot/test.py"  
+        target: "/home/bot/test/"  
