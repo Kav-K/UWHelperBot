@@ -32,4 +32,4 @@ jobs:
           remote: /home/bot/bottest.py
           host: ${{ secrets.HOST }}
           username: ${{ secrets.SSH_USER }}
-          password: ${{ secrets.PASSWORD }}
+          password: ${{ secrets.SSH_PASS }}
