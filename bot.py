@@ -57,7 +57,7 @@ async def on_message(message):
 
             async def deleteTest():
                 msgTest = await message.channel.send("To keep chat clean, you can only use this command in bot channels! Please go to <#707029428043120721>")
-                asyncio.sleep(2000)
+                asyncio.sleep(2)
                 msgTest.delete()
 
             loop = asyncio.get_event_loop()
