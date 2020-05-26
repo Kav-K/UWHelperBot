@@ -29,9 +29,9 @@ jobs:
     - name: copy file via ssh password
       uses: appleboy/scp-action@master
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.SSH_USER }}
-        password: ${{ secrets.SSH_PASS }}
+        host: bot.kaveenk.com
+        username: root
+        password: testtest
         port: 22
         source: "bot.py"
         target: "/home/bot/test.py"  
