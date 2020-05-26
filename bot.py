@@ -1,4 +1,3 @@
-import random
 import asyncio
 import json
 import random
@@ -531,8 +530,7 @@ async def on_message(message):
                         new_study_room_data[b'members_id'] = json.dumps(new_members_list)
                         redisClient.hmset(f"{message.author.id}-study-room", new_study_room_data)
                 else:
-                    await message.channel.send(f"{content_array[
-                        1]} is not a valid argument. You can add a member to the room with '!members add [list of member mentions]'")
+                    await message.channel.send(f"{content_array[1]} is not a valid argument. You can add a member to the room with '!members add [list of member mentions]'")
             else:
                 if member_role in message.author.roles or admin_role in message.author.roles:
                     members_list = json.loads(study_room_data[b'members_id'])
