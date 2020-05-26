@@ -152,7 +152,7 @@ async def on_message(message):
             user_id = apiResponse['data']['user_id']
             if (apiResponse['data']['department'] != "ENG/Electrical and Computer"):
                 response = "<@" + str(
-                    message.author.id) + "> You are not an ECE student! Please manually validate by contacting the admin team. The admin team has been notified of this incident. <@706658128409657366>"
+                    message.author.id) + "> You are not an ECE student! Please manually validate by contacting the admin team. The admin team has been notified of this incident. <&706658128409657366>"
                 await message.channel.send(response)
                 return
             if (len(apiResponse['data']['telephone_numbers']) > 0):
