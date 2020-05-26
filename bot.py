@@ -35,7 +35,7 @@ async def on_ready():
 
 
 @client.event
-async def on_join(member):
+async def on_member_join(member):
     role = discord.utils.get(member.guild.roles, name="Unverified")
     await member.add_roles(role)
 
@@ -46,25 +46,10 @@ async def on_message(message):
         return
 
     content_array = message.content.split(" ")
-    if content_array[0] == '!teeta':
-        mailResponse = "https://i.imgur.com/dEnudis.png"
-        await message.channel.send(mailResponse)
 
-    elif content_array[0] == '!upcoming':
-
+    if content_array[0] == '!upcoming':
         if (message.channel.name in banned_channels):
-            #await message.channel.send("To keep chat clean, you can only use this command in bot channels! Please go to <#707029428043120721>")
-
-            async def deleteTest():
-                msgTest = await message.channel.send("To keep chat clean, you can only use this command in bot channels! Please go to <#707029428043120721>")
-                asyncio.sleep(2)
-                msgTest.delete()
-
-            loop = asyncio.get_event_loop()
-            deleteTest = loop.create_task(deleteTest())
-            await deleteTest
-
-
+            await message.channel.send("To keep chat clean, you can only use this command in here! Please go to <#707029428043120721>")
             return
 
         dateMap = {}
