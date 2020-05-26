@@ -36,7 +36,7 @@ jobs:
         source: "bot.py"
         target: "/home/bot/" 
     - name: Restart bot!
-    - uses: fifsky/ssh-action@master
+      uses: fifsky/ssh-action@master
       with:
         command: |
           cd /home/bot
