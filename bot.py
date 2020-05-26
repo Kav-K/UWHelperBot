@@ -24,6 +24,9 @@ client = discord.Client()
 WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 WATERLOO_API_URL = "https://api.uwaterloo.ca/v2/directory/"
 redisClient = redis.Redis(host='localhost', port=6379, db=0)
+banned_channels = ["general","faculty-general","public-discussion","offtopic"]
+
+
 
 
 @client.event
@@ -49,8 +52,19 @@ async def on_message(message):
 
     elif content_array[0] == '!upcoming':
 
-        if (message.channel.name == "general"):
-            await message.channel.send("You can only use this command in bot channels! Please go to #general-bot")
+        if (message.channel.name in banned_channels):
+            #await message.channel.send("To keep chat clean, you can only use this command in bot channels! Please go to <#707029428043120721>")
+
+            async def deleteTest():
+                msgTest = await message.channel.send("To keep chat clean, you can only use this command in bot channels! Please go to <#707029428043120721>")
+                asyncio.sleep(2000)
+                msgTest.delete()
+
+            loop = asyncio.get_event_loop()
+            deleteTest = loop.create_task(deleteTest())
+            await deleteTest
+
+
             return
 
         dateMap = {}
