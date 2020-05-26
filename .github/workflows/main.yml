@@ -36,13 +36,15 @@ jobs:
         source: "bot.py"
         target: "/home/bot/" 
     - name: Restart bot!
-    - uses: fifsky/ssh-action@master
+      uses: fifsky/ssh-action@master
       with:
         command: |
           cd /home/bot
           kill -9 $(cat bot.pid)
           rm bot.pid
-          python3 bot.py &
+          python3 bot.py </dev/null &>/dev/null &
+          logout
+          exit
         host: bot.kaveenk.com
         user: root
         pass: ${{ secrets.SSH_PASS}}
