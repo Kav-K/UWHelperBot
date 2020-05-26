@@ -44,7 +44,7 @@ async def on_message(message):
 
     content_array = message.content.split(" ")
     if content_array[0] == '!teeta':
-        mailResponse = "Testing 123 https://i.imgur.com/dEnudis.png"
+        mailResponse = "https://i.imgur.com/dEnudis.png"
         await message.channel.send(mailResponse)
 
     elif content_array[0] == '!upcoming':
