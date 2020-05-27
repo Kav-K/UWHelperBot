@@ -312,6 +312,9 @@ async def on_message(message):
         except:
             await message.channel.send("<@" + str(message.author.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`")
     elif content_array[0] == '!assignments':
+        if (message.channel.name in banned_channels):
+            await message.channel.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
+            return
         try:
             selection = content_array[1]
 
@@ -450,15 +453,84 @@ async def on_message(message):
                         inline=False)
         await message.channel.send(embed=embed)
     elif content_array[0] == '!schedule':
-        embed = discord.Embed(title="Class Schedule",
-                              description="Here is a link to a calendar with class schedules for live lectures and Q&A Sessions. Please contact the admin team if there is anything missing",
-                              color=0x800080)
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-        embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
-        embed.add_field(name="Link",
-                        value="https://calendar.google.com/calendar/embed?src=ag2veuvcsc5k4kaqpsv7sp7e04%40group.calendar.google.com&ctz=America%2FToronto",
-                        inline=False)
-        await message.channel.send(embed=embed)
+
+        try:
+            selection = content_array[1]
+            if (message.channel.name in banned_channels):
+                await message.channel.send(
+                    "To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
+                return
+            if (selection == "119"):
+                embed = discord.Embed()
+                embed.add_field(name="MATH 119",
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for MATH 119",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/fd56XUE.png")
+                await message.channel.send(embed=embed)
+                embed2 = discord.Embed()
+                embed2.set_image(url="https://i.imgur.com/fd56XUE.png")
+                await message.channel.send(embed=embed2)
+            elif (selection == "106"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 106",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 106",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/BPhpXxp.png")
+                await message.channel.send(embed=embed)
+                embed2 = discord.Embed()
+                embed2.set_image(url="https://i.imgur.com/3HbKvvf.png")
+                await message.channel.send(embed=embed2)
+                embed3 = discord.Embed()
+                embed3.set_image(url="https://i.imgur.com/cw9S7GY.png")
+                await message.channel.send(embed=embed3)
+                embed4 = discord.Embed()
+                embed4.add_field(name="Quizzes",
+                                value="Quizzes are every monday from 12AM to midnight.",
+                                inline=False)
+                embed4.set_image(url="https://i.imgur.com/BPhpXxp.png")
+                await message.channel.send(embed=embed4)
+            elif (selection == "140"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 140",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 140",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/YCJQw41.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "124"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 124",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 124",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/mHRB3Cs.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "108"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 108",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 108",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/rMqY50F.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "192"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 192",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 192",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/icdO1m5.png")
+                await message.channel.send(embed=embed)
+            else:
+                await message.channel.send("<@" + str(
+                    message.author.id) + "> You must enter a valid course to view a specific course schedule, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`. Type the command without any options to get a lecture and live session calendar.")
+
+        except:
+            embed = discord.Embed(title="Class Schedule",
+                                  description="Here is a link to a calendar with class schedules for live lectures and Q&A Sessions. Please contact the admin team if there is anything missing.",
+                                  color=0x800080)
+            embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+            embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+            embed.add_field(name="Link",
+                            value="https://calendar.google.com/calendar/embed?src=ag2veuvcsc5k4kaqpsv7sp7e04%40group.calendar.google.com&ctz=America%2FToronto",
+                            inline=False)
+            await message.channel.send(embed=embed)
     elif content_array[0] == '!closeroom':
         allowed = False
         for role in message.author.roles:
