@@ -468,7 +468,7 @@ async def on_message(message):
                 embed.set_image(url="https://i.imgur.com/fd56XUE.png")
                 await message.channel.send(embed=embed)
                 embed2 = discord.Embed()
-                embed2.set_image(url="https://i.imgur.com/fd56XUE.png")
+                embed2.set_image(url="https://i.imgur.com/FgRAdMt.png")
                 await message.channel.send(embed=embed2)
             elif (selection == "106"):
                 embed = discord.Embed()
@@ -487,7 +487,6 @@ async def on_message(message):
                 embed4.add_field(name="Quizzes",
                                 value="Quizzes are every monday from 12AM to midnight.",
                                 inline=False)
-                embed4.set_image(url="https://i.imgur.com/BPhpXxp.png")
                 await message.channel.send(embed=embed4)
             elif (selection == "140"):
                 embed = discord.Embed()
