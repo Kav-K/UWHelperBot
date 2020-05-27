@@ -257,7 +257,60 @@ async def on_message(message):
             response = "<@" + str(message.author.id) + "> You do not have a verification in progress"
             await message.channel.send(response)
 
+    elif content_array[0] == '!breakdown':
+        try:
+            selection = content_array[1]
+            if (selection == "140"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 140",
+                                value="Here is a marking scheme breakdown for ECE 140",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/g2BVcrv.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "124"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 124",
+                                value="Here is a marking scheme breakdown for ECE 124",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/0ivd7nu.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "106"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 106",
+                                value="Here is a marking scheme breakdown for ECE 106",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/mX5DQGf.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "108"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 108",
+                                value="Here is a marking scheme breakdown for ECE 108",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/yXTkxiO.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "192"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 192",
+                                value="Here is a marking scheme breakdown for ECE 192",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/RZrHshS.png")
+                await message.channel.send(embed=embed)
+            elif (selection == "119"):
+                embed = discord.Embed()
+                embed.add_field(name="MATH 119",
+                                value="Here is a marking scheme breakdown for MATH 119",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/lOXxjlo.png")
+                await message.channel.send(embed=embed)
+            else:
 
+                await message.channel.send("<@" + str(message.author.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`")
+
+
+
+
+        except:
+            await message.channel.send("<@" + str(message.author.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`")
     elif content_array[0] == '!assignments':
         try:
             selection = content_array[1]
@@ -276,6 +329,8 @@ async def on_message(message):
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/ipSz35S.png")
                 await message.channel.send(embed=embed)
+            else:
+                await message.channel.send("<@"+str(message.author.id)+" you've made an invalid selection! The available courses to view assignments for are `140` and `124`")
 
         except:
             await message.channel.send("<@"+str(message.author.id)+"> You must enter a course to view assignment sets for, valid entries are `140` and `124`")
