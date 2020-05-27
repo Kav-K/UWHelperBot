@@ -333,7 +333,7 @@ async def on_message(message):
                 embed.set_image(url="https://i.imgur.com/ipSz35S.png")
                 await message.channel.send(embed=embed)
             else:
-                await message.channel.send("<@"+str(message.author.id)+" you've made an invalid selection! The available courses to view assignments for are `140` and `124`")
+                await message.channel.send("<@"+str(message.author.id)+"> you've made an invalid selection! The available courses to view assignments for are `140` and `124`")
 
         except:
             await message.channel.send("<@"+str(message.author.id)+"> You must enter a course to view assignment sets for, valid entries are `140` and `124`")
