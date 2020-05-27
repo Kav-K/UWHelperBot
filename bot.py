@@ -134,8 +134,8 @@ async def on_message(message):
         embed.add_field(name="=help", value="Activate the MathBot", inline=False)
         embed.add_field(name="=tex <LATEX>", value="Create a LaTeX equation", inline=False)
         embed.add_field(name="=wolf <QUERY>", value="Use the wolfram engine to search something up or calculate", inline=False)
-        embed.add_field(name="=assignments <140 OR 124>", value="View assignment questions for 124 and 140 from the textbook", inline=False)
-        embed.add_field(name="=breakdown <course number>", value="View the grading scheme breakdown for a course", inline=False)
+        embed.add_field(name="!assignments <140 OR 124>", value="View assignment questions for 124 and 140 from the textbook", inline=False)
+        embed.add_field(name="!breakdown <course number>", value="View the grading scheme breakdown for a course", inline=False)
         await message.channel.send(embed=embed)
 
     elif content_array[0] == '!verify':
