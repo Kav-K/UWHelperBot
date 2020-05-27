@@ -257,6 +257,28 @@ async def on_message(message):
             response = "<@" + str(message.author.id) + "> You do not have a verification in progress"
             await message.channel.send(response)
 
+
+    elif content_array[0] == '!assignments':
+        try:
+            selection = content_array[1]
+
+            if (selection == "140"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 140",
+                                value="Here are the week-based assignment questions for ECE 140",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/H9X2rru.png")
+                await message.channel.send(embed=embed)
+            elif (selection =="124"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 124",
+                                value="Here are the week-based assignment questions for ECE 124",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/ipSz35S.png")
+                await message.channel.send(embed=embed)
+
+        except:
+            await message.channel.send("<@"+str(message.author.id)+"> You must enter a course to view assignment sets for, valid entries are `140` and `124`")
     elif content_array[0] == '!ldaplookup':
         allowed = False
         for role in message.author.roles:
