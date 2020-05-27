@@ -128,13 +128,14 @@ async def on_message(message):
         embed.add_field(name="!upcoming", value="Get a list of upcoming due dates for the next 7 days", inline=False)
         embed.add_field(name="!verify <watid>", value="Verify your account to use this discord", inline=False)
         embed.add_field(name="!piazza", value="Get our relevant piazza links", inline=False)
-        embed.add_field(name="!schedule", value="View a continuously updating class/lab schedule", inline=False)
+        embed.add_field(name="!schedule <OPTIONAL (course number)>", value="View a continuously updating class/lab schedule, or specify a course code for a more specific content/labs/etc schedule.", inline=False)
         embed.add_field(name="!importantdates", value="Get a full calendar with important dates and due dates",
                         inline=False)
         embed.add_field(name="=help", value="Activate the MathBot", inline=False)
         embed.add_field(name="=tex <LATEX>", value="Create a LaTeX equation", inline=False)
-        embed.add_field(name="=wolf <QUERY>", value="Use the wolfram engine to search something up or calculate",
-                        inline=False)
+        embed.add_field(name="=wolf <QUERY>", value="Use the wolfram engine to search something up or calculate", inline=False)
+        embed.add_field(name="=assignments <140 OR 124>", value="View assignment questions for 124 and 140 from the textbook", inline=False)
+        embed.add_field(name="=breakdown <course number>", value="View the grading scheme breakdown for a course", inline=False)
         await message.channel.send(embed=embed)
 
     elif content_array[0] == '!verify':
