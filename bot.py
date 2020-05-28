@@ -322,6 +322,7 @@ async def on_message(message):
                     redisClient.set(str(user) + ".verified", 1)
                     await message.channel.send("<@" + str(user.id) + "> has been set to Verified status")
                 redisClient.set(str(user) + ".name", name)
+                await user.edit(nick=name)
                 await message.channel.send(
                     "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
                 redisClient.set(str(redisClient.get(str(message.author) + ".watid").decode('utf-8')), 1)
