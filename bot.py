@@ -258,6 +258,109 @@ async def on_message(message):
             response = "<@" + str(message.author.id) + "> You do not have a verification in progress"
             await message.channel.send(response)
 
+    elif content_array[0] == '!devalidate':
+        allowed = False
+        for role in message.author.roles:
+            if role.name == 'Admin':
+                allowed = True
+        if (allowed):
+            try:
+                selection = content_array[1]
+                if (selection == "user"):
+                    user = message.mentions[0]
+                    watid = redisClient.get(str(user) + ".watid").decode('utf-8')
+                    redisClient.delete(watid)
+                    await message.channel.send("Unmarked WatID "+watid)
+                    redisClient.delete(str(user)+".watid")
+                    await message.channel.send("Purged WatID")
+                    redisClient.delete(str(user) + ".verified")
+                    await message.channel.send("Purged verified status")
+                    redisClient.delete(str(user) + ".name")
+                    await message.channel.send("Purged legal name")
+                    redisClient.delete(str(message.author))
+                    redisClient.delete(str(user)+".request")
+                    await message.channel.send("Purged request status")
+                    await message.channel.send("Purged user from database successfully.")
+
+                elif (selection == "watid"):
+                    watid = content_array[2]
+                    redisClient.delete(watid)
+                    await message.channel.send("Unmarked WatID "+watid)
+                else:
+                    await message.channel.send("<@"+str(message.author.id)+"> Invalid selection! You can choose to devalidate a user or a WatID.")
+            except:
+                print("<@+"+str(message.author.id)+"> Invalid syntax or selection: `!devalidate <select 'user' or 'watid'> <value>`")
+
+
+
+    elif (content_array[0] == '!correlate'):
+        allowed = False
+        for role in message.author.roles:
+            if role.name == 'Admin':
+                allowed = True
+        if (allowed):
+            try:
+                user = message.mentions[0]
+                watid = content_array[2]
+
+                try:
+                    ranks = content_array[3]
+                except:
+                    await message.channel.send("No ranks supplied, not applying any ranks.")
+                    ranks = ""
+
+                try:
+                    apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
+                    name = apiResponse['data']['full_name']
+                except:
+                    await message.channel.send("Invalid WatID: "+watid)
+                    return
+
+                redisClient.set(str(user) + ".watid", watid)
+                await message.channel.send("WatID "+watid+" has been validated and correlated to <@"+str(user.id)+">")
+                if ("Verified" in ranks):
+                    redisClient.set(str(user) + ".verified", 1)
+                    await message.channel.send("<@" + str(user.id) + "> has been set to Verified status")
+                redisClient.set(str(user) + ".name", name)
+                await message.channel.send(
+                    "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
+                redisClient.set(str(redisClient.get(str(message.author) + ".watid").decode('utf-8')), 1)
+                await message.channel.send(
+                    "The WatID " + watid + " has been marked for no further verifications.")
+
+
+                #Set ranks
+                isTeaching = False
+                for role in user.roles:
+                    if role.name == 'Teaching Staff' or role.name == "Professor" or role.name == "Teaching Assistant":
+                        isTeaching = True
+                if (isTeaching):
+                    if ("Verified" in ranks or "Guest" in ranks):
+                        await message.channel.send("<@"+str(message.author.id)+"> You may not apply your selected roles to this person.")
+                        return
+                try:
+                    rank_array = ranks.split(",")
+                    for rank in rank_array:
+                        if (rank == ""): break
+                        if ("_" in rank):
+                            rank = rank.replace("_"," ")
+                        rankToGive = discord.utils.get(message.guild.roles, name=rank.strip())
+
+                        await user.add_roles(rankToGive)
+
+                        await message.channel.send("Added " + rank + " role to <@" + str(user.id) + ">")
+
+                except Exception as e:
+
+                    await user.add_roles(discord.utils.get(message.guild.roles,name=ranks.strip()))
+
+
+
+                await message.channel.send("All tasks completed successfully")
+            except Exception as e:
+                print(str(e))
+                print('t4')
+                await message.channel.send("<@"+str(message.author.id)+"> You have entered invalid syntax, or the user you are trying to correlate is invalid. `!correlate <USER MENTION> <WatID>`")
     elif content_array[0] == '!breakdown':
         try:
             selection = content_array[1]
