@@ -34,14 +34,13 @@ class Administrative(commands.Cog, name = 'Administrative'):
 	@commands.command()
 	async def verify(self, ctx, *args):
 		try:
-			watid = args[0]
-
 			messageAuthor = ctx.author
+			watid = args[0]
 
 			if (redisClient.exists(str(messageAuthor) + ".request")):
 				response = "<@" + str(
-					messageAuthor.id) + "> There is already a pending verification request for your WatID, \
-										please use `!confirm <code>` or do `!cancelverification`"
+					messageAuthor.id) + "> There is already a pending verification request for your WatID," \
+										"please use `!confirm <code>` or do `!cancelverification`"
 				await ctx.send(response)
 				return
 			# Ask UW API for information
@@ -51,18 +50,18 @@ class Administrative(commands.Cog, name = 'Administrative'):
 			user_id = apiResponse['data']['user_id']
 			if (apiResponse['data']['department'] != "ENG/Electrical and Computer"):
 				response = "<@" + str(
-					messageAuthor.id) + "> You are not an ECE student! \
-										Please manually validate by contacting \
-										the admin team. The admin team has been \
-										notified of this incident. <@&706658128409657366>"
+					messageAuthor.id) + "> You are not an ECE student!" \
+										"Please manually validate by contacting" \
+										"the admin team. The admin team has been" \
+										"notified of this incident. <@&706658128409657366>"
 				await ctx.send(response)
 				return
 			if (len(apiResponse['data']['telephone_numbers']) > 0):
 				response = "<@" + str(
-					messageAuthor.id) + "> You are a faculty member, and faculty members \
-										require manual validation by an administrative team member. \
-										Please contact the administration team by messaging them directly, \
-										or send an email to k5kumara@uwaterloo.ca."
+					messageAuthor.id) + "> You are a faculty member, and faculty members" \
+										"require manual validation by an administrative team member." \
+										"Please contact the administration team by messaging them directly," \
+										"or send an email to k5kumara@uwaterloo.ca."
 				await ctx.send(response)
 				return;
 			if (redisClient.exists(str(messageAuthor) + ".verified")):
@@ -100,18 +99,18 @@ class Administrative(commands.Cog, name = 'Administrative'):
 				print(e.message)
 
 			response = "<@" + str(
-				messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code \
-									in your email and type `!confirm <code>` in discord to verify \
-									your account. Please check your spam and junk folders."
+				messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code" \
+									"in your email and type `!confirm <code>` in discord to verify" \
+									"your account. Please check your spam and junk folders."
 			redisClient.set(str(messageAuthor) + ".request", 1)
 
 			await ctx.send(response)
 		except Exception as e:
 			print(e)
 			response = "<@" + str(
-				messageAuthor.id) + "> No WatID provided or invalid watID, please use `!verify <watid>`.\
-									 Your WatID is the username in your original email, for example, in \
-									 k5kumara@edu.uwaterloo.ca, the watID is k5kumara."
+				messageAuthor.id) + "> No WatID provided or invalid watID, please use `!verify <watid>`." \
+									"Your WatID is the username in your original email, for example, in " \
+									"k5kumara@edu.uwaterloo.ca, the watID is k5kumara."
 			await ctx.send(response)
 
 	@commands.command()
@@ -150,8 +149,8 @@ class Administrative(commands.Cog, name = 'Administrative'):
 					await ctx.send(response)
 			else:
 				response = "<@" + str(
-					messageAuthor.id) + "> You do not have a pending verification request, \
-										please use `!verify <WATID>` to start."
+					messageAuthor.id) + "> You do not have a pending verification request, "\
+										"please use `!verify <WATID>` to start."
 				await ctx.send(response)
 		except Exception as e:
 			print(e)

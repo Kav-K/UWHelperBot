@@ -21,7 +21,7 @@ class Regular(commands.Cog, name = 'Regular'):
 		self._last_member_ = None
 
 	@commands.command()
-	async def helpme(self, ctx):
+	async def help(self, ctx):
 		embed = discord.Embed(title="Commands", description="Here are a list of commands for the stream 4 bot",
 							  color=0x800080)
 		embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
