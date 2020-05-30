@@ -38,7 +38,7 @@ async def CheckRoomExpiry():
         for channel in study_channels:
             if channel.id != 716100962703376515:
                 channel_data = redisClient.hgetall(room_list[channel.name.replace('-text', '').encode()].decode())
-                expiry_time = datetime.strptime(channel_data[b'expires'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
+                expiry_time = datetime.strptime(channel_data[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
                 time_difference = expiry_time - datetime.now()
 
                 if time_difference < timedelta():
@@ -133,7 +133,7 @@ async def on_message(message):
             try:
                 assert redisClient.hgetall(f"{message.author.id}-study-room") == {}, 'room exists'
                 time = float(content_array[2])
-                assert 0 < time <= 600, 'invalid time'
+                assert 0 < time <= 720, 'invalid time'
                 failed = False
             except IndexError:
                 await message.channel.send('You did not specify a time')
@@ -141,7 +141,7 @@ async def on_message(message):
                 await message.channel.send('Time must be an integer or decimal number representing time in minutes')
             except AssertionError as e:
                 if str(e) == 'invalid time':
-                    await message.channel.send('Time must be between 0 and 600 minutes')
+                    await message.channel.send('Time must be between 0 and 720 minutes')
                 else:
                     await message.channel.send(f"You already have a study room created ({room_name})")
 
@@ -192,7 +192,7 @@ async def on_message(message):
                     'members_id': json.dumps(
                         [member.id for member in message.mentions if member != message.author]),
                     'created': datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-                    'expires': (datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                    'expiry': (datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
                 }
                 try:
                     redisClient.hmset(f"{message.author.id}-study-room", study_room_data)
@@ -206,13 +206,48 @@ async def on_message(message):
                     await member_role.delete()
                     await room_admin_role.delete()
 
-                print(redisClient.hgetall(f"{message.author.id}-study-room"))
-                print(redisClient.hgetall("room_list"))
+        elif content_array[1] == 'time':
+            try:
+                study_room = redisClient.hgetall(f"{message.author.id}-study-room")
+                expiry_time = datetime.strptime(study_room[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
+                time_remaining = expiry_time - datetime.now()
 
-        # elif content_array[1] == 'time':
-        #     try:
-        #         room =
+                await message.channel.send(f"{study_room[b'name'].decode()} will expire at "
+                                           f"{expiry_time.strftime('%H:%M:%S')}.\nYou have "
+                                           f"{time_remaining.seconds // 60} min remaining.")
 
+            except KeyError:
+                await message.channel.send(f"You do not have a study room created")
+
+        elif content_array[1] == 'extend':
+            try:
+                study_room = redisClient.hgetall(f"{message.author.id}-study-room")
+                created_time = datetime.strptime(study_room[b'created'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
+                expiry_time = datetime.strptime(study_room[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
+                time = float(content_array[2])
+                assert 0 < time <= 600, 'invalid time'
+                new_time = expiry_time + timedelta(minutes=time)
+                assert new_time < created_time + timedelta(days=1), 'max time'
+
+                study_room[b'expiry'] = new_time.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                redisClient.hmset(f"{message.author.id}-study-room", study_room)
+
+                await message.channel.send(f"{room_name}'s lifespan extended by {time} min and will expire at "
+                                           f"{new_time.strftime('%H:%M:%S')}.\nYou have "
+                                           f"{(new_time - datetime.now()).seconds // 60} min remaining.")
+
+            except KeyError:
+                await message.channel.send(f"You do not have a study room created")
+            except IndexError:
+                await message.channel.send('You did not specify a time')
+            except ValueError:
+                await message.channel.send('Time must be an integer or decimal number representing time in minutes')
+            except AssertionError as e:
+                if str(e) == 'invalid time':
+                    await message.channel.send('Time must be between 0 and 600 minutes')
+                else:
+                    await message.channel.send(f"{room_name}'s lifespan cannot pass 24 hours and must expire before"
+                                               f"{(created_time + timedelta(days=1)).strftime('%H:%M:%S')}")
 
     # if content_array[0] == '!upcoming':
     #     if (message.channel.name in banned_channels):
