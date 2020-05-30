@@ -57,12 +57,11 @@ async def AdministrativeThread(guild):
                     await member.remove_roles(verifiedRole)
                     redisClient.delete(str(id)+".guestExpiry")
 
+
         # Manage study rooms
         room_list = redisClient.hgetall('room_list')
         study_rooms = discord.utils.get(guild.categories, id=709173209722912779).text_channels
-        print('1')
         for study_room in study_rooms:
-            print('1')
             channel_data = redisClient.hgetall(room_list[study_room.name.replace('-text', '').encode()].decode())
             expiry_time = datetime.strptime(channel_data[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
             time_difference = expiry_time - datetime.now()
