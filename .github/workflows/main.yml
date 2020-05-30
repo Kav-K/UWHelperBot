@@ -35,6 +35,14 @@ jobs:
         port: 22
         source: "bot.py"
         target: "/home/bot/" 
+    - name: Copy via ssh
+      uses: garygrossgarten/github-action-scp@release
+      with:
+        local: botCommands
+        remote: /home/bot/botCommands
+        host: bot.kaveenk.com
+        username: root
+        password: ${{ secrets.SSH_PASS }}
     - name: Restart bot!
       uses: fifsky/ssh-action@master
       with:
