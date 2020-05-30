@@ -120,6 +120,9 @@ class Regular(commands.Cog, name = 'Regular'):
 
 	@commands.command()
 	async def schedule(self, ctx, *args):
+
+		messageAuthor = ctx.author
+
 		try:
 			selection = args[0]
 			if (ctx.message.channel.name in banned_channels):
@@ -252,6 +255,9 @@ class Regular(commands.Cog, name = 'Regular'):
 	
 	@commands.command()
 	async def assignments(self, ctx, *args):
+
+		messageAuthor = ctx.author
+
 		if (ctx.message.channel.name in banned_channels):
 			await ctx.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
 			return

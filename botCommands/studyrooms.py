@@ -20,6 +20,9 @@ class StudyRooms(commands.Cog, name = 'Study Room Commands'):
 
 	@commands.command()
 	async def closeroom(self, ctx):
+
+		messageAuthor = ctx.author
+
 		allowed = False
 		for role in messageAuthor.roles:
 			if role.name == 'Admin':
@@ -50,6 +53,9 @@ class StudyRooms(commands.Cog, name = 'Study Room Commands'):
 
 	@commands.command()
 	async def reserveroom(self, ctx, *args):
+
+		messageAuthor = ctx.author
+
 		guild = ctx.message.guild
 		room_name = f"{messageAuthor.display_name.replace(' ', '-').lower()}-study-room"
 		failed = True
@@ -138,6 +144,9 @@ class StudyRooms(commands.Cog, name = 'Study Room Commands'):
 	
 	@commands.command()
 	async def members(self, ctx, *args):
+
+		messageAuthor = ctx.author
+		
 		guild = ctx.message.guild
 		failed = True
 
