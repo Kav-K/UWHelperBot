@@ -301,6 +301,22 @@ async def on_message(message):
             except AssertionError:
                 await message.channel.send(f"You did not have any mention members")
 
+        elif content_array[1] == 'members':
+            try:
+                study_room = redisClient.hgetall(f"{message.author.id}-study-room")
+                members_list = json.loads(study_room[b'members_id'])
+                if len(members_list) > 0:
+                    response_message = f"Members in {room_name}: "
+                    for member in members_list:
+                        response_message = response_message + '\n' + discord.utils.get(message.guild.members,
+                                                                                       id=member).display_name
+                else:
+                    response_message = f"There are no members in {room_name}"
+                await message.channel.send(response_message)
+            except KeyError:
+                await message.channel.send(f"You do not have a study room created")
+
+
     # if content_array[0] == '!upcoming':
     #     if (message.channel.name in banned_channels):
     #         await message.channel.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
