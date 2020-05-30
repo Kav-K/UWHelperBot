@@ -225,7 +225,7 @@ async def on_message(message):
                 created_time = datetime.strptime(study_room[b'created'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
                 expiry_time = datetime.strptime(study_room[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
                 time = float(content_array[2])
-                assert 0 < time <= 600, 'invalid time'
+                assert 0 < time <= 720, 'invalid time'
                 new_time = expiry_time + timedelta(minutes=time)
                 assert new_time < created_time + timedelta(days=1), 'max time'
 
@@ -244,7 +244,7 @@ async def on_message(message):
                 await message.channel.send('Time must be an integer or decimal number representing time in minutes')
             except AssertionError as e:
                 if str(e) == 'invalid time':
-                    await message.channel.send('Time must be between 0 and 600 minutes')
+                    await message.channel.send('Time must be between 0 and 720 minutes')
                 else:
                     await message.channel.send(f"{room_name}'s lifespan cannot pass 24 hours and must expire before"
                                                f"{(created_time + timedelta(days=1)).strftime('%H:%M:%S')}")
