@@ -32,8 +32,9 @@ class Administrative(commands.Cog, name = 'Administrative'):
 		await member.add_roles(role)
 
 	@commands.command()
-	async def verify(self, ctx, watid):
+	async def verify(self, ctx, *args):
 		try:
+			watid = args[0]
 
 			messageAuthor = ctx.author
 
@@ -133,7 +134,7 @@ class Administrative(commands.Cog, name = 'Administrative'):
 
 					# Mark user and WatID as verified
 					redisClient.set(str(messageAuthor) + ".verified", 1)
-					redisClient.set(str(redisClient.get(str(mmessageAuthor) + ".watid").decode('utf-8')), 1)
+					redisClient.set(str(redisClient.get(str(messageAuthor) + ".watid").decode('utf-8')), 1)
 					redisClient.delete(str(messageAuthor) + ".request")
 					# 706966831268626464
 					role = discord.utils.get(ctx.guild.roles, name="Verified")
@@ -284,7 +285,7 @@ class Administrative(commands.Cog, name = 'Administrative'):
 				await ctx.send("<@"+str(messageAuthor.id)+"> You have entered invalid syntax, or the user you are trying to correlate is invalid. `!correlate <USER MENTION> <WatID>`")
 	
 	@commands.command()
-	async def daplookup(self, ctx, *args):
+	async def ldaplookup(self, ctx, *args):
 
 		messageAuthor = ctx.author
 
