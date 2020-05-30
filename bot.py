@@ -101,16 +101,16 @@ async def on_message(message):
         await message.channel.send('You are ugly DreBot')
 
     elif content_array[0] == '!clearroom':
-        miniRoom = redisClient.hgetall(f"{message.author.id}-study-room")
+        study_room = redisClient.hgetall(f"{message.author.id}-study-room")
 
         text_channel = discord.utils.get(message.guild.text_channels,
-                                         id=int(miniRoom[b'text_id'].decode('utf-8')))
+                                         id=int(study_room[b'text_id'].decode('utf-8')))
         voice_channel = discord.utils.get(message.guild.voice_channels,
-                                          id=int(miniRoom[b'voice_id'].decode('utf-8')))
-        admin_role = discord.utils.get(message.guild.roles, id=int(miniRoom[b'admin_role_id'].decode('utf-8')))
-        member_role = discord.utils.get(message.guild.roles, id=int(miniRoom[b'member_role_id'].decode('utf-8')))
+                                          id=int(study_room[b'voice_id'].decode('utf-8')))
+        admin_role = discord.utils.get(message.guild.roles, id=int(study_room[b'admin_role_id'].decode('utf-8')))
+        member_role = discord.utils.get(message.guild.roles, id=int(study_room[b'member_role_id'].decode('utf-8')))
         new_room_list = redisClient.hgetall('room_list')
-        del new_room_list[miniRoom[b'name']]
+        del new_room_list[study_room[b'name']]
 
         if len(new_room_list) == 0:
             redisClient.delete('room_list')
@@ -248,6 +248,58 @@ async def on_message(message):
                 else:
                     await message.channel.send(f"{room_name}'s lifespan cannot pass 24 hours and must expire before"
                                                f"{(created_time + timedelta(days=1)).strftime('%H:%M:%S')}")
+
+        elif content_array[1] == 'add':
+            try:
+                study_room = redisClient.hgetall(f"{message.author.id}-study-room")
+                member_role = discord.utils.get(message.guild.roles, id=int(study_room[b'member_role_id'].decode('utf-8')))
+                new_members_list = json.loads(study_room[b'members_id'])
+                assert len(message.mentions) > 0
+
+                for member in message.mentions:
+                    if member != message.author:
+                        if member.id not in new_members_list:
+                            await member.add_roles(member_role)
+                            await message.channel.send(
+                                f"Added {member.display_name} to {room_name}-text and {room_name}-voice")
+                            new_members_list.append(member.id)
+                        else:
+                            await message.channel.send(
+                                f"{member.display_name} is already a member of {room_name}")
+
+                    new_study_room = study_room
+                    new_study_room[b'members_id'] = json.dumps(new_members_list)
+                    redisClient.hmset(f"{message.author.id}-study-room", new_study_room)
+            except KeyError:
+                await message.channel.send(f"You do not have a study room created")
+            except AssertionError:
+                await message.channel.send(f"You did not have any mention members")
+
+        elif content_array[1] == 'remove':
+            try:
+                study_room = redisClient.hgetall(f"{message.author.id}-study-room")
+                member_role = discord.utils.get(message.guild.roles, id=int(study_room[b'member_role_id'].decode('utf-8')))
+                new_members_list = json.loads(study_room[b'members_id'])
+                assert len(message.mentions) > 0
+
+                for member in message.mentions:
+                    if member != message.author:
+                        if member.id in new_members_list:
+                            await member.remove_roles(member_role)
+                            await message.channel.send(
+                                f"Removed {member.display_name} from {room_name}-text and {room_name}-voice")
+                            new_members_list.remove(member.id)
+                        else:
+                            await message.channel.send(
+                                f"{member.display_name} is not a member of {room_name}")
+
+                    new_study_room = study_room
+                    new_study_room[b'members_id'] = json.dumps(new_members_list)
+                    redisClient.hmset(f"{message.author.id}-study-room", new_study_room)
+            except KeyError:
+                await message.channel.send(f"You do not have a study room created")
+            except AssertionError:
+                await message.channel.send(f"You did not have any mention members")
 
     # if content_array[0] == '!upcoming':
     #     if (message.channel.name in banned_channels):
