@@ -384,5 +384,5 @@ class Administrative(commands.Cog, name = 'Administrative'):
 						verifiedRole not in member.roles and unverifiedRole not in member.roles and adminRole not in member.roles and teachingRole not in member.roles):
 					await ctx.send("Added unverified role to " + member.name)
 					await member.add_roles(unverifiedRole)
-			await ctx.send("All role validations completed successfully.")
+			await ctx.send("test All role validations completed successfully.")
 
