@@ -131,18 +131,19 @@ async def on_message(message):
 
         if content_array[1] == 'create':
             try:
+                assert redisClient.hgetall(f"{message.author.id}-study-room") == {}, 'room exists'
                 time = float(content_array[2])
-                assert(0 < time <= 600)
-                assert(redisClient.get(f"{message.author.id}-study-room") is None)
+                assert 0 < time <= 600, 'invalid time'
                 failed = False
             except IndexError:
                 await message.channel.send('You did not specify a time')
             except ValueError:
                 await message.channel.send('Time must be an integer or decimal number representing time in minutes')
-            except AssertionError:
-                await message.channel.send('Time must be between 0 and 600 minutes')
-            except redis.exceptions.ResponseError:
-                await message.channel.send(f"You already have a study room created ({room_name})")
+            except AssertionError as e:
+                if str(e) == 'invalid time':
+                    await message.channel.send('Time must be between 0 and 600 minutes')
+                else:
+                    await message.channel.send(f"You already have a study room created ({room_name})")
 
             if not failed:
                 members = message.mentions
@@ -207,6 +208,10 @@ async def on_message(message):
 
                 print(redisClient.hgetall(f"{message.author.id}-study-room"))
                 print(redisClient.hgetall("room_list"))
+
+        # elif content_array[1] == 'time':
+        #     try:
+        #         room =
 
 
     # if content_array[0] == '!upcoming':
