@@ -316,6 +316,20 @@ async def on_message(message):
             except KeyError:
                 await message.channel.send(f"You do not have a study room created")
 
+        elif content_array[1] == 'help':
+            response_message = 'Here are the following commands for study rooms:\n' \
+                               '- !room create <time> [mentions]\n' \
+                               '- !room time\n' \
+                               '- !room extend <time>\n' \
+                               '- !room add [mentions]\n' \
+                               '- !room remove [mentions]\n' \
+                               '- !room members\n\n' \
+                               'Example: !room create 60 @Feridun @Math\n\n' \
+                               'Note: All commands can be used in any text channel. ' \
+                               'When adding members to the room, use #general-bot or any channel that ' \
+                               'the members are already a part of.'
+
+            await message.channel.send(response_message)
 
     # if content_array[0] == '!upcoming':
     #     if (message.channel.name in banned_channels):
