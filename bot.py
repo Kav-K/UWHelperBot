@@ -31,19 +31,50 @@ async def CheckRoomExpiry():
     guild = discord.utils.get(client.guilds, id=706657592578932797)
 
     while True:
+        SLEEP_TIME = 10
         room_list = redisClient.hgetall('room_list')
         study_channels = discord.utils.get(guild.categories, id=709173209722912779).text_channels
-        print(room_list)
 
         for channel in study_channels:
             if channel.id != 716100962703376515:
-                print(channel)
                 channel_data = redisClient.hgetall(room_list[channel.name.replace('-text', '').encode()].decode())
-                # expiry_time = datetime.strptime(channel_data[b'expires'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
-                print(channel_data)
+                expiry_time = datetime.strptime(channel_data[b'expires'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
+                time_difference = expiry_time - datetime.now()
+
+                if time_difference < timedelta():
+                    text_channel = discord.utils.get(guild.text_channels,
+                                                     id=int(channel_data[b'text_id'].decode('utf-8')))
+                    voice_channel = discord.utils.get(guild.voice_channels,
+                                                      id=int(channel_data[b'voice_id'].decode('utf-8')))
+                    admin_role = discord.utils.get(guild.roles,
+                                                   id=int(channel_data[b'admin_role_id'].decode('utf-8')))
+                    member_role = discord.utils.get(guild.roles,
+                                                    id=int(channel_data[b'member_role_id'].decode('utf-8')))
+                    new_room_list = redisClient.hgetall('room_list')
+                    del new_room_list[channel_data[b'name']]
+
+                    if len(new_room_list) == 0:
+                        redisClient.delete('room_list')
+                    else:
+                        redisClient.hmset('room_list', new_room_list)
+
+                    redisClient.delete(room_list[channel.name.replace('-text', '').encode()].decode())
+                    await text_channel.delete()
+                    await voice_channel.delete()
+                    await member_role.delete()
+                    await admin_role.delete()
+
+                elif timedelta(seconds=30) < time_difference < timedelta(seconds=30 + SLEEP_TIME):
+                    await channel.send(f"{channel.name.replace('-text', '')} will be deleted in 1 minute")
+
+                elif timedelta(minutes=1) < time_difference < timedelta(minutes=1, seconds=SLEEP_TIME):
+                    await channel.send(f"{channel.name.replace('-text', '')} will be deleted in 10 minutes")
+
+                elif timedelta(minutes=1, seconds=30) < time_difference < timedelta(minutes=1, seconds=30 + SLEEP_TIME):
+                    await channel.send(f"{channel.name.replace('-text', '')} will be deleted in 1 hour")
 
         await asyncio.sleep(10)
-        print('hey there')
+
 
 @client.event
 async def on_ready():
@@ -51,7 +82,6 @@ async def on_ready():
 
     roomThread = asyncio.get_event_loop().create_task(CheckRoomExpiry())
     await roomThread
-
 
 
 @client.event
@@ -97,72 +127,86 @@ async def on_message(message):
         guild = message.guild
         author = message.author
         room_name = f"{author.display_name.replace(' ', '-').lower()}-study-room"
+        failed = True
 
         if content_array[1] == 'create':
-            time = float(content_array[2])
-            members = message.mentions
-            room_admin_role = await guild.create_role(name=f"{room_name}-admin")
-            member_role = await guild.create_role(name=f"{room_name}-member")
-            everyone_role = discord.utils.get(guild.roles, name='@everyone')
-
-            await message.author.add_roles(room_admin_role)
-            for member in members:
-                if member != author:
-                    await member.add_roles(member_role)
-
-            voice_overwrites = {
-                everyone_role: discord.PermissionOverwrite(view_channel=False),
-                member_role: discord.PermissionOverwrite(view_channel=True),
-                room_admin_role: discord.PermissionOverwrite(view_channel=True, kick_members=True,
-                                                             mute_members=True,
-                                                             deafen_members=True)
-            }
-
-            text_overwrites = {
-                everyone_role: discord.PermissionOverwrite(view_channel=False),
-                member_role: discord.PermissionOverwrite(view_channel=True),
-                room_admin_role: discord.PermissionOverwrite(view_channel=True, kick_members=True)
-            }
-
-            voice_channel = await guild.create_voice_channel(f"{room_name}-voice", overwrites=voice_overwrites,
-                                                             category=discord.utils.get(guild.categories,
-                                                                                        id=709173209722912779))
-            text_channel = await guild.create_text_channel(f"{room_name}-text", overwrites=text_overwrites,
-                                                           category=discord.utils.get(guild.categories,
-                                                                                      id=709173209722912779))
-            await message.channel.send(
-                f"Created {room_name}-text and {room_name}-voice\nReserved for {time} min")
-
-            print((datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
-            assert(isinstance((datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"), str))
-
-            study_room_data = {
-                'name': room_name,
-                'voice_id': voice_channel.id,
-                'text_id': text_channel.id,
-                'admin_id': message.author.id,
-                'admin_role_id': room_admin_role.id,
-                'member_role_id': member_role.id,
-                'members_id': json.dumps(
-                    [member.id for member in message.mentions if member != message.author]),
-                'created': datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
-                'expires': (datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-            }
             try:
-                redisClient.hmset(f"{message.author.id}-study-room", study_room_data)
+                time = float(content_array[2])
+                assert(0 < time <= 600)
+                assert(redisClient.get(f"{message.author.id}-study-room") is None)
+                failed = False
+            except IndexError:
+                await message.channel.send('You did not specify a time')
+            except ValueError:
+                await message.channel.send('Time must be an integer or decimal number representing time in minutes')
+            except AssertionError:
+                await message.channel.send('Time must be between 0 and 600 minutes')
+            except redis.exceptions.ResponseError:
+                await message.channel.send(f"You already have a study room created ({room_name})")
 
-                room_list = redisClient.hgetall('room_list')
-                room_list[room_name] = f"{message.author.id}-study-room"
-                redisClient.hmset('room_list', room_list)
-            except Exception as e:
-                print(e)
-                await text_channel.delete()
-                await voice_channel.delete()
-                await member_role.delete()
-                await room_admin_role.delete()
+            if not failed:
+                members = message.mentions
+                room_admin_role = await guild.create_role(name=f"{room_name}-admin")
+                member_role = await guild.create_role(name=f"{room_name}-member")
+                everyone_role = discord.utils.get(guild.roles, name='@everyone')
 
-            print(redisClient.hgetall(f"{message.author.id}-study-room"))
-            print(redisClient.hgetall("room_list"))
+                await message.author.add_roles(room_admin_role)
+                for member in members:
+                    if member != author:
+                        await member.add_roles(member_role)
+
+                voice_overwrites = {
+                    everyone_role: discord.PermissionOverwrite(view_channel=False),
+                    member_role: discord.PermissionOverwrite(view_channel=True),
+                    room_admin_role: discord.PermissionOverwrite(view_channel=True, kick_members=True,
+                                                                 mute_members=True,
+                                                                 deafen_members=True)
+                }
+
+                text_overwrites = {
+                    everyone_role: discord.PermissionOverwrite(view_channel=False),
+                    member_role: discord.PermissionOverwrite(view_channel=True),
+                    room_admin_role: discord.PermissionOverwrite(view_channel=True, kick_members=True)
+                }
+
+                voice_channel = await guild.create_voice_channel(f"{room_name}-voice", overwrites=voice_overwrites,
+                                                                 category=discord.utils.get(guild.categories,
+                                                                                            id=709173209722912779))
+                text_channel = await guild.create_text_channel(f"{room_name}-text", overwrites=text_overwrites,
+                                                               category=discord.utils.get(guild.categories,
+                                                                                          id=709173209722912779))
+                await message.channel.send(
+                    f"Created {room_name}-text and {room_name}-voice\nReserved for {time} min")
+
+                print((datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
+                assert(isinstance((datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"), str))
+
+                study_room_data = {
+                    'name': room_name,
+                    'voice_id': voice_channel.id,
+                    'text_id': text_channel.id,
+                    'admin_id': message.author.id,
+                    'admin_role_id': room_admin_role.id,
+                    'member_role_id': member_role.id,
+                    'members_id': json.dumps(
+                        [member.id for member in message.mentions if member != message.author]),
+                    'created': datetime.now().strftime("%Y-%m-%dT%H:%M:%S.%fZ"),
+                    'expires': (datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+                }
+                try:
+                    redisClient.hmset(f"{message.author.id}-study-room", study_room_data)
+                    room_list = redisClient.hgetall('room_list')
+                    room_list[room_name] = f"{message.author.id}-study-room"
+                    redisClient.hmset('room_list', room_list)
+                except Exception as e:
+                    print(e)
+                    await text_channel.delete()
+                    await voice_channel.delete()
+                    await member_role.delete()
+                    await room_admin_role.delete()
+
+                print(redisClient.hgetall(f"{message.author.id}-study-room"))
+                print(redisClient.hgetall("room_list"))
 
 
     # if content_array[0] == '!upcoming':
