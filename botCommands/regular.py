@@ -1,4 +1,5 @@
 import pytz
+import requests
 import urllib.request
 
 from datetime import datetime
@@ -11,6 +12,8 @@ import discord
 from discord.ext import commands
 
 banned_channels = ["general","faculty-general","public-discussion","offtopic"]
+
+WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 
 # Regular
 class Regular(commands.Cog, name = 'Regular'):
@@ -306,3 +309,49 @@ class Regular(commands.Cog, name = 'Regular'):
 						value="https://calendar.google.com/calendar/embed?src=k5kumara%40edu.uwaterloo.ca&ctz=America%2FToronto",
 						inline=False)
 		await ctx.send(embed=embed)
+
+	@commands.command()
+	async def infosessions(self, ctx):
+		embed = discord.Embed(title="Co-Op Info Sessions",
+							  description="Here is a list of upcoming info sessions",
+							  color=0x800080)
+
+		apiResponse = requests.get("https://api.uwaterloo.ca/v2/resources/infosessions.json.?key=" + WATERLOO_API_KEY).json()
+
+		for i, event in enumerate(apiResponse['data']):
+
+			# Only print the 20 upcoming events
+			if i > 20:
+				break
+
+			# Only prints data if it is after a certain date
+			eventDate = datetime.strptime(event['date'], "%Y-%m-%d")
+
+			if eventDate < datetime.now():
+				continue
+
+			# Combine information
+			
+			dateInformation = eventDate.strftime("%B %d, ") + " at " + event['start_time'] + " to " + event['end_time'] + "\n"
+
+			eventDescription = event['description'][:100] + "...\n"
+
+			eventLink = "[Link to the Event]" + "(" + event['link'] + ") "
+
+			combinedDescription = dateInformation + eventDescription + eventLink
+
+			embed.add_field(name=event['employer'], value = combinedDescription, 
+						inline=False)
+
+		embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+		embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+
+		await ctx.send(embed=embed)
+
+	@commands.command()
+	async def fml(self, ctx):
+		# Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
+		finalExamDate = datetime.strptime("2020-08-07", "%Y-%m-%d")
+		encouragingMessage = "Hang in there! You've got about " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
+		await ctx.send(encouragingMessage)
+
