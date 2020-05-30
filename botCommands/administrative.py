@@ -470,6 +470,10 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send("This user is already a guest on this server!")
                 else:
                     redisClient.set(str(user.id) + ".guestExpiry", str(endDate))
+                    guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
+                    verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
+                    await user.add_roles(guestRole)
+                    await user.add_roles(verifiedRole)
                     await ctx.send("Granted <@" + str(user.id) + "> temporary membership for " + str(time) + " hours.")
             except Exception as e:
                 print(str(e))
