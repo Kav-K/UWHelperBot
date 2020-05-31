@@ -31,7 +31,7 @@ class StudyRooms(commands.Cog, name='Study Room Commands'):
         if allowed:
             room_list = redisClient.hgetall('room_list')
             study_room = ctx.message.channel
-            if study_room.name in room_list:
+            if study_room.name.replace('-text', '') in room_list:
                 study_room = redisClient.hgetall(room_list[study_room.name.replace('-text', '').encode()].decode())
 
                 text_channel = discord.utils.get(guild.text_channels,
