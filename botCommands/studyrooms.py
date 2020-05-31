@@ -30,10 +30,10 @@ class StudyRooms(commands.Cog, name='Study Room Commands'):
 
         if allowed:
             room_list = redisClient.hgetall('room_list')
-            study_room = ctx.message.channel
-            if study_room.name.replace('-text', '') in room_list:
-                study_room = redisClient.hgetall(room_list[study_room.name.replace('-text', '').encode()].decode())
-
+            channel = ctx.message.channel
+            if channel.name.replace('-text', '').encode() in room_list:
+                redis_room_name = room_list[channel.name.replace('-text', '').encode()].decode()
+                study_room = redisClient.hgetall(redis_room_name)
                 text_channel = discord.utils.get(guild.text_channels,
                                                  id=int(study_room[b'text_id'].decode('utf-8')))
                 voice_channel = discord.utils.get(guild.voice_channels,
@@ -42,15 +42,14 @@ class StudyRooms(commands.Cog, name='Study Room Commands'):
                                                id=int(study_room[b'admin_role_id'].decode('utf-8')))
                 member_role = discord.utils.get(guild.roles,
                                                 id=int(study_room[b'member_role_id'].decode('utf-8')))
-                new_room_list = redisClient.hgetall('room_list')
+                new_room_list = room_list
                 del new_room_list[study_room[b'name']]
 
                 if len(new_room_list) == 0:
                     redisClient.delete('room_list')
                 else:
                     redisClient.hmset('room_list', new_room_list)
-
-                redisClient.delete(room_list[study_room.name.replace('-text', '').encode()].decode())
+                redisClient.delete(redis_room_name)
                 await text_channel.delete()
                 await voice_channel.delete()
                 await member_role.delete()
