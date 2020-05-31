@@ -62,42 +62,45 @@ async def AdministrativeThread(guild):
         room_list = redisClient.hgetall('room_list')
         study_rooms = discord.utils.get(guild.categories, id=709173209722912779).text_channels
         for study_room in study_rooms:
-            channel_data = redisClient.hgetall(room_list[study_room.name.replace('-text', '').encode()].decode())
-            expiry_time = datetime.strptime(channel_data[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
-            time_difference = expiry_time - datetime.now()
+            try:
+                channel_data = redisClient.hgetall(room_list[study_room.name.replace('-text', '').encode()].decode())
+                expiry_time = datetime.strptime(channel_data[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
+                time_difference = expiry_time - datetime.now()
 
-            if time_difference < timedelta():
-                text_channel = discord.utils.get(guild.text_channels,
-                                                 id=int(channel_data[b'text_id'].decode('utf-8')))
-                voice_channel = discord.utils.get(guild.voice_channels,
-                                                  id=int(channel_data[b'voice_id'].decode('utf-8')))
-                admin_role = discord.utils.get(guild.roles,
-                                               id=int(channel_data[b'admin_role_id'].decode('utf-8')))
-                member_role = discord.utils.get(guild.roles,
-                                                id=int(channel_data[b'member_role_id'].decode('utf-8')))
-                new_room_list = redisClient.hgetall('room_list')
-                del new_room_list[channel_data[b'name']]
+                if time_difference < timedelta():
+                    text_channel = discord.utils.get(guild.text_channels,
+                                                     id=int(channel_data[b'text_id'].decode('utf-8')))
+                    voice_channel = discord.utils.get(guild.voice_channels,
+                                                      id=int(channel_data[b'voice_id'].decode('utf-8')))
+                    admin_role = discord.utils.get(guild.roles,
+                                                   id=int(channel_data[b'admin_role_id'].decode('utf-8')))
+                    member_role = discord.utils.get(guild.roles,
+                                                    id=int(channel_data[b'member_role_id'].decode('utf-8')))
+                    new_room_list = redisClient.hgetall('room_list')
+                    del new_room_list[channel_data[b'name']]
 
-                if len(new_room_list) == 0:
-                    redisClient.delete('room_list')
-                else:
-                    redisClient.hmset('room_list', new_room_list)
+                    if len(new_room_list) == 0:
+                        redisClient.delete('room_list')
+                    else:
+                        redisClient.hmset('room_list', new_room_list)
 
-                redisClient.delete(room_list[study_room.name.replace('-text', '').encode()].decode())
-                await text_channel.delete()
-                await voice_channel.delete()
-                await member_role.delete()
-                await admin_role.delete()
+                    redisClient.delete(room_list[study_room.name.replace('-text', '').encode()].decode())
+                    await text_channel.delete()
+                    await voice_channel.delete()
+                    await member_role.delete()
+                    await admin_role.delete()
 
-            elif timedelta(seconds=30) < time_difference < timedelta(seconds=30 + SLEEP_TIME):
-                await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 1 minute")
+                elif timedelta(minutes=1) < time_difference < timedelta(minutes=1, seconds=SLEEP_TIME):
+                    await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 1 minute")
 
-            elif timedelta(minutes=1) < time_difference < timedelta(minutes=1, seconds=SLEEP_TIME):
-                await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 10 minutes")
+                elif timedelta(minutes=10) < time_difference < timedelta(minutes=10, seconds=SLEEP_TIME):
+                    await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 10 minutes")
 
-            elif timedelta(minutes=1, seconds=30) < time_difference < timedelta(minutes=1,
-                                                                                seconds=30 + SLEEP_TIME):
-                await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 1 hour")
+                elif timedelta(hours=1) < time_difference < timedelta(hours=1, seconds=SLEEP_TIME):
+                    await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 1 hour")
+
+            except Exception as e:
+                print(e)
 
         await asyncio.sleep(SLEEP_TIME)
 
