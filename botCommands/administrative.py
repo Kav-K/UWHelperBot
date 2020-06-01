@@ -29,6 +29,7 @@ async def AdministrativeThread(guild):
     sec2Role = discord.utils.get(guild.roles, name="Section 2")
     sec1Role = discord.utils.get(guild.roles, name="Section 1")
     teachingStaffRole = discord.utils.get(guild.roles, name="Teaching Staff")
+    adminChannel = discord.utils.get(guild.channels, id=706664390304202814)
     while True:
         est = timezone('US/Eastern')
         currentTime = datetime.now().astimezone(est)
@@ -39,18 +40,29 @@ async def AdministrativeThread(guild):
             id = member.id
             if (teachingStaffRole in member.roles and verifiedRole in member.roles):
                 await member.remove_roles(verifiedRole)
-                adminChannel = discord.utils.get(guild.channels, id=706664390304202814)
                 await adminChannel.send("WARNING: The user <@"+str(id)+"> is teaching faculty and was found to have the Verified role. It has been removed.")
 
 
-        #Remove section roles for guests
+        #Remove section roles for guests, remove double section ranks.
         for member in guild.members:
             id = member.id
+
+            if (sec1Role in member.roles and sec2Role in member.roles):
+                await member.remove_roles(sec1Role)
+                await adminChannel.send("WARNING: The user <@" + str(
+                    id) + "> has duplicate roles. The user has been reset to the section 2 role. Section 1 role has been removed.")
+
+
             if (guestRole in member.roles):
                 if (sec2Role in member.roles):
                     await member.remove_roles(sec2Role)
-                elif (sec1Role in member.roles):
+                    await adminChannel.send("WARNING: The user <@" + str(
+                        id) + "> is a guest and was found to have a sectional rank. It has been removed.")
+
+                if (sec1Role in member.roles):
                     await member.remove_roles(sec1Role)
+                    await adminChannel.send("WARNING: The user <@" + str(
+                        id) + "> is a guest and was found to have a sectional rank. It has been removed.")
 
 
             #Expire memberships for temporary guests
