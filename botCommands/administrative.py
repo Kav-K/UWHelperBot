@@ -518,7 +518,10 @@ class Administrative(commands.Cog, name='Administrative'):
 
             else:
                 await ctx.send("The administrative daemon thread is already running!")
-
+    @commands.command()
+    async def eatass(self,ctx):
+        await ctx.send("https://gyazo.com/38cbda993854e66a5833284186279ce8")
+        await ctx.send("You got your ass ate.")
     @commands.command()
     async def guest(self, ctx, *args):
         for role in ctx.author.roles:
