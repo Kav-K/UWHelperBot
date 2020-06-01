@@ -28,10 +28,20 @@ async def AdministrativeThread(guild):
     verifiedRole = discord.utils.get(guild.roles, name="Verified")
     sec2Role = discord.utils.get(guild.roles, name="Section 2")
     sec1Role = discord.utils.get(guild.roles, name="Section 1")
+    teachingStaffRole = discord.utils.get(guild.roles, name="Teaching Staff")
     while True:
         est = timezone('US/Eastern')
         currentTime = datetime.now().astimezone(est)
         SLEEP_TIME = 5
+
+        #Remove verified role for professors!
+        for member in guild.members:
+            id = member.id
+            if (teachingStaffRole in member.roles and verifiedRole in member.roles):
+                await member.remove_roles(verifiedRole)
+                adminChannel = discord.utils.get(guild.channels, id=706664390304202814)
+                await adminChannel.send("WARNING: The user <@"+str(id)+"> is teaching faculty and was found to have the Verified role. It has been removed.")
+
 
         #Remove section roles for guests
         for member in guild.members:
