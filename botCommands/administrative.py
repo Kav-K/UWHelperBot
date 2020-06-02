@@ -525,7 +525,11 @@ class Administrative(commands.Cog, name='Administrative'):
                     continue
 
                 try:
-                    if (redisClient.exists(str(member.id)+".watid") and not redisClient.exists(str(member.id)+".rolevalidated")):
+                    if (redisClient.exists(str(member.id)+".watid")):
+                        if (redisClient.exists(str(member.id) + ".rolevalidated")):
+                            continue
+
+
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
                         watID = redisClient.get(str(member.id) + ".watid").decode("utf-8")
                         await adminChannel.send("The WatID for user <@" + str(member.id) + "> is "+watID)
