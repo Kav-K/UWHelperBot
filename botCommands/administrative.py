@@ -29,7 +29,7 @@ async def AdministrativeThread(guild):
     sec2Role = discord.utils.get(guild.roles, name="Section 2")
     sec1Role = discord.utils.get(guild.roles, name="Section 1")
     teachingStaffRole = discord.utils.get(guild.roles, name="Teaching Staff")
-    adminChannel = discord.utils.get(guild.channels, id=706664390304202814)
+    adminChannel = discord.utils.get(guild.channels, id=716954090495541248)
     while True:
         est = timezone('US/Eastern')
         currentTime = datetime.now().astimezone(est)
@@ -137,6 +137,18 @@ class Administrative(commands.Cog, name='Administrative'):
 
         # Not really sure what this does
         self._last_member_ = None
+
+
+    @commands.Cog.listener()
+    async def on_message(self, ctx):
+        global daemonRunning
+        if (daemonRunning == False):
+            daemonRunning = True
+            adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(ctx.guild))
+            adminChannel = discord.utils.get(ctx.guild.channels, id=716954090495541248)
+            await adminChannel.send("The administrative daemon thread is now running.")
+
+            await adminThread
 
 
     @commands.Cog.listener()
