@@ -17,7 +17,8 @@ class bullshit(commands.Cog, name = 'Bullshit'):
 		trentDictionary = {}
 
 		trentDictionary["im blue imma be im daie"] = 'https://www.youtube.com/watch?v=HgV1O0X4uXI'
-
+		trentDictionary["HERBO WTFWUA?"] = 'https://open.spotify.com/track/1MAF77bjR5toanBgnsMQ8k?si=kVMlN2tFQbyd3iSQKfGShw'
+		
 		try:
 			print(phrase)
 			await ctx.send(trentDictionary[phrase])
