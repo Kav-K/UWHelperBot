@@ -309,6 +309,22 @@ class Administrative(commands.Cog, name='Administrative'):
                     await messageAuthor.add_roles(verifiedRole)
                     await messageAuthor.remove_roles(unverifiedRole)
 
+                    try:
+                        watID = redisClient.get(str(messageAuthor.id) + ".watid").decode("utf-8")
+                        sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
+                        sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
+
+                        adminChannel = discord.utils.get(messageAuthor.guild.channels, id=716954090495541248)
+                        await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
+                        if (watID in section2List):
+                            await messageAuthor.add_roles(sec2Role)
+                            await adminChannel.send("Added the Section 2 Role to <@" + str(messageAuthor.id) + ">.")
+                        else:
+                            await messageAuthor.add_roles(sec1Role)
+                            await adminChannel.send("Added the Section 1 Role to <@" + str(messageAuthor.id) + ">.")
+                    except Exception as e:
+                        print(str(e))
+
                 else:
                     response = "<@" + str(messageAuthor.id) + "> Invalid verification code."
                     await ctx.send(response)
@@ -547,10 +563,10 @@ class Administrative(commands.Cog, name='Administrative'):
             verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
             guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
             teachingRole = discord.utils.get(ctx.message.guild.roles, name="Teaching Staff")
-
+            bot = discord.utils.get(ctx.message.guild.roles, name="Bot")
 
             for member in ctx.author.guild.members:
-                if (teachingRole in member.roles or guestRole in member.roles or verifiedRole not in member.roles):
+                if (teachingRole in member.roles or guestRole in member.roles or verifiedRole not in member.roles or bot in member.roles):
                     continue
 
                 try:
