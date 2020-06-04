@@ -50,7 +50,6 @@ class StudyRooms(commands.Cog, name = 'Study Room Commands'):
 		else:
 			await ctx.send("You are not allowed to use this command, <@" + str(messageAuthor.id) + ">!")
 
-
 	@commands.command()
 	async def reserveroom(self, ctx, *args):
 

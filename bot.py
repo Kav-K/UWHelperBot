@@ -11,6 +11,7 @@ TOKEN = "NzA2Njc4Mzk2MzEwMjU3NzI1.Xq9v2A.iCXfvgwxz4fnmlrRUvTlA_JnSTA"
 from botCommands.administrative import Administrative
 from botCommands.regular import Regular
 from botCommands.studyrooms import StudyRooms
+from botCommands.bullshit import bullshit
 
 # Write PID
 pid = str(os.getpid())
@@ -34,6 +35,7 @@ def main():
 	bot.add_cog(Administrative(bot))
 	bot.add_cog(Regular(bot))
 	bot.add_cog(StudyRooms(bot))
+	bot.add_cog(bullshit(bot))
 	bot.run(TOKEN)
 
 
