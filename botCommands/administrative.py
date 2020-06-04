@@ -564,9 +564,10 @@ class Administrative(commands.Cog, name='Administrative'):
             guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
             teachingRole = discord.utils.get(ctx.message.guild.roles, name="Teaching Staff")
             bot = discord.utils.get(ctx.message.guild.roles, name="Bot")
+            pending = discord.utils.get(ctx.message.guild.roles, name="pending")
 
             for member in ctx.author.guild.members:
-                if (teachingRole in member.roles or guestRole in member.roles or verifiedRole not in member.roles or bot in member.roles):
+                if (teachingRole in member.roles or verifiedRole not in member.roles or bot in member.roles):
                     continue
 
                 try:
@@ -590,6 +591,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         redisClient.set(str(member.id)+".rolevalidated","true")
 
                     else:
+                        await member.add_roles(pending)
                         await adminChannel.send("<@&706658128409657366> There was no WatID for: <@" + str(
                             member.id) + "> please investigate.")
 
