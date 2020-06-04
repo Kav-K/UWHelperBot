@@ -172,6 +172,9 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
+        bot = discord.utils.get(ctx.guild.roles, name="Bot")
+        adminRole = discord.utils.get(ctx.guild.roles, name="Admin")
+        pendingRole = discord.utils.get(ctx.guild.roles, name="pending")
         global daemonRunning
         if (daemonRunning == False):
             daemonRunning = True
@@ -180,6 +183,50 @@ class Administrative(commands.Cog, name='Administrative'):
             await adminChannel.send("The administrative daemon thread is now running.")
 
             await adminThread
+        pendingChannel = discord.utils.get(ctx.guild.channels, id=717655708098756640)
+
+        if (bot in ctx.author.roles or ctx.channel != pendingChannel or adminRole in ctx.author.roles): return
+
+        try:
+            watid = str(ctx.content)
+            apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
+            print(apiResponse)
+            name = apiResponse['data']['full_name']
+            print(name)
+            print(str(ctx.author.nick))
+
+            if (ctx.author.nick == name):
+                user = ctx.author
+                await pendingChannel.send("<@"+str(ctx.author.id)+"> Valid, you are now being re-validated.")
+                try:
+
+                    # redisClient.set(str(user) + ".watid", watid)
+                    redisClient.set(str(user.id) + ".watid", watid)
+                    await pendingChannel.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
+                    redisClient.set(str(user) + ".name", name)
+                    await pendingChannel.edit(nick=name)
+                    await pendingChannel.send(
+                        "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
+                    redisClient.set(watid, 1)
+                    await pendingChannel.send(
+                        "The WatID " + watid + " has been marked for no further verifications.")
+
+
+                    await pendingChannel.send("All tasks completed successfully")
+                    await user.remove_roles(pendingRole)
+                except Exception as e:
+                    print(str(e))
+                    await pendingChannel.send("There was an error validating you. <@&706658128409657366>")
+            else:
+                await pendingChannel.send("This is not you! If you think this is a mistake, please contact a member of the admin team.")
+
+
+        except Exception as e:
+            print(str(e))
+            await pendingChannel.send("<@"+str(ctx.author.id)+"> That is not a valid WatID!")
+
+
+
 
 
     @commands.Cog.listener()
