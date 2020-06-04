@@ -141,6 +141,35 @@ class Administrative(commands.Cog, name='Administrative'):
         self._last_member_ = None
 
 
+
+    @commands.Cog.listener()
+    async def on_member_remove(self, member):
+        adminChannel = discord.utils.get(member.guild.channels, id=716954090495541248)
+        await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
+
+        try:
+            watid = redisClient.get(str(member.id) + ".watid").decode('utf-8')
+            redisClient.delete(watid)
+            await adminChannel.send("Unmarked WatID " + watid)
+            redisClient.delete(str(member) + ".watid")
+            redisClient.delete(str(member.id) + ".watid")
+            await adminChannel.send("Purged WatID")
+            redisClient.delete(str(member.id) + ".verified")
+            redisClient.delete(str(member) + ".verified")
+            await adminChannel.send("Purged verified status")
+            redisClient.delete(str(member) + ".name")
+            redisClient.delete(str(member.id) + ".name")
+            await adminChannel.send("Purged legal name")
+            redisClient.delete(str(member))
+            redisClient.delete(str(member.id) + ".request")
+            await adminChannel.send("Purged request status")
+            await adminChannel.send("Purged user from database successfully.")
+        except Exception as e:
+            print(str(e))
+            print("lazy nullify")
+
+
+
     @commands.Cog.listener()
     async def on_message(self, ctx):
         global daemonRunning
