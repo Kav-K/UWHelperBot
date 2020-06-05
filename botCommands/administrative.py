@@ -669,6 +669,15 @@ class Administrative(commands.Cog, name='Administrative'):
     async def eatass(self,ctx):
         await ctx.send("https://gyazo.com/38cbda993854e66a5833284186279ce8")
         await ctx.send("You got your ass ate.")
+
+    @commands.command()
+    async def forcedeleteroom(self, ctx):
+        author = ctx.message.author
+        try:
+            redisClient.delete(f'{author.id}-study-room')
+            await ctx.send(f'{author.id}-study-room has been deleted from redis')
+        except Exception:
+            await ctx.send('room not found')
     @commands.command()
     async def guest(self, ctx, *args):
         for role in ctx.author.roles:
