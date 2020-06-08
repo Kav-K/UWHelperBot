@@ -22,7 +22,10 @@ redisClient = redis.Redis(host='localhost', port=6379, db=0)
 TOKEN = "NzA2Njc4Mzk2MzEwMjU3NzI1.Xq9v2A.iCXfvgwxz4fnmlrRUvTlA_JnSTA"
 section2List = ["saaliyan","a9ahluwa","yhahn","kalatras","d22an","n22arora","j24au","g4aujla","s3aulakh","mavolio","e2baek","x53bai","d22baker","nbeilis","j39bi","ebilaver","jbodner","a23bose","j24brar","j6braun","r6bui","gbylykba","achalakk","v5chaudh","ichellad","h596chen","ly23chen","h559chen","ncherish","jchik","jchitkar","skcho","kchoa","e25chu","nchunghu","m24coope","asdhiman","j3enrigh","derisogl","d24ferna","lfournie","n6franci","agabuniy","a57garg","mgionet","sgoodarz","c2gravel","m8guan","a324gupt","wharris","a29he","c55he","chenfrey","e44ho","rhoffman","p23hu","h338huan","l247huan","a73huang","a226jain","z242jian","h56jin","pkachhia","kkalathi","e2koh","k5kumara","jklkundn","k26le","j763lee","d267lee","k323lee","rlevesqu","a284li","r374li","k36liang","j352lu","b49lu","mlysenko","vmago","smanakta","j78marti","rhmayilv","a47mehta","d36mehta","a2mladen","d6moon","a27nadee","b42nguye","dnnnguye","b43nguye","m22niu","snuraniv","t5oliver","motchet","m332pate","v227pate","b36peng","bphu","npotdar","m98rahma","msraihaa","jrintjem","rrouhana","o3salem","apsalvad","s5santhi","hsayedal","tshahjah","s4shahri","r4sim","a553sing","a558sing","ll3smith","j225smit","kb2son","dsribala","tstauffe","a6su","ssubbara","m38syed","w29tam","c46tan","w4tao","s4thapa","ctraxler","etroci","a2vaseeh","j23vuong","d7wan","j23weng","t54wong","yy8wong","y657wu","j478wu","cy2xi","c7xiang","k233yang","j52yoon","i6zhang","cf3zhang","c624zhan","z963zhan"]
 
-
+user_text_channels = [706657592578932800, 706659318883156069, 706659290072743977, 707029428043120721, 707017400226283570, 707028983346364447, 707029364511866890, 706658348522537041, 706658374221299742, 706658405875449868, 706658430819106847, 706658454252552323, 706658481683300383, 707777895745192017, 707777914594132019, 707777928137670666, 710408899336863805, 709975299059875872, 709975393167212614]
+user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,706659396146430002,707777965630554123,706658429892296714,706658540709740546,706658731697504286,706658766585724950,706658831437922396,706658925826801684]
+whitelist_channel_names = ["faculty-general","create-a-ticket"]
+lockdown_chat = ["lockdown-chat"]
 
 # Used for daemon tasks, such as removing temporary membership and etc.
 async def AdministrativeThread(guild):
@@ -172,6 +175,8 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
+
+
         bot = discord.utils.get(ctx.guild.roles, name="Bot")
         adminRole = discord.utils.get(ctx.guild.roles, name="Admin")
         pendingRole = discord.utils.get(ctx.guild.roles, name="pending")
@@ -444,6 +449,91 @@ class Administrative(commands.Cog, name='Administrative'):
                 ctx.send("<@" + str(
                     messageAuthor.id) + "> Invalid syntax or selection: `!devalidate <select 'user' or 'watid'> <value>`")
 
+    @commands.command()
+    async def lockdown(self,ctx, *args):
+
+        messageAuthor = ctx.author
+        verifiedRole = discord.utils.get(messageAuthor.guild.roles, name="Verified")
+        allowed = False
+        for role in messageAuthor.roles:
+            if role.name == 'Admin':
+                allowed = True
+        if (allowed):
+            if (not redisClient.exists("lockdown") or redisClient.get("lockdown").decode('utf-8') == "0"):
+
+                redisClient.set("lockdown", 1)
+                propagationMessage = await ctx.send("Cycling lockdown permissions to all text channels... Status: [0/"+str(len(messageAuthor.guild.text_channels))+"]")
+                counter = 0
+                for channel in messageAuthor.guild.text_channels:
+                    counter += 1
+                    if (channel.name in lockdown_chat):
+                        await channel.set_permissions(verifiedRole, send_messages=True,read_messages=True,read_message_history=True)
+                        await channel.send(
+                            "This server has temporarily gone into lockdown mode. This may be due to maintenance or due to a strict exam period. You may use this chat to chat freely until lockdown mode is lifted. All ticketing functionalities still work.")
+                        continue
+
+                    if (channel.id not in user_text_channels or channel.name == "create-a-ticket" or channel.category.name== "Open Tickets" or channel.category.name == "Closed Tickets"):
+                        continue
+                    await propagationMessage.edit(content="Cycling lockdown permissions to all channels... Status: ["+str(counter)+"/"+str(len(messageAuthor.guild.text_channels))+"]")
+                    await channel.set_permissions(verifiedRole, send_messages=False,read_messages=False,read_message_history=False)
+                await ctx.send("Finished cycling permissions to all text channels.")
+
+                counter = 0
+                propagationMessage = await ctx.send(
+                    "Cycling lockdown permissions to all voice channels... Status: [0/" + str(
+                        len(messageAuthor.guild.voice_channels)) + "]")
+                for channel in messageAuthor.guild.voice_channels:
+                    counter += 1
+                    if (channel.id not in user_voice_channels):
+                        continue
+                    await channel.set_permissions(verifiedRole, view_channel=False,connect=False)
+                    await propagationMessage.edit(
+                        content="Cycling lockdown permissions to all channels... Status: [" + str(counter) + "/" + str(
+                            len(messageAuthor.guild.voice_channels)) + "]")
+                await ctx.send("Cycled lockdown permissions to all voice channels.")
+
+
+                await ctx.send("Lockdown mode enabled. Bot commands and user text chat has been disabled.")
+            else:
+
+                redisClient.set("lockdown", 0)
+                propagationMessage = await ctx.send("Cycling to remove lockdown permissions from all text channels... Status: [0/" + str(
+                    len(messageAuthor.guild.text_channels))+"]")
+                counter = 0
+                for channel in messageAuthor.guild.text_channels:
+                    counter += 1
+                    if (channel.name in lockdown_chat):
+                        await channel.set_permissions(verifiedRole, send_messages=False,read_messages=False,read_message_history=False)
+
+                        continue
+                    if (channel.id not in user_text_channels or channel.name in whitelist_channel_names or channel.name == "create-a-ticket" or channel.category.name== "Open Tickets" or channel.category.name == "Closed Tickets"):
+                        continue
+                    await propagationMessage.edit(
+                        content="Cycling to remove lockdown permissions from all text channels... Status: [" + str(counter) + "/" + str(
+                            len(messageAuthor.guild.text_channels))+"]")
+                    await channel.set_permissions(verifiedRole, send_messages=True,read_messages=True,read_message_history=True)
+                await ctx.send("Finished cycling permissions to all text channels.")
+
+                counter = 0
+                propagationMessage = await ctx.send(
+                    "Cycling lockdown permissions to all voice channels... Status: [0/" + str(
+                        len(messageAuthor.guild.voice_channels)) + "]")
+                for channel in messageAuthor.guild.voice_channels:
+                    counter += 1
+                    if (channel.id not in user_voice_channels):
+                        continue
+                    await channel.set_permissions(verifiedRole, view_channel=True,connect=True)
+                    await propagationMessage.edit(
+                        content="Cycling lockdown permissions to all channels... Status: [" + str(counter) + "/" + str(
+                            len(messageAuthor.guild.voice_channels)) + "]")
+                await ctx.send("Cycled lockdown permissions to all voice channels.")
+
+
+
+                await ctx.send("Lockdown mode disabled. Bot commands and user text chat has been enabled again.")
+
+        else:
+            await ctx.send("You are not allowed to use this command!")
     @commands.command()
     async def correlate(self, ctx, *args):
 
