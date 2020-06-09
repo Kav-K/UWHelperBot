@@ -356,3 +356,7 @@ class Regular(commands.Cog, name = 'Regular'):
         finalExamDate = datetime.strptime("2020-08-07", "%Y-%m-%d")
         encouragingMessage = "Hang in there! You've got about " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
         await ctx.send(encouragingMessage)
+    @commands.command()
+    async def crying(self, ctx):
+        cryingMesage = "Will you even make it to 2A?"
+        await ctx.send(cryingMesage)
