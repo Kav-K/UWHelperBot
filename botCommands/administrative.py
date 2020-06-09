@@ -5,6 +5,7 @@ import json
 import asyncio
 from datetime import datetime, timedelta
 from pytz import timezone
+from lazy_streams import stream
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -12,8 +13,12 @@ from sendgrid.helpers.mail import Mail
 import discord
 from discord.ext import commands
 import pytz
+#We gotta do some bullshit because discord calls are all async and we cant immediately start the daemon thread
+#on startup without any context from discord :(
 global daemonRunning
 daemonRunning = False
+
+
 WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 WATERLOO_API_URL = "https://api.uwaterloo.ca/v2/directory/"
 
@@ -21,11 +26,21 @@ redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
 TOKEN = "NzA2Njc4Mzk2MzEwMjU3NzI1.Xq9v2A.iCXfvgwxz4fnmlrRUvTlA_JnSTA"
 section2List = ["saaliyan","a9ahluwa","yhahn","kalatras","d22an","n22arora","j24au","g4aujla","s3aulakh","mavolio","e2baek","x53bai","d22baker","nbeilis","j39bi","ebilaver","jbodner","a23bose","j24brar","j6braun","r6bui","gbylykba","achalakk","v5chaudh","ichellad","h596chen","ly23chen","h559chen","ncherish","jchik","jchitkar","skcho","kchoa","e25chu","nchunghu","m24coope","asdhiman","j3enrigh","derisogl","d24ferna","lfournie","n6franci","agabuniy","a57garg","mgionet","sgoodarz","c2gravel","m8guan","a324gupt","wharris","a29he","c55he","chenfrey","e44ho","rhoffman","p23hu","h338huan","l247huan","a73huang","a226jain","z242jian","h56jin","pkachhia","kkalathi","e2koh","k5kumara","jklkundn","k26le","j763lee","d267lee","k323lee","rlevesqu","a284li","r374li","k36liang","j352lu","b49lu","mlysenko","vmago","smanakta","j78marti","rhmayilv","a47mehta","d36mehta","a2mladen","d6moon","a27nadee","b42nguye","dnnnguye","b43nguye","m22niu","snuraniv","t5oliver","motchet","m332pate","v227pate","b36peng","bphu","npotdar","m98rahma","msraihaa","jrintjem","rrouhana","o3salem","apsalvad","s5santhi","hsayedal","tshahjah","s4shahri","r4sim","a553sing","a558sing","ll3smith","j225smit","kb2son","dsribala","tstauffe","a6su","ssubbara","m38syed","w29tam","c46tan","w4tao","s4thapa","ctraxler","etroci","a2vaseeh","j23vuong","d7wan","j23weng","t54wong","yy8wong","y657wu","j478wu","cy2xi","c7xiang","k233yang","j52yoon","i6zhang","cf3zhang","c624zhan","z963zhan"]
-
+ADMIN_ROLE_ID = 706658128409657366
+TEACHING_STAFF_ROLE_ID = 709977207401087036
 user_text_channels = [706657592578932800, 706659318883156069, 706659290072743977, 707029428043120721, 707017400226283570, 707028983346364447, 707029364511866890, 706658348522537041, 706658374221299742, 706658405875449868, 706658430819106847, 706658454252552323, 706658481683300383, 707777895745192017, 707777914594132019, 707777928137670666, 710408899336863805, 709975299059875872, 709975393167212614]
 user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,706659396146430002,707777965630554123,706658429892296714,706658540709740546,706658731697504286,706658766585724950,706658831437922396,706658925826801684]
 whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
+
+
+#See if a user is permitted to run an admin command
+def permittedAdmin(user):
+    return ADMIN_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
+
+#See if a user is teaching faculty
+def permittedStaff(user):
+    return TEACHING_STAFF_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
 
 # Used for daemon tasks, such as removing temporary membership and etc.
 async def AdministrativeThread(guild):
@@ -76,7 +91,7 @@ async def AdministrativeThread(guild):
                 print("The user: "+str(member)+" has a pending membership expiry date: "+stringExpiryTime)
                 #2020-05-30 09:46:59.610027-04:00
                 stringExpiryTime = stringExpiryTime.replace("-04:00","")
-                expiryDate = datetime.strptime(stringExpiryTime,"%Y-%m-%d %H:%M:%S.%f").astimezone(est) + timedelta(hours=4)
+                expiryDate = datetime.strptime(stringExpiryTime,"%Y-%m-%d %H:%M:%S.%f").astimezone(est) + timedelta(hours=4) #fuck timezones
 
                 if (expiryDate <= currentTime):
                     print("User "+str(member)+"'s membership has expired, removing roles")
@@ -169,13 +184,11 @@ class Administrative(commands.Cog, name='Administrative'):
             await adminChannel.send("Purged user from database successfully.")
         except Exception as e:
             print(str(e))
-            print("lazy nullify")
 
 
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-
 
         bot = discord.utils.get(ctx.guild.roles, name="Bot")
         adminRole = discord.utils.get(ctx.guild.roles, name="Admin")
@@ -188,6 +201,7 @@ class Administrative(commands.Cog, name='Administrative'):
             await adminChannel.send("The administrative daemon thread is now running.")
 
             await adminThread
+
         pendingChannel = discord.utils.get(ctx.guild.channels, id=717655708098756640)
 
         if (bot in ctx.author.roles or ctx.channel != pendingChannel or adminRole in ctx.author.roles): return
@@ -195,10 +209,8 @@ class Administrative(commands.Cog, name='Administrative'):
         try:
             watid = str(ctx.content)
             apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
-            print(apiResponse)
             name = apiResponse['data']['full_name']
-            print(name)
-            print(str(ctx.author.nick))
+
 
             if (ctx.author.nick == name):
                 user = ctx.author
@@ -275,7 +287,8 @@ class Administrative(commands.Cog, name='Administrative'):
                                         " Please contact the administration team by messaging them directly," \
                                         " or send an email to k5kumara@uwaterloo.ca."
                 await ctx.send(response)
-                return;
+                return
+
             try:
                 if (redisClient.exists(str(messageAuthor) + ".verified") or redisClient.exists(str(messageAuthor.id) + ".verified")):
                     if (int(redisClient.get(str(messageAuthor) + ".verified")) == 1 or int(redisClient.get(str(messageAuthor.id) + ".verified")) == 1):
@@ -398,7 +411,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
         # 706966831268626464
         if (redisClient.exists(str(messageAuthor.id) + ".request")):
-            redisClient.delete(str(messageAuthor.id))
+            redisClient.delete(str(messageAuthor.id)+".request")
             response = "<@" + str(
                 messageAuthor.id) + "> Cancelled your on-going verification, please try again with `!verify <watid>`"
             await ctx.send(response)
@@ -410,12 +423,8 @@ class Administrative(commands.Cog, name='Administrative'):
     async def devalidate(self, ctx, *args):
 
         messageAuthor = ctx.author
-
-        allowed = False
-        for role in messageAuthor.roles:
-            if role.name == 'Admin':
-                allowed = True
-        if (allowed):
+        #TODO make this cleaner maybe
+        if (permittedAdmin(messageAuthor)):
             try:
 
                 selection = args[0]
@@ -449,16 +458,14 @@ class Administrative(commands.Cog, name='Administrative'):
                 ctx.send("<@" + str(
                     messageAuthor.id) + "> Invalid syntax or selection: `!devalidate <select 'user' or 'watid'> <value>`")
 
+    #TODO This is absolute dogshit code that I wrote at 6am, make this way way better
     @commands.command()
     async def lockdown(self,ctx, *args):
 
         messageAuthor = ctx.author
         verifiedRole = discord.utils.get(messageAuthor.guild.roles, name="Verified")
-        allowed = False
-        for role in messageAuthor.roles:
-            if role.name == 'Admin':
-                allowed = True
-        if (allowed):
+
+        if (permittedAdmin(messageAuthor)):
             if (not redisClient.exists("lockdown") or redisClient.get("lockdown").decode('utf-8') == "0"):
 
                 redisClient.set("lockdown", 1)
@@ -539,11 +546,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
         messageAuthor = ctx.author
 
-        allowed = False
-        for role in messageAuthor.roles:
-            if role.name == 'Admin':
-                allowed = True
-        if (allowed):
+        if (permittedAdmin(messageAuthor)):
             try:
                 user = ctx.message.mentions[0]
                 watid = args[1]
@@ -612,12 +615,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
         messageAuthor = ctx.author
 
-        allowed = False
-        for role in messageAuthor.roles:
-            if role.name == 'Admin' or role.name == 'Professor':
-                allowed = True
-
-        if (allowed):
+        if (permittedAdmin(messageAuthor) or permittedStaff(messageAuthor)):
             try:
 
                 watid = args[0]
@@ -690,11 +688,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
         messageAuthor = ctx.author
 
-        allowed = False
-        for role in messageAuthor.roles:
-            if role.name == 'Admin':
-                allowed = True
-        if (allowed):
+        if (permittedAdmin(messageAuthor)):
             section1Role = discord.utils.get(ctx.message.guild.roles, name="Section 1")
             section2Role = discord.utils.get(ctx.message.guild.roles, name="Section 2")
             verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
@@ -743,12 +737,10 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.command()
     async def daemon(self, ctx):
         global daemonRunning
-        for role in ctx.author.roles:
-            if role.name == 'Admin':
-                allowed = True
-        if (allowed):
+        messageAuthor = ctx.author
+        if (permittedAdmin(messageAuthor)):
             if (daemonRunning == False):
-                adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(ctx.author.guild))
+                adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(messageAuthor.guild))
                 await ctx.send("The administrative daemon thread is now running.")
                 daemonRunning = True
                 await adminThread
@@ -761,20 +753,9 @@ class Administrative(commands.Cog, name='Administrative'):
         await ctx.send("You got your ass ate.")
 
     @commands.command()
-    async def forcedeleteroom(self, ctx):
-        author = ctx.message.author
-        try:
-            redisClient.delete(f'{author.id}-study-room')
-            await ctx.send(f'{author.id}-study-room has been deleted from redis')
-        except Exception:
-            await ctx.send('room not found')
-    @commands.command()
     async def guest(self, ctx, *args):
-        for role in ctx.author.roles:
-            if role.name == 'Admin':
-                allowed = True
         messageAuthor = ctx.author
-        if (allowed):
+        if (permittedAdmin(messageAuthor)):
             try:
                 user = ctx.message.mentions[0]
                 time = args[1]

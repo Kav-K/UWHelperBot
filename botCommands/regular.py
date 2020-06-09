@@ -1,7 +1,7 @@
 import pytz
 import requests
 import urllib.request
-
+import redis
 from datetime import datetime
 from datetime import timedelta
 
@@ -12,7 +12,7 @@ import discord
 from discord.ext import commands
 
 banned_channels = ["general","faculty-general","public-discussion","offtopic"]
-
+redisClient = redis.Redis(host='localhost', port=6379, db=0)
 WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 
 # Regular
@@ -28,7 +28,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed = discord.Embed(title="Commands", description="Here are a list of commands for the stream 4 bot",
                               color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-        embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+        embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="!textbooks", value="Get a link to the textbooks and shared resources", inline=False)
         embed.add_field(name="!upcoming", value="Get a list of upcoming due dates for the next 7 days", inline=False)
         embed.add_field(name="!verify <watid>", value="Verify your account to use this discord", inline=False)
@@ -49,11 +49,10 @@ class Regular(commands.Cog, name = 'Regular'):
                               description="Here is a dropbox link for our collective resources. Feel free to contact the admin team if you'd like to add to it.",
                               color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-        embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+        embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="Link", value="https://www.dropbox.com/sh/tg1se0xab9c9cfc/AAAdJJZXi1bkkHUoW5oYT_EAa?dl=0",
                         inline=False)
         await ctx.send(embed=embed)
-
     @commands.command()
     async def upcoming(self, ctx):
         if (ctx.channel.name in banned_channels):
@@ -110,7 +109,7 @@ class Regular(commands.Cog, name = 'Regular'):
                               description="These are all upcoming quizzes, due dates, and other important dates. Please contact the admin team if there are any issues.",
                               color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-        embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+        embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
 
         for idate in dateList:
             for messageToSend in dateMap[idate]:
@@ -137,23 +136,23 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="MATH 119",
                                 value="Here is a schedule of topics, tests, quizzes, and assignments for MATH 119",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/fd56XUE.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/119schedule1.png")
                 await ctx.send(embed=embed)
                 embed2 = discord.Embed()
-                embed2.set_image(url="https://i.imgur.com/FgRAdMt.png")
+                embed2.set_image(url="https://api.kaveenk.com/bot/119schedule2.png")
                 await ctx.send(embed=embed2)
             elif (selection == "106"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 106",
                                 value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 106",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/BPhpXxp.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/106schedule1.png")
                 await ctx.send(embed=embed)
                 embed2 = discord.Embed()
-                embed2.set_image(url="https://i.imgur.com/3HbKvvf.png")
+                embed2.set_image(url="https://api.kaveenk.com/bot/106schedule2.png")
                 await ctx.send(embed=embed2)
                 embed3 = discord.Embed()
-                embed3.set_image(url="https://i.imgur.com/cw9S7GY.png")
+                embed3.set_image(url="https://api.kaveenk.com/bot/106schedule3.png")
                 await ctx.send(embed=embed3)
                 embed4 = discord.Embed()
                 embed4.add_field(name="Quizzes",
@@ -165,28 +164,28 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="ECE 140",
                                 value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 140",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/YCJQw41.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/140schedule1.png")
                 await ctx.send(embed=embed)
             elif (selection == "124"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 124",
                                 value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 124",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/mHRB3Cs.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/124schedule1.png")
                 await ctx.send(embed=embed)
             elif (selection == "108"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 108",
                                 value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 108",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/rMqY50F.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/108schedule1.png")
                 await ctx.send(embed=embed)
             elif (selection == "192"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 192",
                                 value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 192",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/icdO1m5.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/192schedule1.png")
                 await ctx.send(embed=embed)
             else:
                 await ctx.send("<@" + str(
@@ -197,7 +196,7 @@ class Regular(commands.Cog, name = 'Regular'):
                                   description="Here is a link to a calendar with class schedules for live lectures and Q&A Sessions. Please contact the admin team if there is anything missing.",
                                   color=0x800080)
             embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-            embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+            embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
             embed.add_field(name="Link",
                             value="https://calendar.google.com/calendar/embed?src=ag2veuvcsc5k4kaqpsv7sp7e04%40group.calendar.google.com&ctz=America%2FToronto",
                             inline=False)
@@ -213,42 +212,42 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="ECE 140",
                                 value="Here is a marking scheme breakdown for ECE 140",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/g2BVcrv.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/140breakdown.png")
                 await ctx.send(embed=embed)
             elif (selection == "124"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 124",
                                 value="Here is a marking scheme breakdown for ECE 124",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/0ivd7nu.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/124breakdown.png")
                 await ctx.send(embed=embed)
             elif (selection == "106"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 106",
                                 value="Here is a marking scheme breakdown for ECE 106",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/mX5DQGf.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/106breakdown.png")
                 await ctx.send(embed=embed)
             elif (selection == "108"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 108",
                                 value="Here is a marking scheme breakdown for ECE 108",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/yXTkxiO.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/108breakdown.png")
                 await ctx.send(embed=embed)
             elif (selection == "192"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 192",
                                 value="Here is a marking scheme breakdown for ECE 192",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/RZrHshS.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/192breakdown.png")
                 await ctx.send(embed=embed)
             elif (selection == "119"):
                 embed = discord.Embed()
                 embed.add_field(name="MATH 119",
                                 value="Here is a marking scheme breakdown for MATH 119",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/lOXxjlo.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/119breakdown.png")
                 await ctx.send(embed=embed)
             else:
 
@@ -272,14 +271,14 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="ECE 140",
                                 value="Here are the week-based assignment questions for ECE 140",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/H9X2rru.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/140assignments.png")
                 await ctx.send(embed=embed)
             elif (selection =="124"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 124",
                                 value="Here are the week-based assignment questions for ECE 124",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/ipSz35S.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/124assignments.png")
                 await ctx.send(embed=embed)
             else:
                 await ctx.send("<@"+str(messageAuthor.id)+"> you've made an invalid selection! The available courses to view assignments for are `140` and `124`")
@@ -291,7 +290,7 @@ class Regular(commands.Cog, name = 'Regular'):
     async def piazza(self, ctx):
         embed = discord.Embed(title="Piazza Links", description="Here are our relevant piazza links.", color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-        embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+        embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="FYE", value="https://piazza.com/class/k9rmr76sakf74o", inline=False)
         embed.add_field(name="ECE 140", value="https://piazza.com/class/k9u2in2foal48e", inline=False)
         embed.add_field(name="MATH 119", value="https://piazza.com/class/k8ykzmozh5241x", inline=False)
@@ -304,7 +303,7 @@ class Regular(commands.Cog, name = 'Regular'):
                               description="Here is a link to a calendar with important dates. Please contact the admin team if there is anything missing",
                               color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-        embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+        embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="Link",
                         value="https://calendar.google.com/calendar/embed?src=k5kumara%40edu.uwaterloo.ca&ctz=America%2FToronto",
                         inline=False)
@@ -344,7 +343,7 @@ class Regular(commands.Cog, name = 'Regular'):
                         inline=False)
 
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-        embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+        embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
 
         await ctx.send(embed=embed)
     @commands.command()
@@ -356,4 +355,23 @@ class Regular(commands.Cog, name = 'Regular'):
         finalExamDate = datetime.strptime("2020-08-07", "%Y-%m-%d")
         encouragingMessage = "Hang in there! You've got about " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
         await ctx.send(encouragingMessage)
+    @commands.command()
+    async def subscribe(self,ctx):
+        messageAuthor = ctx.author
+        if (redisClient.exists(str(messageAuthor.id)+".subscribed") and redisClient.get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+            await ctx.send("<@"+str(messageAuthor.id)+"> you are already subscribed for notifications!")
+            redisClient.set(str(messageAuthor.id)+".subscribed", "true")
+        else:
+            redisClient.set(str(messageAuthor.id) + ".subscribed", "true")
+            await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully subscribed to notifications!")
+    @commands.command()
+    async def unsubscribe(self,ctx):
+        messageAuthor = ctx.author
+        if (redisClient.exists(str(messageAuthor.id)+".subscribed") and redisClient.get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+            await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully unsubscribed from all notifications")
+            redisClient.set(str(messageAuthor.id)+".subscribed", "false")
+        else:
+            await ctx.send("<@"+str(messageAuthor.id)+"> you are not currently subscribed to any notifications!")
+
+
 
