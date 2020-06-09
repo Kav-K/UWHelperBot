@@ -9,6 +9,7 @@ from lazy_streams import stream
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
+from botCommands.utils import *
 
 import discord
 from discord.ext import commands
@@ -26,21 +27,11 @@ redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
 TOKEN = "NzA2Njc4Mzk2MzEwMjU3NzI1.Xq9v2A.iCXfvgwxz4fnmlrRUvTlA_JnSTA"
 section2List = ["saaliyan","a9ahluwa","yhahn","kalatras","d22an","n22arora","j24au","g4aujla","s3aulakh","mavolio","e2baek","x53bai","d22baker","nbeilis","j39bi","ebilaver","jbodner","a23bose","j24brar","j6braun","r6bui","gbylykba","achalakk","v5chaudh","ichellad","h596chen","ly23chen","h559chen","ncherish","jchik","jchitkar","skcho","kchoa","e25chu","nchunghu","m24coope","asdhiman","j3enrigh","derisogl","d24ferna","lfournie","n6franci","agabuniy","a57garg","mgionet","sgoodarz","c2gravel","m8guan","a324gupt","wharris","a29he","c55he","chenfrey","e44ho","rhoffman","p23hu","h338huan","l247huan","a73huang","a226jain","z242jian","h56jin","pkachhia","kkalathi","e2koh","k5kumara","jklkundn","k26le","j763lee","d267lee","k323lee","rlevesqu","a284li","r374li","k36liang","j352lu","b49lu","mlysenko","vmago","smanakta","j78marti","rhmayilv","a47mehta","d36mehta","a2mladen","d6moon","a27nadee","b42nguye","dnnnguye","b43nguye","m22niu","snuraniv","t5oliver","motchet","m332pate","v227pate","b36peng","bphu","npotdar","m98rahma","msraihaa","jrintjem","rrouhana","o3salem","apsalvad","s5santhi","hsayedal","tshahjah","s4shahri","r4sim","a553sing","a558sing","ll3smith","j225smit","kb2son","dsribala","tstauffe","a6su","ssubbara","m38syed","w29tam","c46tan","w4tao","s4thapa","ctraxler","etroci","a2vaseeh","j23vuong","d7wan","j23weng","t54wong","yy8wong","y657wu","j478wu","cy2xi","c7xiang","k233yang","j52yoon","i6zhang","cf3zhang","c624zhan","z963zhan"]
-ADMIN_ROLE_ID = 706658128409657366
-TEACHING_STAFF_ROLE_ID = 709977207401087036
 user_text_channels = [706657592578932800, 706659318883156069, 706659290072743977, 707029428043120721, 707017400226283570, 707028983346364447, 707029364511866890, 706658348522537041, 706658374221299742, 706658405875449868, 706658430819106847, 706658454252552323, 706658481683300383, 707777895745192017, 707777914594132019, 707777928137670666, 710408899336863805, 709975299059875872, 709975393167212614]
 user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,706659396146430002,707777965630554123,706658429892296714,706658540709740546,706658731697504286,706658766585724950,706658831437922396,706658925826801684]
 whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
 
-
-#See if a user is permitted to run an admin command
-def permittedAdmin(user):
-    return ADMIN_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
-
-#See if a user is teaching faculty
-def permittedStaff(user):
-    return TEACHING_STAFF_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
 
 # Used for daemon tasks, such as removing temporary membership and etc.
 async def AdministrativeThread(guild):
@@ -165,25 +156,8 @@ class Administrative(commands.Cog, name='Administrative'):
         adminChannel = discord.utils.get(member.guild.channels, id=716954090495541248)
         await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
 
-        try:
-            watid = redisClient.get(str(member.id) + ".watid").decode('utf-8')
-            redisClient.delete(watid)
-            await adminChannel.send("Unmarked WatID " + watid)
-            redisClient.delete(str(member) + ".watid")
-            redisClient.delete(str(member.id) + ".watid")
-            await adminChannel.send("Purged WatID")
-            redisClient.delete(str(member.id) + ".verified")
-            redisClient.delete(str(member) + ".verified")
-            await adminChannel.send("Purged verified status")
-            redisClient.delete(str(member) + ".name")
-            redisClient.delete(str(member.id) + ".name")
-            await adminChannel.send("Purged legal name")
-            redisClient.delete(str(member))
-            redisClient.delete(str(member.id) + ".request")
-            await adminChannel.send("Purged request status")
-            await adminChannel.send("Purged user from database successfully.")
-        except Exception as e:
-            print(str(e))
+        redisPurge(member)
+        adminChannel.send("User has been purged from the database successfully.")
 
 
 
@@ -423,33 +397,17 @@ class Administrative(commands.Cog, name='Administrative'):
     async def devalidate(self, ctx, *args):
 
         messageAuthor = ctx.author
-        #TODO make this cleaner maybe
         if (permittedAdmin(messageAuthor)):
             try:
-
                 selection = args[0]
                 if (selection == "user"):
                     user = ctx.message.mentions[0]
-                    watid = redisClient.get(str(user.id) + ".watid").decode('utf-8')
-                    redisClient.delete(watid)
-                    await ctx.send("Unmarked WatID " + watid)
-                    redisClient.delete(str(user) + ".watid")
-                    redisClient.delete(str(user.id) + ".watid")
-                    await ctx.send("Purged WatID")
-                    redisClient.delete(str(user.id) + ".verified")
-                    redisClient.delete(str(user) + ".verified")
-                    await ctx.send("Purged verified status")
-                    redisClient.delete(str(user) + ".name")
-                    redisClient.delete(str(user.id) + ".name")
-                    await ctx.send("Purged legal name")
-                    redisClient.delete(str(messageAuthor))
-                    redisClient.delete(str(user.id) + ".request")
-                    await ctx.send("Purged request status")
+                    redisPurge(user)
                     await ctx.send("Purged user from database successfully.")
 
                 elif (selection == "watid"):
                     watid = args[1]
-                    redisClient.delete(watid)
+                    redisUnmarkWatID(watid)
                     await ctx.send("Unmarked WatID " + watid)
                 else:
                     await ctx.send("<@" + str(
@@ -579,16 +537,14 @@ class Administrative(commands.Cog, name='Administrative'):
                     "The WatID " + watid + " has been marked for no further verifications.")
 
                 # Set ranks
-                isTeaching = False
-                for role in user.roles:
-                    if role.name == 'Teaching Staff' or role.name == "Professor" or role.name == "Teaching Assistant":
-                        isTeaching = True
-                if (isTeaching):
+
+                if (permittedStaff(user)):
                     if ("Verified" in ranks or "Guest" in ranks):
                         await ctx.send(
                             "<@" + str(messageAuthor.id) + "> You may not apply your selected roles to this person.")
                         return
                 try:
+                    #TODO better way of doing this shit!
                     rank_array = ranks.split(",")
                     for rank in rank_array:
                         if (rank == ""): break
@@ -751,6 +707,11 @@ class Administrative(commands.Cog, name='Administrative'):
     async def eatass(self,ctx):
         await ctx.send("https://gyazo.com/38cbda993854e66a5833284186279ce8")
         await ctx.send("You got your ass ate.")
+    @commands.command()
+    async def subscribermessage(self, ctx, *args):
+        messageAuthor = ctx.author
+        subscriberList = stream(messageAuthor.guild.members).filter(lambda x: redisClient.exists(str(x.id)+".subscribed")
+        and redisClient.get(str(x.id)+".subscribed").decode('utf-8')=="true").to_list()
 
     @commands.command()
     async def guest(self, ctx, *args):

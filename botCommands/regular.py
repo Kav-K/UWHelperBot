@@ -7,6 +7,7 @@ from datetime import timedelta
 
 from pytz import timezone
 from icalendar import Calendar
+from botCommands.utils import *
 
 import discord
 from discord.ext import commands
@@ -364,6 +365,8 @@ class Regular(commands.Cog, name = 'Regular'):
         else:
             redisClient.set(str(messageAuthor.id) + ".subscribed", "true")
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully subscribed to notifications!")
+            await send_dm(messageAuthor,"You have successfully subscribed to notifications! You will receive important push notifications from the admin team and from upcoming dates here.")
+
     @commands.command()
     async def unsubscribe(self,ctx):
         messageAuthor = ctx.author
