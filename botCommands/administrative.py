@@ -220,12 +220,17 @@ class Administrative(commands.Cog, name='Administrative'):
             await pendingChannel.send("<@"+str(ctx.author.id)+"> That is not a valid WatID!")
 
 
-
-
-
     @commands.Cog.listener()
     async def on_ready(self):
         print(f'{self.bot.user.name} has connected to Discord!')
+
+        global daemonRunning
+        if not daemonRunning:
+            daemonRunning = True
+            adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(self.bot.guilds[0]))
+            adminChannel = discord.utils.get(self.bot.guilds[0].channels, id=716954090495541248)
+            await adminChannel.send("The administrative daemon thread is now running.")
+            print('Admin thread start')
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
