@@ -33,6 +33,7 @@ whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
 
 
+#TODO Start this with context without needing an on_message event to pass context through to it.!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Used for daemon tasks, such as removing temporary membership and etc.
 async def AdministrativeThread(guild):
     guestRole = discord.utils.get(guild.roles, name="Guest")
@@ -82,6 +83,7 @@ async def AdministrativeThread(guild):
                 print("The user: "+str(member)+" has a pending membership expiry date: "+stringExpiryTime)
                 #2020-05-30 09:46:59.610027-04:00
                 stringExpiryTime = stringExpiryTime.replace("-04:00","")
+                #TODO sanitize bullshit timezones
                 expiryDate = datetime.strptime(stringExpiryTime,"%Y-%m-%d %H:%M:%S.%f").astimezone(est) + timedelta(hours=4) #fuck timezones
 
                 if (expiryDate <= currentTime):
@@ -170,6 +172,7 @@ class Administrative(commands.Cog, name='Administrative'):
         global daemonRunning
         if (daemonRunning == False):
             daemonRunning = True
+            #TODO How can we do this on startup without needing an on_message event to pass context???
             adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(ctx.guild))
             adminChannel = discord.utils.get(ctx.guild.channels, id=716954090495541248)
             await adminChannel.send("The administrative daemon thread is now running.")
@@ -708,10 +711,45 @@ class Administrative(commands.Cog, name='Administrative'):
         await ctx.send("https://gyazo.com/38cbda993854e66a5833284186279ce8")
         await ctx.send("You got your ass ate.")
     @commands.command()
-    async def subscribermessage(self, ctx, *args):
+    async def testformatting(self, ctx, *args):
         messageAuthor = ctx.author
-        subscriberList = stream(messageAuthor.guild.members).filter(lambda x: redisClient.exists(str(x.id)+".subscribed")
-        and redisClient.get(str(x.id)+".subscribed").decode('utf-8')=="true").to_list()
+        if permittedAdmin(messageAuthor):
+
+            message = " ".join(args)
+            await ctx.send(message.replace("\\n","\n"))
+    @commands.command()
+    async def subscribermessage(self,ctx,*args):
+        messageAuthor = ctx.author
+        if permittedAdmin(messageAuthor):
+            subscriberList = stream(messageAuthor.guild.members).filter(lambda x: redisClient.exists(str(x.id)+".subscribed") and redisClient.get(str(x.id)+".subscribed").decode('utf-8')=="true").to_list()
+
+            message = " ".join(args).replace("\\n","\n")
+            messageToEdit = await ctx.send("Sending notifications to subscribed members. Status: [0/"+str(len(subscriberList))+"]")
+            for x, subscriber in enumerate(subscriberList):
+                await messageToEdit.edit(content="Sending notifications to subscribed members. Status: ["+str(x)+"/"+str(len(subscriberList))+"]")
+                try:
+                    await send_dm(subscriber,message)
+                except Exception as e:
+                    await ctx.send("Could not send a message to <@"+str(subscriber.id)+">: "+str(e))
+
+
+    @commands.command()
+    async def subscribers(self,ctx):
+        messageAuthor = ctx.author
+        if (permittedAdmin(messageAuthor)):
+            embed = discord.Embed(title="Subscribed Members",
+                                  description="Here is a list of all subscribed members",
+                                  color=0x800080)
+            embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+            embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+            subscriberList = stream(messageAuthor.guild.members).filter(
+                lambda x: redisClient.exists(str(x.id) + ".subscribed")
+                          and redisClient.get(str(x.id) + ".subscribed").decode('utf-8') == "true").to_list()
+
+
+            embed.add_field(name="Subscribed Members",value="\n".join(map(str,subscriberList)), inline=False)
+            await ctx.send(embed=embed)
+
 
     @commands.command()
     async def guest(self, ctx, *args):
