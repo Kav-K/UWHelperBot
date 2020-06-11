@@ -238,6 +238,32 @@ class Administrative(commands.Cog, name='Administrative'):
         await member.add_roles(role)
 
     @commands.command()
+    async def lock(self,ctx):
+        channel = ctx.channel
+        messageAuthor = ctx.author
+
+        #lol put it into a loop later
+        guestRole = discord.utils.get(messageAuthor.guild.roles, name="Guest")
+        sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
+        sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
+        regularRoles = [guestRole,sec1Role,sec2Role]
+
+
+        if (permittedAdmin(messageAuthor)):
+            if (redisClient.exists(str(channel.id)+".locked")):
+                for memberRole in regularRoles:
+                    await channel.set_permissions(memberRole, send_messages=True, read_messages=True, read_message_history=True)
+                await ctx.send("This channel has been unlocked. Sending messages is enabled again.")
+                redisClient.delete(str(channel.id)+".locked")
+            else:
+                redisClient.set(str(channel.id)+".locked",1)
+                for memberRole in regularRoles:
+                    await channel.set_permissions(memberRole, send_messages=False, read_messages=True, read_message_history=True)
+                await ctx.send("This channel has been locked. Sending messages is disabled.")
+
+
+
+    @commands.command()
     async def verify(self, ctx, *args):
         try:
             messageAuthor = ctx.author
