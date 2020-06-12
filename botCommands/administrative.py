@@ -780,6 +780,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
             embed.add_field(name="Subscribed Members",value="\n".join(map(str,subscriberList)), inline=False)
             await ctx.send(embed=embed)
+            await ctx.send("Total subscribers: "+str(len(subscriberList)))
 
 
     @commands.command()
