@@ -33,6 +33,19 @@ whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
 
 
+#Paginate a list!
+def paginate(toPaginate, linesToPaginate=20):
+    paginated = []
+
+    for count, line in enumerate(toPaginate):
+        if count != 0 and count % linesToPaginate == 0:
+            yield paginated
+            paginated.clear()
+        else:
+            paginated.append(str(line))
+
+    yield paginated
+
 #TODO Start this with context without needing an on_message event to pass context through to it.!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Used for daemon tasks, such as removing temporary membership and etc.
 async def AdministrativeThread(guild):
@@ -763,7 +776,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 except Exception as e:
                     await ctx.send("Could not send a message to <@"+str(subscriber.id)+">: "+str(e))
 
-
     @commands.command()
     async def subscribers(self,ctx):
         messageAuthor = ctx.author
@@ -776,9 +788,9 @@ class Administrative(commands.Cog, name='Administrative'):
             subscriberList = stream(messageAuthor.guild.members).filter(
                 lambda x: redisClient.exists(str(x.id) + ".subscribed")
                           and redisClient.get(str(x.id) + ".subscribed").decode('utf-8') == "true").to_list()
+            for page in paginate(map(str,subscriberList)):
+                embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)
 
-
-            embed.add_field(name="Subscribed Members",value="\n".join(map(str,subscriberList)), inline=False)
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
 
