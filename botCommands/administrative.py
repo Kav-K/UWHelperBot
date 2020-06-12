@@ -33,18 +33,6 @@ whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
 
 
-#Paginate a list!
-def paginate(toPaginate, linesToPaginate=20):
-    paginated = []
-
-    for count, line in enumerate(toPaginate):
-        if count != 0 and count % linesToPaginate == 0:
-            yield paginated
-            paginated.clear()
-        else:
-            paginated.append(str(line))
-
-    yield paginated
 
 #TODO Start this with context without needing an on_message event to pass context through to it.!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Used for daemon tasks, such as removing temporary membership and etc.
@@ -240,7 +228,10 @@ class Administrative(commands.Cog, name='Administrative'):
         global daemonRunning
         if not daemonRunning:
             daemonRunning = True
-            adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(self.bot.guilds[0]))
+            asyncio.get_event_loop().create_task(AdministrativeThread(self.bot.guilds[0]))
+            #Set global GUILD!
+            setGuild(self.bot.guilds[0])
+            print("Set the guild to" +str(self.bot.guilds[0]))
             adminChannel = discord.utils.get(self.bot.guilds[0].channels, id=716954090495541248)
             await adminChannel.send("The administrative daemon thread is now running.")
             print('Admin thread start')
@@ -785,9 +776,11 @@ class Administrative(commands.Cog, name='Administrative'):
                                   color=0x800080)
             embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
             embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+
             subscriberList = stream(messageAuthor.guild.members).filter(
                 lambda x: redisClient.exists(str(x.id) + ".subscribed")
                           and redisClient.get(str(x.id) + ".subscribed").decode('utf-8') == "true").to_list()
+
             for page in paginate(map(str,subscriberList)):
                 embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)
 
