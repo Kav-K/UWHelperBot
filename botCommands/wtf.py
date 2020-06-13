@@ -59,11 +59,23 @@ class wtf(commands.Cog, name = 'wtf'):
             # Get index in list (since it's ordered by UI)
             channelIdx = 0
 
-            await ctx.send("Hey, what does Grace's mom sell?")
-            await asyncio.sleep(1)
-            await ctx.send("What?")
-            await asyncio.sleep(1)
-            await ctx.send("Elevators :)")
+            state = random.randint(0, 5)
+            if state <= 3:
+                await ctx.send("Hey, what does Grace's mom sell?")
+                await asyncio.sleep(1)
+                await ctx.send("What?")
+                await asyncio.sleep(1)
+                await ctx.send("Elevators :)")
+            elif state == 4:
+                await ctx.send("Hey Kaveen, what is a rhombus?")
+                await asyncio.sleep(1)
+                await ctx.send("No clue")
+            elif state == 5:
+                await ctx.send("Vroom vroom")
+                await asyncio.sleep(1)
+                await ctx.send("I'm Trent and I love car games")
+                await asyncio.sleep(1)
+                await ctx.send("Time for you to take a ride")
             
             # Get the index of the current channel
             for idx, channel in enumerate(ctx.guild.voice_channels):
