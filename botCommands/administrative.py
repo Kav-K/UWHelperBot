@@ -9,7 +9,8 @@ from lazy_streams import stream
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from botCommands.utils import *
+from utils.utils import *
+from utils.redisutils import *
 
 import discord
 from discord.ext import commands
