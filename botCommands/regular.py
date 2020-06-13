@@ -6,13 +6,15 @@ from datetime import timedelta
 
 from pytz import timezone
 from icalendar import Calendar
+
+import botCommands.checks as checks
 from botCommands.utils.utils import *
+from botCommands.utils.redisutils import *
 
 import discord
 from discord.ext import commands
 
 banned_channels = ["general","faculty-general","public-discussion","offtopic"]
-redisClient = redis.Redis(host='localhost', port=6379, db=0)
 WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 
 # Regular
@@ -22,6 +24,7 @@ class Regular(commands.Cog, name = 'Regular'):
 
         # Not really sure what this does
         self._last_member_ = None
+
 
     @commands.command()
     async def help(self, ctx):
@@ -53,12 +56,10 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.add_field(name="Link", value="https://www.dropbox.com/sh/tg1se0xab9c9cfc/AAAdJJZXi1bkkHUoW5oYT_EAa?dl=0",
                         inline=False)
         await ctx.send(embed=embed)
+
+    @checks.channel_check()
     @commands.command()
     async def upcoming(self, ctx):
-        if (ctx.channel.name in banned_channels):
-            await ctx.channel.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
-            return
-
         dateMap = {}
         dateList = []
 
@@ -120,17 +121,13 @@ class Regular(commands.Cog, name = 'Regular'):
         # Closes the page
         calendar.close()
 
+    @checks.channel_check()
     @commands.command()
     async def schedule(self, ctx, *args):
-
         messageAuthor = ctx.author
 
         try:
             selection = args[0]
-            if (ctx.message.channel.name in banned_channels):
-                await ctx.send(
-                    "To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
-                return
             if (selection == "119"):
                 embed = discord.Embed()
                 embed.add_field(name="MATH 119",
@@ -255,14 +252,11 @@ class Regular(commands.Cog, name = 'Regular'):
         except:
             await ctx.send("<@" + str(messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`")
 
+    @checks.channel_check()
     @commands.command()
     async def assignments(self, ctx, *args):
-
         messageAuthor = ctx.author
 
-        if (ctx.message.channel.name in banned_channels):
-            await ctx.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
-            return
         try:
             selection = args[0]
 
@@ -358,20 +352,20 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def subscribe(self,ctx):
         messageAuthor = ctx.author
-        if (redisClient.exists(str(messageAuthor.id)+".subscribed") and redisClient.get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you are already subscribed for notifications!")
-            redisClient.set(str(messageAuthor.id)+".subscribed", "true")
+            db_set(str(messageAuthor.id)+".subscribed", "true")
         else:
-            redisClient.set(str(messageAuthor.id) + ".subscribed", "true")
+            db_set(str(messageAuthor.id) + ".subscribed", "true")
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully subscribed to notifications!")
             await send_dm(messageAuthor,"You have successfully subscribed to notifications! You will receive important push notifications from the admin team and from upcoming dates here.")
 
     @commands.command()
     async def unsubscribe(self,ctx):
         messageAuthor = ctx.author
-        if (redisClient.exists(str(messageAuthor.id)+".subscribed") and redisClient.get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully unsubscribed from all notifications")
-            redisClient.set(str(messageAuthor.id)+".subscribed", "false")
+            db_set(str(messageAuthor.id)+".subscribed", "false")
         else:
             await ctx.send("<@"+str(messageAuthor.id)+"> you are not currently subscribed to any notifications!")
 

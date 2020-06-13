@@ -1,16 +1,11 @@
 import discord
 from lazy_streams import stream
-import redis
-#TODO CLEAN THESE DATABASE THINGS UP
-redisClient = redis.Redis(host='localhost', port=6379, db=0)
 global GUILD
 GUILD = None
 
 #TODO PUT THESE INTO A SETTINGS/CONFIG
 ADMIN_ROLE_ID = 706658128409657366
 TEACHING_STAFF_ROLE_ID = 709977207401087036
-
-
 
 
 #Check if a user has a set of roles
@@ -25,12 +20,11 @@ def hasRoles(memberToCheck,roleNames):
 def isVerified(memberToCheck):
     return getRole("Verified") in memberToCheck.roles
 
+
 #Return the global GUILD object
 def getGuild():
     global GUILD
     return GUILD
-
-#Set the guild variable
 def setGuild(inputGuild):
     global GUILD
     print("Got guild set request to: "+str(inputGuild))
@@ -58,6 +52,7 @@ def getRole(roleIdentifier):
     else:
         return discord.utils.get(GUILD.roles, name=roleIdentifier)
 
+
 #Get all members or get members with a specific set of roles
 def getMembers(roles=[]):
     if (len(roles)<1):
@@ -79,27 +74,6 @@ def paginate(toPaginate, linesToPaginate=20):
             paginated.append(str(line))
 
     yield paginated
-
-#Unmark a WatID
-def redisUnmarkWatID(watid):
-    redisClient.delete(watid)
-
-
-#Purge a user from database completely
-def redisPurge(member: discord.Member):
-    try:
-        watid = redisClient.get(str(member.id) + ".watid").decode('utf-8')
-        redisClient.delete(watid)
-        redisClient.delete(str(member) + ".watid")
-        redisClient.delete(str(member.id) + ".watid")
-        redisClient.delete(str(member.id) + ".verified")
-        redisClient.delete(str(member) + ".verified")
-        redisClient.delete(str(member) + ".name")
-        redisClient.delete(str(member.id) + ".name")
-        redisClient.delete(str(member))
-        redisClient.delete(str(member.id) + ".request")
-    except Exception as e:
-        print(str(e))
 
 #Send a DM
 async def send_dm(member: discord.Member, content):
