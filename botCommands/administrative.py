@@ -1,5 +1,4 @@
 import random
-import redis
 import requests
 import json
 import asyncio
@@ -22,8 +21,6 @@ daemonRunning = False
 
 WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 WATERLOO_API_URL = "https://api.uwaterloo.ca/v2/directory/"
-
-redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
 TOKEN = "NzA2Njc4Mzk2MzEwMjU3NzI1.Xq9v2A.iCXfvgwxz4fnmlrRUvTlA_JnSTA"
 section2List = ["saaliyan","a9ahluwa","yhahn","kalatras","d22an","n22arora","j24au","g4aujla","s3aulakh","mavolio","e2baek","x53bai","d22baker","nbeilis","j39bi","ebilaver","jbodner","a23bose","j24brar","j6braun","r6bui","gbylykba","achalakk","v5chaudh","ichellad","h596chen","ly23chen","h559chen","ncherish","jchik","jchitkar","skcho","kchoa","e25chu","nchunghu","m24coope","asdhiman","j3enrigh","derisogl","d24ferna","lfournie","n6franci","agabuniy","a57garg","mgionet","sgoodarz","c2gravel","m8guan","a324gupt","wharris","a29he","c55he","chenfrey","e44ho","rhoffman","p23hu","h338huan","l247huan","a73huang","a226jain","z242jian","h56jin","pkachhia","kkalathi","e2koh","k5kumara","jklkundn","k26le","j763lee","d267lee","k323lee","rlevesqu","a284li","r374li","k36liang","j352lu","b49lu","mlysenko","vmago","smanakta","j78marti","rhmayilv","a47mehta","d36mehta","a2mladen","d6moon","a27nadee","b42nguye","dnnnguye","b43nguye","m22niu","snuraniv","t5oliver","motchet","m332pate","v227pate","b36peng","bphu","npotdar","m98rahma","msraihaa","jrintjem","rrouhana","o3salem","apsalvad","s5santhi","hsayedal","tshahjah","s4shahri","r4sim","a553sing","a558sing","ll3smith","j225smit","kb2son","dsribala","tstauffe","a6su","ssubbara","m38syed","w29tam","c46tan","w4tao","s4thapa","ctraxler","etroci","a2vaseeh","j23vuong","d7wan","j23weng","t54wong","yy8wong","y657wu","j478wu","cy2xi","c7xiang","k233yang","j52yoon","i6zhang","cf3zhang","c624zhan","z963zhan"]
@@ -89,7 +86,7 @@ async def AdministrativeThread(guild):
                     print("User "+str(member)+"'s membership has expired, removing roles")
                     await member.remove_roles(guestRole)
                     await member.remove_roles(verifiedRole)
-                    redisClient.delete(str(id)+".guestExpiry")
+                    db_delete(str(id)+".guestExpiry")
 
 
         # Manage study rooms
@@ -114,11 +111,11 @@ async def AdministrativeThread(guild):
                     del new_room_list[channel_data[b'name']]
 
                     if len(new_room_list) == 0:
-                        redisClient.delete('room_list')
+                        db_delete('room_list')
                     else:
                         redisClient.hmset('room_list', new_room_list)
 
-                    redisClient.delete(room_list[study_room.name.replace('-text', '').encode()].decode())
+                    db_delete(room_list[study_room.name.replace('-text', '').encode()].decode())
                     await text_channel.delete()
                     await voice_channel.delete()
                     await member_role.delete()
@@ -248,7 +245,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 for memberRole in regularRoles:
                     await channel.set_permissions(memberRole, send_messages=True, read_messages=True, read_message_history=True)
                 await ctx.send("This channel has been unlocked. Sending messages is enabled again.")
-                redisClient.delete(str(channel.id)+".locked")
+                db_delete(str(channel.id)+".locked")
             else:
                 db_set(str(channel.id)+".locked",1)
                 for memberRole in regularRoles:
@@ -366,8 +363,8 @@ class Administrative(commands.Cog, name='Administrative'):
                     db_set(str(messageAuthor.id) + ".verified", 1)
                     db_set(str(db_get(str(messageAuthor.id) + ".watid")), 1)
 
-                    if (db_exists(str(messageAuthor.id))): redisClient.delete(str(messageAuthor.id) + ".request")
-                    if (db_exists(str(messageAuthor))): redisClient.delete(str(messageAuthor) + ".request")
+                    if (db_exists(str(messageAuthor.id))): db_delete(str(messageAuthor.id) + ".request")
+                    if (db_exists(str(messageAuthor))): db_delete(str(messageAuthor) + ".request")
                     # 706966831268626464
                     verifiedRole = discord.utils.get(ctx.guild.roles, name="Verified")
                     unverifiedRole = discord.utils.get(ctx.guild.roles, name="Unverified")
@@ -411,7 +408,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
         # 706966831268626464
         if (db_exists(str(messageAuthor.id) + ".request")):
-            redisClient.delete(str(messageAuthor.id)+".request")
+            db_delete(str(messageAuthor.id)+".request")
             response = "<@" + str(
                 messageAuthor.id) + "> Cancelled your on-going verification, please try again with `!verify <watid>`"
             await ctx.send(response)
@@ -614,7 +611,7 @@ class Administrative(commands.Cog, name='Administrative'):
                                       description="Here is an internal lookup by the University of Waterloo",
                                       color=0x800080)
                 embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-                embed.(url="https://i.imgur.com/UWyVzwu.png")
+                embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
                 embed.add_field(name="Status",
                                 value=apiResponse['meta']['message'],
                                 inline=False)

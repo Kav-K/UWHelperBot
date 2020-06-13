@@ -5,11 +5,11 @@ import redis
 redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
 #Unmark a WatID
-def redisUnmarkWatID(watid):
+def db_unmarkWatID(watid):
     redisClient.delete(watid)
 
 #Purge a user from database completely
-def redisPurgeUser(member: discord.Member):
+def db_purgeUser(member: discord.Member):
     try:
         watid = redisClient.get(str(member.id) + ".watid").decode('utf-8')
         redisClient.delete(watid)
@@ -25,7 +25,19 @@ def redisPurgeUser(member: discord.Member):
         print(str(e))
 
 #Performs a get request and decodes
-def redisGet(key):
+def db_get(key):
     return redisClient.get(key).decode('utf-8')
 
-def redisSet(key, value):
+#Sets a value in the redis db
+def db_set(key, value):
+    redisClient.set(key, value)
+
+#Checks a value exists in the redis db
+def db_exists(key):
+    return redisClient.exists(key)
+
+#Checks a value exists in the redis db
+def db_delete(key):
+    return redisClient.delete(key)
+
+
