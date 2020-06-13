@@ -8,6 +8,7 @@ from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
 from botCommands.utils.utils import *
 from botCommands.utils.redisutils import *
+from botCommands.utils.tasks import *
 
 import discord
 from discord.ext import commands
@@ -24,107 +25,9 @@ user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,
 whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
 ADMIN_CHANNEL_NAME = "bot-alerts"
-
-#TODO Start this with context without needing an on_message event to pass context through to it.!!!!!!!!!!!!!!!!!!!!!!!!!!!
-# Used for daemon tasks, such as removing temporary membership and etc.
-async def AdministrativeThread(guild):
-    guestRole = getRole("Guest")
-    verifiedRole = getRole("Verified")
-    sec2Role = getRole("Section 2")
-    sec1Role = getRole("Section 1")
-    adminChannel = getChannel("bot-alerts")
-
-    while True:
-        est = timezone('US/Eastern')
-        currentTime = datetime.now().astimezone(est)
-        SLEEP_TIME = 5
-
-        #Remove verified role for professors!
-        for member in guild.members:
-            if (hasRoles(member, ["Teaching Staff","Verified"])):
-                await member.remove_roles(verifiedRole)
-                await adminChannel.send("WARNING: The user <@"+str(member.id)+"> is teaching faculty and was found to have the Verified role. It has been removed.")
+awaitingSM = {}
 
 
-        #Remove section roles for guests, remove double section ranks.
-        for member in guild.members:
-            if (hasRoles(member,["Section 1","Section 2"])):
-                await member.remove_roles(sec1Role)
-                await adminChannel.send("WARNING: The user <@" + str(
-                    member.id) + "> has duplicate roles. The user has been reset to the section 2 role. Section 1 role has been removed.")
-
-
-            if (hasRoles(member,["Guest","Section 2"]) or hasRoles(member,["Guest","Section 1"])):
-                await member.remove_roles(sec2Role) if sec2Role in member.roles else await member.remove_roles(sec1Role)
-                await adminChannel.send("WARNING: The user <@" + str(
-                    member.id) + "> is a guest and was found to have a sectional rank. It has been removed.")
-
-            #Expire memberships for temporary guests
-
-            if (db_exists(str(id)+".guestExpiry")):
-                stringExpiryTime = db_get(str(id)+".guestExpiry")
-                print("The user: "+str(member)+" has a pending membership expiry date: "+stringExpiryTime)
-                #2020-05-30 09:46:59.610027-04:00
-                stringExpiryTime = stringExpiryTime.replace("-04:00","")
-                #TODO make this into a function in utils.py
-                expiryDate = datetime.strptime(stringExpiryTime,"%Y-%m-%d %H:%M:%S.%f").astimezone(est) + timedelta(hours=4) #fuck timezones
-
-                if (expiryDate <= currentTime):
-                    await member.remove_roles(guestRole)
-                    await member.remove_roles(verifiedRole)
-                    db_delete(str(id)+".guestExpiry")
-
-
-        # Manage study rooms
-        room_list = redisClient.hgetall('room_list')
-        unsanitized_study_rooms = getCategory(709173209722912779).text_channels
-        study_rooms = stream(unsanitized_study_rooms).filter(lambda x: "private" not in x.name.lower()).to_list()
-        for study_room in study_rooms:
-            try:
-                channel_data = redisClient.hgetall(room_list[study_room.name.replace('-text', '').encode()].decode())
-                channel_data = dict((k.decode('utf8'), v.decode('utf8')) for k, v in channel_data.items())
-
-                expiry_time = datetime.strptime(channel_data['expiry'], "%Y-%m-%dT%H:%M:%S.%fZ")
-                time_difference = expiry_time - datetime.now()
-
-                if time_difference < timedelta():
-                    text_channel = getChannel(int(channel_data['text_id']))
-                    voice_channel = getChannel(int(channel_data['voice_id']))
-
-                    admin_role = getRole(int(channel_data['admin_role_id']))
-
-                    member_role = getRole(int(channel_data['member_role_id']))
-
-                    new_room_list = redisClient.hgetall('room_list')
-
-                    del new_room_list[channel_data['name'].encode()]
-
-                    if len(new_room_list) == 0:
-
-                        db_delete('room_list')
-                    else:
-                        redisClient.hmset('room_list', new_room_list)
-
-                    db_delete(room_list[study_room.name.replace('-text', '').encode()].decode())
-                    await text_channel.delete()
-                    await voice_channel.delete()
-                    await member_role.delete()
-                    await admin_role.delete()
-
-
-                elif timedelta(minutes=1) < time_difference < timedelta(minutes=1, seconds=SLEEP_TIME):
-                    await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 1 minute")
-
-                elif timedelta(minutes=10) < time_difference < timedelta(minutes=10, seconds=SLEEP_TIME):
-                    await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 10 minutes")
-
-                elif timedelta(hours=1) < time_difference < timedelta(hours=1, seconds=SLEEP_TIME):
-                    await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 1 hour")
-
-            except Exception as e:
-                print(e)
-
-        await asyncio.sleep(SLEEP_TIME)
 
 # Administrative
 class Administrative(commands.Cog, name='Administrative'):
@@ -139,8 +42,6 @@ class Administrative(commands.Cog, name='Administrative'):
     async def on_member_remove(self, member):
         adminChannel = getChannel(ADMIN_CHANNEL_NAME)
         await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
-
-
         db_purgeUser(member)
         adminChannel.send("User has been purged from the database successfully.")
 
@@ -148,16 +49,6 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.Cog.listener()
     async def on_message(self, ctx):
         pendingRole = getRole("pending")
-        global daemonRunning
-        if (daemonRunning == False):
-            daemonRunning = True
-            #TODO How can we do this on startup without needing an on_message event to pass context???
-            adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(ctx.guild))
-            adminChannel = getChannel("pending")
-            await adminChannel.send("The administrative daemon thread is now running.")
-
-            await adminThread
-
         pendingChannel = getChannel("pending")
 
         if (ctx.author == self.bot.user or ctx.channel != pendingChannel or hasRoles(ctx.author,["Admin"])): return
@@ -201,22 +92,24 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.Cog.listener()
     async def on_ready(self):
+        setGuild(self.bot.guilds[0])
+        print("Set the guild to" + str(self.bot.guilds[0]))
         print(f'{self.bot.user.name} has connected to Discord!')
-
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
         global daemonRunning
         if not daemonRunning:
             daemonRunning = True
             asyncio.get_event_loop().create_task(AdministrativeThread(self.bot.guilds[0]))
-            #Set global GUILD!
-            setGuild(self.bot.guilds[0])
-            print("Set the guild to" +str(self.bot.guilds[0]))
-            adminChannel = getChannel(ADMIN_CHANNEL_NAME)
             await adminChannel.send("The administrative daemon thread is now running.")
             print('Admin thread start')
+            asyncio.get_event_loop().create_task(CommBroker(self.bot.guilds[0]))
+            await adminChannel.send("The communications broker thread is now running.")
+            print('Communications broker thread start')
+
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        role = discord.utils.get(member.guild.roles, name="Unverified")
+        role = getRole("Unverified")
         await member.add_roles(role)
 
     @commands.command()
@@ -441,9 +334,9 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 db_set("lockdown", 1)
                 propagationMessage = await ctx.send("Cycling lockdown permissions to all text channels... Status: [0/"+str(len(messageAuthor.guild.text_channels))+"]")
-                counter = 0
-                for channel in messageAuthor.guild.text_channels:
-                    counter += 1
+
+                for counter, channel in enumerate(messageAuthor.guild.text_channels):
+
                     if (channel.name in lockdown_chat):
                         await channel.set_permissions(verifiedRole, send_messages=True,read_messages=True,read_message_history=True)
                         await channel.send(
@@ -456,12 +349,11 @@ class Administrative(commands.Cog, name='Administrative'):
                     await channel.set_permissions(verifiedRole, send_messages=False,read_messages=False,read_message_history=False)
                 await ctx.send("Finished cycling permissions to all text channels.")
 
-                counter = 0
+
                 propagationMessage = await ctx.send(
                     "Cycling lockdown permissions to all voice channels... Status: [0/" + str(
                         len(messageAuthor.guild.voice_channels)) + "]")
-                for channel in messageAuthor.guild.voice_channels:
-                    counter += 1
+                for counter,channel in enumerate(messageAuthor.guild.voice_channels):
                     if (channel.id not in user_voice_channels):
                         continue
                     await channel.set_permissions(verifiedRole, view_channel=False,connect=False)
@@ -469,9 +361,8 @@ class Administrative(commands.Cog, name='Administrative'):
                         content="Cycling lockdown permissions to all channels... Status: [" + str(counter) + "/" + str(
                             len(messageAuthor.guild.voice_channels)) + "]")
                 await ctx.send("Cycled lockdown permissions to all voice channels.")
-
-
                 await ctx.send("Lockdown mode enabled. Bot commands and user text chat has been disabled.")
+
             else:
 
                 db_set("lockdown", 0)
@@ -671,7 +562,6 @@ class Administrative(commands.Cog, name='Administrative'):
                         if (db_exists(str(member.id) + ".rolevalidated")):
                             continue
 
-
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
                         watID = db_get(str(member.id) + ".watid")
                         await adminChannel.send("The WatID for user <@" + str(member.id) + "> is "+watID)
@@ -724,19 +614,34 @@ class Administrative(commands.Cog, name='Administrative'):
             message = " ".join(args)
             await ctx.send(message.replace("\\n","\n"))
     @commands.command()
-    async def subscribermessage(self,ctx,*args):
+    async def sm(self,ctx,*args):
         messageAuthor = ctx.author
         if permittedAdmin(messageAuthor):
-            subscriberList = stream(messageAuthor.guild.members).filter(lambda x: db_exists(str(x.id)+".subscribed") and db_get(str(x.id)+".subscribed")=="true").to_list()
+            try:
+                if (args[0].lower() == 'confirm'):
+                    if (messageAuthor.id in awaitingSM):
+                        await sendSubscriberMessage(awaitingSM[messageAuthor.id])
+                        del awaitingSM[messageAuthor.id]
+                    else:
+                        await ctx.send("You do not have a pending subscriber message to send out.")
+                elif (args[0].lower() == 'cancel'):
+                    if (messageAuthor.id in awaitingSM):
+                        del awaitingSM[messageAuthor.id]
+                        await ctx.send("Deleted your pending subscriber message request")
+                    else:
+                        await ctx.send("You do not have a pending subscriber message to cancel.")
+                else:
+                    if (messageAuthor.id not in awaitingSM):
+                        message = " ".join(args)
+                        await ctx.send(message.replace("\\n", "\n"))
+                        await ctx.send("This is a preview of the message you are about to send. To send, please type `!sm confirm`")
+                        awaitingSM[messageAuthor.id] = message
+                    else:
+                        await ctx.send("You already have a pending subscriber message request. Please `!sm confirm` or `!sm cancel`")
+            except Exception as e:
+                print(e)
 
-            message = " ".join(args).replace("\\n","\n")
-            messageToEdit = await ctx.send("Sending notifications to subscribed members. Status: [0/"+str(len(subscriberList))+"]")
-            for x, subscriber in enumerate(subscriberList):
-                await messageToEdit.edit(content="Sending notifications to subscribed members. Status: ["+str(x)+"/"+str(len(subscriberList))+"]")
-                try:
-                    await send_dm(subscriber,message)
-                except Exception as e:
-                    await ctx.send("Could not send a message to <@"+str(subscriber.id)+">: "+str(e))
+
 
     @commands.command()
     async def subscribers(self,ctx):

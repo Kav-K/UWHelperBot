@@ -83,7 +83,7 @@ class Regular(commands.Cog, name = 'Regular'):
                 # Initialize timezone
                 est = timezone('US/Eastern')
 
-                finalStartDate, finalEndDate = None, None
+
                 try:
                     finalStartDate = startdate.replace(tzinfo=pytz.utc).astimezone(est)
                     finalEndDate = enddate.replace(tzinfo=pytz.utc).astimezone(est)
@@ -99,6 +99,7 @@ class Regular(commands.Cog, name = 'Regular'):
                     finalEndDate.strftime("%A, %B %d at %-I:%M %p") + ";" + summary)
 
                 # Create a sorted mapping between date and message
+                # TODO Map using #stream.map() later somehow?
                 if (datetime.now().date() <= finalStartDate.date() <= dateRangeEnd.date()):
                     if (finalStartDate not in dateMap):
                         dateMap[finalStartDate] = []
