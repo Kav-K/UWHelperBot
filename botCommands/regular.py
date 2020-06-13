@@ -1,7 +1,6 @@
 import pytz
 import requests
 import urllib.request
-import redis
 from datetime import datetime
 from datetime import timedelta
 

@@ -8,8 +8,6 @@ from datetime import timedelta
 import discord
 from discord.ext import commands
 
-redisClient = redis.Redis(host='localhost', port=6379, db=0)
-
 # Study Rooms
 class StudyRooms(commands.Cog, name='Study Room Commands'):
     def __init__(self, bot):
