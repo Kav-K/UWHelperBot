@@ -290,14 +290,14 @@ class Administrative(commands.Cog, name='Administrative'):
 
             try:
                 if (db_exists(str(messageAuthor) + ".verified") or db_exists(str(messageAuthor.id) + ".verified")):
-                    if (int(redisClient.get(str(messageAuthor) + ".verified")) == 1 or int(redisClient.get(str(messageAuthor.id) + ".verified")) == 1):
+                    if (int(db_get(str(messageAuthor) + ".verified")) == 1 or int(db_get(str(messageAuthor.id) + ".verified")) == 1):
                         response = "<@" + str(messageAuthor.id) + "> You have already been verified"
                         await ctx.send(response)
                         return
             except:
                 print("Lazy nullify error.")
             if (db_exists(str(user_id))):
-                if (int(redisClient.get(str(user_id))) == 1):
+                if (int(db_get(str(user_id))) == 1):
                     response = "<@" + str(
                         messageAuthor.id) + "> This user_id has already been verified. Not you? Contact an admin."
                     await ctx.send(response)
@@ -350,12 +350,12 @@ class Administrative(commands.Cog, name='Administrative'):
 
             if (db_exists(str(messageAuthor.id) + ".request")):
 
-                if (int(code) == int(redisClient.get(str(messageAuthor.id)+".code"))):
+                if (int(code) == int(db_get(str(messageAuthor.id)+".code"))):
                     response = "<@" + str(messageAuthor.id) + "> You were successfully verified."
 
                     await ctx.send(response)
 
-                    nickname = redisClient.get(str(messageAuthor.id) + ".name")
+                    nickname = db_get(str(messageAuthor.id) + ".name")
 
                     await messageAuthor.edit(nick=str(nickname.decode('utf-8')))
 
