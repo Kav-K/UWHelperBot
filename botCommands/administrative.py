@@ -366,7 +366,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         sec1Role = getRole("Section 1")
                         watID = db_get(str(messageAuthor.id) + ".watid")
 
-                        adminChannel = discord.utils.get(messageAuthor.guild.channels, id=716954090495541248)
+                        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
                         if (watID in section2List):
                             await messageAuthor.add_roles(sec2Role)
