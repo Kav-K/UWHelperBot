@@ -8,6 +8,9 @@ from datetime import timedelta
 import discord
 from discord.ext import commands
 
+from botCommands.utils.utils import *
+from botCommands.utils.redisutils import *
+
 # Study Rooms
 class StudyRooms(commands.Cog, name='Study Room Commands'):
     def __init__(self, bot):
@@ -44,10 +47,10 @@ class StudyRooms(commands.Cog, name='Study Room Commands'):
                 del new_room_list[study_room[b'name']]
 
                 if len(new_room_list) == 0:
-                    redisClient.delete('room_list')
+                    db_delete('room_list')
                 else:
                     redisClient.hmset('room_list', new_room_list)
-                redisClient.delete(redis_room_name)
+                db_delete(redis_room_name)
                 await text_channel.delete()
                 await voice_channel.delete()
                 await member_role.delete()
