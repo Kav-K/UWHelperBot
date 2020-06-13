@@ -9,8 +9,8 @@ from lazy_streams import stream
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from utils.utils import *
-from utils.redisutils import *
+from botCommands.utils.utils import *
+from botCommands.utils.redisutils import *
 
 import discord
 from discord.ext import commands
@@ -19,7 +19,6 @@ import pytz
 #on startup without any context from discord :(
 global daemonRunning
 daemonRunning = False
-
 
 WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 WATERLOO_API_URL = "https://api.uwaterloo.ca/v2/directory/"
@@ -32,8 +31,6 @@ user_text_channels = [706657592578932800, 706659318883156069, 706659290072743977
 user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,706659396146430002,707777965630554123,706658429892296714,706658540709740546,706658731697504286,706658766585724950,706658831437922396,706658925826801684]
 whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
-
-
 
 #TODO Start this with context without needing an on_message event to pass context through to it.!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Used for daemon tasks, such as removing temporary membership and etc.
@@ -140,10 +137,6 @@ async def AdministrativeThread(guild):
                 print(e)
 
         await asyncio.sleep(SLEEP_TIME)
-
-
-
-
 
 # Administrative
 class Administrative(commands.Cog, name='Administrative'):
