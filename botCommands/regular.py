@@ -6,6 +6,8 @@ from datetime import timedelta
 
 from pytz import timezone
 from icalendar import Calendar
+
+import botCommands.checks as checks
 from botCommands.utils.utils import *
 from botCommands.utils.redisutils import *
 
@@ -22,6 +24,7 @@ class Regular(commands.Cog, name = 'Regular'):
 
         # Not really sure what this does
         self._last_member_ = None
+
 
     @commands.command()
     async def help(self, ctx):
@@ -53,12 +56,10 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.add_field(name="Link", value="https://www.dropbox.com/sh/tg1se0xab9c9cfc/AAAdJJZXi1bkkHUoW5oYT_EAa?dl=0",
                         inline=False)
         await ctx.send(embed=embed)
+
+    @checks.channel_check()
     @commands.command()
     async def upcoming(self, ctx):
-        if (ctx.channel.name in banned_channels):
-            await ctx.channel.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
-            return
-
         dateMap = {}
         dateList = []
 
@@ -120,17 +121,13 @@ class Regular(commands.Cog, name = 'Regular'):
         # Closes the page
         calendar.close()
 
+    @checks.channel_check()
     @commands.command()
     async def schedule(self, ctx, *args):
-
         messageAuthor = ctx.author
 
         try:
             selection = args[0]
-            if (ctx.message.channel.name in banned_channels):
-                await ctx.send(
-                    "To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
-                return
             if (selection == "119"):
                 embed = discord.Embed()
                 embed.add_field(name="MATH 119",
@@ -255,14 +252,11 @@ class Regular(commands.Cog, name = 'Regular'):
         except:
             await ctx.send("<@" + str(messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`")
 
+    @checks.channel_check()
     @commands.command()
     async def assignments(self, ctx, *args):
-
         messageAuthor = ctx.author
 
-        if (ctx.message.channel.name in banned_channels):
-            await ctx.send("To keep chat clean, you can't use this command in here! Please go to <#707029428043120721>")
-            return
         try:
             selection = args[0]
 
