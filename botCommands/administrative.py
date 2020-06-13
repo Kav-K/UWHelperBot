@@ -153,7 +153,7 @@ class Administrative(commands.Cog, name='Administrative'):
         adminChannel = discord.utils.get(member.guild.channels, id=716954090495541248)
         await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
 
-        redisPurge(member)
+        redisPurgeUser(member)
         adminChannel.send("User has been purged from the database successfully.")
 
 
@@ -370,7 +370,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     # Mark user and WatID as verified
                     redisClient.set(str(messageAuthor.id) + ".verified", 1)
                     #redisClient.set(str(redisClient.get(str(messageAuthor) + ".watid").decode('utf-8')), 1)
-                    redisClient.set(str(redisClient.get(str(messageAuthor.id) + ".watid").decode('utf-8')), 1)
+                    redisClient.set(str(redisGetDecoded(str(messageAuthor.id) + ".watid")), 1)
 
                     if (redisClient.exists(str(messageAuthor.id))): redisClient.delete(str(messageAuthor.id) + ".request")
                     if (redisClient.exists(str(messageAuthor))): redisClient.delete(str(messageAuthor) + ".request")
@@ -381,7 +381,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     await messageAuthor.remove_roles(unverifiedRole)
 
                     try:
-                        watID = redisClient.get(str(messageAuthor.id) + ".watid").decode("utf-8")
+                        watID = redisGetDecoded(str(messageAuthor.id) + ".watid")
                         sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
                         sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
 
@@ -434,7 +434,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 selection = args[0]
                 if (selection == "user"):
                     user = ctx.message.mentions[0]
-                    redisPurge(user)
+                    redisPurgeUser(user)
                     await ctx.send("Purged user from database successfully.")
 
                 elif (selection == "watid"):
@@ -456,7 +456,7 @@ class Administrative(commands.Cog, name='Administrative'):
         verifiedRole = discord.utils.get(messageAuthor.guild.roles, name="Verified")
 
         if (permittedAdmin(messageAuthor)):
-            if (not redisClient.exists("lockdown") or redisClient.get("lockdown").decode('utf-8') == "0"):
+            if (not redisClient.exists("lockdown") or redisGetDecoded("lockdown") == "0"):
 
                 redisClient.set("lockdown", 1)
                 propagationMessage = await ctx.send("Cycling lockdown permissions to all text channels... Status: [0/"+str(len(messageAuthor.guild.text_channels))+"]")
@@ -613,7 +613,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     # Find user's discord tag
                     for member in ctx.message.mentions:
                         discordID = str(member.id)
-                        watid = redisClient.get(discordID + ".watid").decode('utf-8')
+                        watid = redisGetDecoded(discordID + ".watid")
                         break
                 apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
 
@@ -696,7 +696,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
 
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
-                        watID = redisClient.get(str(member.id) + ".watid").decode("utf-8")
+                        watID = redisGetDecoded(str(member.id) + ".watid")
                         await adminChannel.send("The WatID for user <@" + str(member.id) + "> is "+watID)
 
                         await member.remove_roles(section1Role)
@@ -750,7 +750,7 @@ class Administrative(commands.Cog, name='Administrative'):
     async def subscribermessage(self,ctx,*args):
         messageAuthor = ctx.author
         if permittedAdmin(messageAuthor):
-            subscriberList = stream(messageAuthor.guild.members).filter(lambda x: redisClient.exists(str(x.id)+".subscribed") and redisClient.get(str(x.id)+".subscribed").decode('utf-8')=="true").to_list()
+            subscriberList = stream(messageAuthor.guild.members).filter(lambda x: redisClient.exists(str(x.id)+".subscribed") and redisGetDecoded(str(x.id)+".subscribed")=="true").to_list()
 
             message = " ".join(args).replace("\\n","\n")
             messageToEdit = await ctx.send("Sending notifications to subscribed members. Status: [0/"+str(len(subscriberList))+"]")
@@ -773,7 +773,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
             subscriberList = stream(messageAuthor.guild.members).filter(
                 lambda x: redisClient.exists(str(x.id) + ".subscribed")
-                          and redisClient.get(str(x.id) + ".subscribed").decode('utf-8') == "true").to_list()
+                          and redisGetDecoded(str(x.id) + ".subscribed") == "true").to_list()
 
             for page in paginate(map(str,subscriberList)):
                 embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)

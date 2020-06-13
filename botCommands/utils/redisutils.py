@@ -9,7 +9,7 @@ def redisUnmarkWatID(watid):
     redisClient.delete(watid)
 
 #Purge a user from database completely
-def redisPurge(member: discord.Member):
+def redisPurgeUser(member: discord.Member):
     try:
         watid = redisClient.get(str(member.id) + ".watid").decode('utf-8')
         redisClient.delete(watid)
@@ -23,3 +23,7 @@ def redisPurge(member: discord.Member):
         redisClient.delete(str(member.id) + ".request")
     except Exception as e:
         print(str(e))
+
+#Performs a get request and decodes
+def redisGetDecoded(key):
+    return redisClient.get(key).decode('utf-8')
