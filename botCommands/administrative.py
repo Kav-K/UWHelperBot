@@ -1,10 +1,8 @@
 import random
 import requests
-import json
 import asyncio
 from datetime import datetime, timedelta
 from pytz import timezone
-from lazy_streams import stream
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -13,9 +11,6 @@ from botCommands.utils.redisutils import *
 
 import discord
 from discord.ext import commands
-import pytz
-#We gotta do some bullshit because discord calls are all async and we cant immediately start the daemon thread
-#on startup without any context from discord :(
 global daemonRunning
 daemonRunning = False
 
@@ -28,16 +23,17 @@ user_text_channels = [706657592578932800, 706659318883156069, 706659290072743977
 user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,706659396146430002,707777965630554123,706658429892296714,706658540709740546,706658731697504286,706658766585724950,706658831437922396,706658925826801684]
 whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
+ADMIN_CHANNEL_NAME = "bot-alerts"
 
 #TODO Start this with context without needing an on_message event to pass context through to it.!!!!!!!!!!!!!!!!!!!!!!!!!!!
 # Used for daemon tasks, such as removing temporary membership and etc.
 async def AdministrativeThread(guild):
-    guestRole = discord.utils.get(guild.roles, name="Guest")
-    verifiedRole = discord.utils.get(guild.roles, name="Verified")
-    sec2Role = discord.utils.get(guild.roles, name="Section 2")
-    sec1Role = discord.utils.get(guild.roles, name="Section 1")
-    teachingStaffRole = discord.utils.get(guild.roles, name="Teaching Staff")
-    adminChannel = discord.utils.get(guild.channels, id=716954090495541248)
+    guestRole = getRole("Guest")
+    verifiedRole = getRole("Verified")
+    sec2Role = getRole("Section 2")
+    sec1Role = getRole("Section 1")
+    adminChannel = getChannel("bot-alerts")
+
     while True:
         est = timezone('US/Eastern')
         currentTime = datetime.now().astimezone(est)
@@ -45,45 +41,35 @@ async def AdministrativeThread(guild):
 
         #Remove verified role for professors!
         for member in guild.members:
-            id = member.id
-            if (teachingStaffRole in member.roles and verifiedRole in member.roles):
+            if (hasRoles(member, ["Teaching Staff","Verified"])):
                 await member.remove_roles(verifiedRole)
-                await adminChannel.send("WARNING: The user <@"+str(id)+"> is teaching faculty and was found to have the Verified role. It has been removed.")
+                await adminChannel.send("WARNING: The user <@"+str(member.id)+"> is teaching faculty and was found to have the Verified role. It has been removed.")
 
 
         #Remove section roles for guests, remove double section ranks.
         for member in guild.members:
-            id = member.id
-
-            if (sec1Role in member.roles and sec2Role in member.roles):
+            if (hasRoles(member,["Section 1","Section 2"])):
                 await member.remove_roles(sec1Role)
                 await adminChannel.send("WARNING: The user <@" + str(
-                    id) + "> has duplicate roles. The user has been reset to the section 2 role. Section 1 role has been removed.")
+                    member.id) + "> has duplicate roles. The user has been reset to the section 2 role. Section 1 role has been removed.")
 
 
-            if (guestRole in member.roles):
-                if (sec2Role in member.roles):
-                    await member.remove_roles(sec2Role)
-                    await adminChannel.send("WARNING: The user <@" + str(
-                        id) + "> is a guest and was found to have a sectional rank. It has been removed.")
-
-                if (sec1Role in member.roles):
-                    await member.remove_roles(sec1Role)
-                    await adminChannel.send("WARNING: The user <@" + str(
-                        id) + "> is a guest and was found to have a sectional rank. It has been removed.")
-
+            if (hasRoles(member,["Guest","Section 2"]) or hasRoles(member,["Guest","Section 1"])):
+                await member.remove_roles(sec2Role) if sec2Role in member.roles else await member.remove_roles(sec1Role)
+                await adminChannel.send("WARNING: The user <@" + str(
+                    member.id) + "> is a guest and was found to have a sectional rank. It has been removed.")
 
             #Expire memberships for temporary guests
+
             if (db_exists(str(id)+".guestExpiry")):
                 stringExpiryTime = db_get(str(id)+".guestExpiry")
                 print("The user: "+str(member)+" has a pending membership expiry date: "+stringExpiryTime)
                 #2020-05-30 09:46:59.610027-04:00
                 stringExpiryTime = stringExpiryTime.replace("-04:00","")
-                #TODO sanitize bullshit timezones
+                #TODO make this into a function in utils.py
                 expiryDate = datetime.strptime(stringExpiryTime,"%Y-%m-%d %H:%M:%S.%f").astimezone(est) + timedelta(hours=4) #fuck timezones
 
                 if (expiryDate <= currentTime):
-                    print("User "+str(member)+"'s membership has expired, removing roles")
                     await member.remove_roles(guestRole)
                     await member.remove_roles(verifiedRole)
                     db_delete(str(id)+".guestExpiry")
@@ -91,26 +77,30 @@ async def AdministrativeThread(guild):
 
         # Manage study rooms
         room_list = redisClient.hgetall('room_list')
-        study_rooms = discord.utils.get(guild.categories, id=709173209722912779).text_channels
+        unsanitized_study_rooms = getCategory(709173209722912779).text_channels
+        study_rooms = stream(unsanitized_study_rooms).filter(lambda x: "private" not in x.name.lower()).to_list()
         for study_room in study_rooms:
             try:
                 channel_data = redisClient.hgetall(room_list[study_room.name.replace('-text', '').encode()].decode())
-                expiry_time = datetime.strptime(channel_data[b'expiry'].decode(), "%Y-%m-%dT%H:%M:%S.%fZ")
+                channel_data = dict((k.decode('utf8'), v.decode('utf8')) for k, v in channel_data.items())
+
+                expiry_time = datetime.strptime(channel_data['expiry'], "%Y-%m-%dT%H:%M:%S.%fZ")
                 time_difference = expiry_time - datetime.now()
 
                 if time_difference < timedelta():
-                    text_channel = discord.utils.get(guild.text_channels,
-                                                     id=int(channel_data[b'text_id'].decode('utf-8')))
-                    voice_channel = discord.utils.get(guild.voice_channels,
-                                                      id=int(channel_data[b'voice_id'].decode('utf-8')))
-                    admin_role = discord.utils.get(guild.roles,
-                                                   id=int(channel_data[b'admin_role_id'].decode('utf-8')))
-                    member_role = discord.utils.get(guild.roles,
-                                                    id=int(channel_data[b'member_role_id'].decode('utf-8')))
+                    text_channel = getChannel(int(channel_data['text_id']))
+                    voice_channel = getChannel(int(channel_data['voice_id']))
+
+                    admin_role = getRole(int(channel_data['admin_role_id']))
+
+                    member_role = getRole(int(channel_data['member_role_id']))
+
                     new_room_list = redisClient.hgetall('room_list')
-                    del new_room_list[channel_data[b'name']]
+
+                    del new_room_list[channel_data['name'].encode()]
 
                     if len(new_room_list) == 0:
+
                         db_delete('room_list')
                     else:
                         redisClient.hmset('room_list', new_room_list)
@@ -120,6 +110,7 @@ async def AdministrativeThread(guild):
                     await voice_channel.delete()
                     await member_role.delete()
                     await admin_role.delete()
+
 
                 elif timedelta(minutes=1) < time_difference < timedelta(minutes=1, seconds=SLEEP_TIME):
                     await study_room.send(f"{study_room.name.replace('-text', '')} will be deleted in 1 minute")
@@ -139,7 +130,6 @@ async def AdministrativeThread(guild):
 class Administrative(commands.Cog, name='Administrative'):
     def __init__(self, bot):
         self.bot = bot
-
         # Not really sure what this does
         self._last_member_ = None
 
@@ -147,34 +137,34 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        adminChannel = discord.utils.get(member.guild.channels, id=716954090495541248)
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
         await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
+
 
         db_purgeUser(member)
         adminChannel.send("User has been purged from the database successfully.")
 
+
     @commands.Cog.listener()
     async def on_message(self, ctx):
-
-        bot = discord.utils.get(ctx.guild.roles, name="Bot")
-        adminRole = discord.utils.get(ctx.guild.roles, name="Admin")
-        pendingRole = discord.utils.get(ctx.guild.roles, name="pending")
+        pendingRole = getRole("pending")
         global daemonRunning
         if (daemonRunning == False):
             daemonRunning = True
             #TODO How can we do this on startup without needing an on_message event to pass context???
             adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(ctx.guild))
-            adminChannel = discord.utils.get(ctx.guild.channels, id=716954090495541248)
+            adminChannel = getChannel("pending")
             await adminChannel.send("The administrative daemon thread is now running.")
 
             await adminThread
 
-        pendingChannel = discord.utils.get(ctx.guild.channels, id=717655708098756640)
+        pendingChannel = getChannel("pending")
 
-        if (bot in ctx.author.roles or ctx.channel != pendingChannel or adminRole in ctx.author.roles): return
+        if (ctx.author == self.bot.user or ctx.channel != pendingChannel or hasRoles(ctx.author,["Admin"])): return
 
         try:
             watid = str(ctx.content)
+            #TODO put in utils
             apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
             name = apiResponse['data']['full_name']
 
@@ -183,6 +173,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 user = ctx.author
                 await pendingChannel.send("<@"+str(ctx.author.id)+"> Valid, you are now being re-validated.")
                 try:
+
                     db_set(str(user.id) + ".watid", watid)
                     await pendingChannel.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
                     db_set(str(user) + ".name", name)
@@ -219,7 +210,7 @@ class Administrative(commands.Cog, name='Administrative'):
             #Set global GUILD!
             setGuild(self.bot.guilds[0])
             print("Set the guild to" +str(self.bot.guilds[0]))
-            adminChannel = discord.utils.get(self.bot.guilds[0].channels, id=716954090495541248)
+            adminChannel = getChannel(ADMIN_CHANNEL_NAME)
             await adminChannel.send("The administrative daemon thread is now running.")
             print('Admin thread start')
 
@@ -234,9 +225,9 @@ class Administrative(commands.Cog, name='Administrative'):
         messageAuthor = ctx.author
 
         #lol put it into a loop later
-        guestRole = discord.utils.get(messageAuthor.guild.roles, name="Guest")
-        sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
-        sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
+        guestRole = getRole("Guest")
+        sec1Role = getRole("Section 1")
+        sec2Role = getRole("Section 2")
         regularRoles = [guestRole,sec1Role,sec2Role]
 
 
@@ -251,8 +242,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 for memberRole in regularRoles:
                     await channel.set_permissions(memberRole, send_messages=False, read_messages=True, read_message_history=True)
                 await ctx.send("This channel has been locked. Sending messages is disabled.")
-
-
 
     @commands.command()
     async def verify(self, ctx, *args):
@@ -366,15 +355,16 @@ class Administrative(commands.Cog, name='Administrative'):
                     if (db_exists(str(messageAuthor.id))): db_delete(str(messageAuthor.id) + ".request")
                     if (db_exists(str(messageAuthor))): db_delete(str(messageAuthor) + ".request")
                     # 706966831268626464
-                    verifiedRole = discord.utils.get(ctx.guild.roles, name="Verified")
-                    unverifiedRole = discord.utils.get(ctx.guild.roles, name="Unverified")
+                    verifiedRole = getRole("Verified")
+                    unverifiedRole = getRole("Unverified")
                     await messageAuthor.add_roles(verifiedRole)
                     await messageAuthor.remove_roles(unverifiedRole)
 
                     try:
+
+                        sec2Role = getRole("Section 2")
+                        sec1Role = getRole("Section 1")
                         watID = db_get(str(messageAuthor.id) + ".watid")
-                        sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
-                        sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
 
                         adminChannel = discord.utils.get(messageAuthor.guild.channels, id=716954090495541248)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
@@ -444,7 +434,7 @@ class Administrative(commands.Cog, name='Administrative'):
     async def lockdown(self,ctx, *args):
 
         messageAuthor = ctx.author
-        verifiedRole = discord.utils.get(messageAuthor.guild.roles, name="Verified")
+        verifiedRole = getRole("Verified")
 
         if (permittedAdmin(messageAuthor)):
             if (not db_exists("lockdown") or db_get("lockdown") == "0"):
@@ -515,8 +505,6 @@ class Administrative(commands.Cog, name='Administrative'):
                         content="Cycling lockdown permissions to all channels... Status: [" + str(counter) + "/" + str(
                             len(messageAuthor.guild.voice_channels)) + "]")
                 await ctx.send("Cycled lockdown permissions to all voice channels.")
-
-
 
                 await ctx.send("Lockdown mode disabled. Bot commands and user text chat has been enabled again.")
 
@@ -662,22 +650,21 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.command()
     async def validateroles(self, ctx):
-        adminChannel = discord.utils.get(ctx.author.guild.channels, id=716954090495541248)
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
 
         messageAuthor = ctx.author
 
         if (permittedAdmin(messageAuthor)):
-            section1Role = discord.utils.get(ctx.message.guild.roles, name="Section 1")
-            section2Role = discord.utils.get(ctx.message.guild.roles, name="Section 2")
-            verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
-            guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
-            teachingRole = discord.utils.get(ctx.message.guild.roles, name="Teaching Staff")
-            bot = discord.utils.get(ctx.message.guild.roles, name="Bot")
-            pending = discord.utils.get(ctx.message.guild.roles, name="pending")
+            section1Role = getRole("Section 1")
+            section2Role = getRole("Section 2")
+            verifiedRole = getRole("Verified")
+            teachingRole = getRole("Teaching Staff")
+            bot = getRole("Bot")
+            pending = getRole("Pending")
 
-            for member in ctx.author.guild.members:
-                if (teachingRole in member.roles or verifiedRole not in member.roles or bot in member.roles):
-                    continue
+            for member in stream(ctx.author.guild.members)\
+                    .filter(lambda x: teachingRole not in x.roles and verifiedRole in x.roles and bot not in x.roles).\
+                    to_list():
 
                 try:
                     if (db_exists(str(member.id)+".watid")):
@@ -788,9 +775,10 @@ class Administrative(commands.Cog, name='Administrative'):
                 if (db_exists(str(user.id) + ".guestExpiry")):
                     await ctx.send("This user is already a guest on this server!")
                 else:
+
                     db_set(str(user.id) + ".guestExpiry", str(endDate))
-                    guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
-                    verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
+                    guestRole = getRole("Guest")
+                    verifiedRole = getRole("Verified")
                     await user.add_roles(guestRole)
                     await user.add_roles(verifiedRole)
                     await ctx.send("Granted <@" + str(user.id) + "> temporary membership for " + str(time) + " hours.")
