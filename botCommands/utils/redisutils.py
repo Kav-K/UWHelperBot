@@ -1,20 +1,15 @@
 import discord
-from lazy_streams import stream
 import redis
 
+#Creates an instance of the redis client
 redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
-ADMIN_ROLE_ID = 706658128409657366
-TEACHING_STAFF_ROLE_ID = 709977207401087036
-
-
 #Unmark a WatID
-def redisUnmarkWatID(watid):
+def db_unmarkWatID(watid):
     redisClient.delete(watid)
 
-
 #Purge a user from database completely
-def redisPurge(member: discord.Member):
+def db_purgeUser(member: discord.Member):
     try:
         watid = redisClient.get(str(member.id) + ".watid").decode('utf-8')
         redisClient.delete(watid)
@@ -29,15 +24,20 @@ def redisPurge(member: discord.Member):
     except Exception as e:
         print(str(e))
 
-#Send a DM
-async def send_dm(member: discord.Member, content):
-    channel = await member.create_dm()
-    await channel.send(content)
+#Performs a get request and decodes
+def db_get(key):
+    return redisClient.get(key).decode('utf-8')
 
-#See if a user is permitted to run an admin command
-def permittedAdmin(user):
-    return ADMIN_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
+#Sets a value in the redis db
+def db_set(key, value):
+    redisClient.set(key, value)
 
-#See if a user is teaching faculty
-def permittedStaff(user):
-    return TEACHING_STAFF_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
+#Checks a value exists in the redis db
+def db_exists(key):
+    return redisClient.exists(key)
+
+#Checks a value exists in the redis db
+def db_delete(key):
+    return redisClient.delete(key)
+
+
