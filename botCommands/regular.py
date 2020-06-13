@@ -1,13 +1,12 @@
 import pytz
 import requests
 import urllib.request
-import redis
 from datetime import datetime
 from datetime import timedelta
 
 from pytz import timezone
 from icalendar import Calendar
-from botCommands.utils import *
+from botCommands.utils.utils import *
 
 import discord
 from discord.ext import commands

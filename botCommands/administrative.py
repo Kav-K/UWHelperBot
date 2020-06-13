@@ -1,15 +1,12 @@
 import random
-import redis
 import requests
-import json
 import asyncio
 from datetime import datetime, timedelta
 from pytz import timezone
-from lazy_streams import stream
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
-from botCommands.utils import *
+from botCommands.utils.utils import *
 
 import discord
 from discord.ext import commands
@@ -28,7 +25,7 @@ user_text_channels = [706657592578932800, 706659318883156069, 706659290072743977
 user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,706659396146430002,707777965630554123,706658429892296714,706658540709740546,706658731697504286,706658766585724950,706658831437922396,706658925826801684]
 whitelist_channel_names = ["faculty-general","create-a-ticket"]
 lockdown_chat = ["lockdown-chat"]
-
+ADMIN_CHANNEL_NAME = "bot-alerts"
 
 
 #TODO Start this with context without needing an on_message event to pass context through to it.!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -38,8 +35,7 @@ async def AdministrativeThread(guild):
     verifiedRole = getRole("Verified")
     sec2Role = getRole("Section 2")
     sec1Role = getRole("Section 1")
-    teachingStaffRole = getRole("Teaching Staff")
-    adminChannel = discord.utils.get(guild.channels, id=716954090495541248)
+    adminChannel = getChannel("bot-alerts")
 
     while True:
         est = timezone('US/Eastern')
@@ -83,7 +79,7 @@ async def AdministrativeThread(guild):
 
         # Manage study rooms
         room_list = redisClient.hgetall('room_list')
-        unsanitized_study_rooms = discord.utils.get(guild.categories, id=709173209722912779).text_channels
+        unsanitized_study_rooms = getCategory(709173209722912779).text_channels
         study_rooms = stream(unsanitized_study_rooms).filter(lambda x: "private" not in x.name.lower()).to_list()
         for study_room in study_rooms:
             try:
@@ -148,36 +144,34 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        adminChannel = discord.utils.get(member.guild.channels, id=716954090495541248)
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
         await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
 
         redisPurge(member)
-        adminChannel.send("User has been purged from the database successfully.")
+        await adminChannel.send("User has been purged from the database successfully.")
 
 
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-
-        bot = discord.utils.get(ctx.guild.roles, name="Bot")
-        adminRole = discord.utils.get(ctx.guild.roles, name="Admin")
-        pendingRole = discord.utils.get(ctx.guild.roles, name="pending")
+        pendingRole = getRole("pending")
         global daemonRunning
         if (daemonRunning == False):
             daemonRunning = True
             #TODO How can we do this on startup without needing an on_message event to pass context???
             adminThread = asyncio.get_event_loop().create_task(AdministrativeThread(ctx.guild))
-            adminChannel = discord.utils.get(ctx.guild.channels, id=716954090495541248)
+            adminChannel = getChannel("pending")
             await adminChannel.send("The administrative daemon thread is now running.")
 
             await adminThread
 
-        pendingChannel = discord.utils.get(ctx.guild.channels, id=717655708098756640)
+        pendingChannel = getChannel("pending")
 
         if (ctx.author == self.bot.user or ctx.channel != pendingChannel or hasRoles(ctx.author,["Admin"])): return
 
         try:
             watid = str(ctx.content)
+            #TODO put in utils
             apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
             name = apiResponse['data']['full_name']
 
@@ -187,7 +181,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 await pendingChannel.send("<@"+str(ctx.author.id)+"> Valid, you are now being re-validated.")
                 try:
 
-                    # redisClient.set(str(user) + ".watid", watid)
                     redisClient.set(str(user.id) + ".watid", watid)
                     await pendingChannel.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
                     redisClient.set(str(user) + ".name", name)
@@ -224,7 +217,7 @@ class Administrative(commands.Cog, name='Administrative'):
             #Set global GUILD!
             setGuild(self.bot.guilds[0])
             print("Set the guild to" +str(self.bot.guilds[0]))
-            adminChannel = discord.utils.get(self.bot.guilds[0].channels, id=716954090495541248)
+            adminChannel = getChannel(ADMIN_CHANNEL_NAME)
             await adminChannel.send("The administrative daemon thread is now running.")
             print('Admin thread start')
 
@@ -239,9 +232,9 @@ class Administrative(commands.Cog, name='Administrative'):
         messageAuthor = ctx.author
 
         #lol put it into a loop later
-        guestRole = discord.utils.get(messageAuthor.guild.roles, name="Guest")
-        sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
-        sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
+        guestRole = getRole("Guest")
+        sec1Role = getRole("Section 1")
+        sec2Role = getRole("Section 2")
         regularRoles = [guestRole,sec1Role,sec2Role]
 
 
@@ -256,8 +249,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 for memberRole in regularRoles:
                     await channel.set_permissions(memberRole, send_messages=False, read_messages=True, read_message_history=True)
                 await ctx.send("This channel has been locked. Sending messages is disabled.")
-
-
 
     @commands.command()
     async def verify(self, ctx, *args):
@@ -373,15 +364,15 @@ class Administrative(commands.Cog, name='Administrative'):
                     if (redisClient.exists(str(messageAuthor.id))): redisClient.delete(str(messageAuthor.id) + ".request")
                     if (redisClient.exists(str(messageAuthor))): redisClient.delete(str(messageAuthor) + ".request")
                     # 706966831268626464
-                    verifiedRole = discord.utils.get(ctx.guild.roles, name="Verified")
-                    unverifiedRole = discord.utils.get(ctx.guild.roles, name="Unverified")
+                    verifiedRole = getRole("Verified")
+                    unverifiedRole = getRole("Unverified")
                     await messageAuthor.add_roles(verifiedRole)
                     await messageAuthor.remove_roles(unverifiedRole)
 
                     try:
                         watID = redisClient.get(str(messageAuthor.id) + ".watid").decode("utf-8")
-                        sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
-                        sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
+                        sec2Role = getRole("Section 2")
+                        sec1Role = getRole("Section 1")
 
                         adminChannel = discord.utils.get(messageAuthor.guild.channels, id=716954090495541248)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
@@ -451,7 +442,7 @@ class Administrative(commands.Cog, name='Administrative'):
     async def lockdown(self,ctx, *args):
 
         messageAuthor = ctx.author
-        verifiedRole = discord.utils.get(messageAuthor.guild.roles, name="Verified")
+        verifiedRole = getRole("Verified")
 
         if (permittedAdmin(messageAuthor)):
             if (not redisClient.exists("lockdown") or redisClient.get("lockdown").decode('utf-8') == "0"):
@@ -522,8 +513,6 @@ class Administrative(commands.Cog, name='Administrative'):
                         content="Cycling lockdown permissions to all channels... Status: [" + str(counter) + "/" + str(
                             len(messageAuthor.guild.voice_channels)) + "]")
                 await ctx.send("Cycled lockdown permissions to all voice channels.")
-
-
 
                 await ctx.send("Lockdown mode disabled. Bot commands and user text chat has been enabled again.")
 
@@ -670,22 +659,21 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.command()
     async def validateroles(self, ctx):
-        adminChannel = discord.utils.get(ctx.author.guild.channels, id=716954090495541248)
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
 
         messageAuthor = ctx.author
 
         if (permittedAdmin(messageAuthor)):
-            section1Role = discord.utils.get(ctx.message.guild.roles, name="Section 1")
-            section2Role = discord.utils.get(ctx.message.guild.roles, name="Section 2")
-            verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
-            guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
-            teachingRole = discord.utils.get(ctx.message.guild.roles, name="Teaching Staff")
-            bot = discord.utils.get(ctx.message.guild.roles, name="Bot")
-            pending = discord.utils.get(ctx.message.guild.roles, name="pending")
+            section1Role = getRole("Section 1")
+            section2Role = getRole("Section 2")
+            verifiedRole = getRole("Verified")
+            teachingRole = getRole("Teaching Staff")
+            bot = getRole("Bot")
+            pending = getRole("Pending")
 
-            for member in ctx.author.guild.members:
-                if (teachingRole in member.roles or verifiedRole not in member.roles or bot in member.roles):
-                    continue
+            for member in stream(ctx.author.guild.members)\
+                    .filter(lambda x: teachingRole not in x.roles and verifiedRole in x.roles and bot not in x.roles).\
+                    to_list():
 
                 try:
                     if (redisClient.exists(str(member.id)+".watid")):
@@ -797,8 +785,8 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send("This user is already a guest on this server!")
                 else:
                     redisClient.set(str(user.id) + ".guestExpiry", str(endDate))
-                    guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
-                    verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
+                    guestRole = getRole("Guest")
+                    verifiedRole = getRole("Verified")
                     await user.add_roles(guestRole)
                     await user.add_roles(verifiedRole)
                     await ctx.send("Granted <@" + str(user.id) + "> temporary membership for " + str(time) + " hours.")
