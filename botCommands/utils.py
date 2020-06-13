@@ -10,6 +10,9 @@ GUILD = None
 ADMIN_ROLE_ID = 706658128409657366
 TEACHING_STAFF_ROLE_ID = 709977207401087036
 
+
+
+
 #Check if a user has a set of roles
 def hasRoles(memberToCheck,roleNames):
     if (len(roleNames)< 2):
@@ -22,14 +25,38 @@ def hasRoles(memberToCheck,roleNames):
 def isVerified(memberToCheck):
     return getRole("Verified") in memberToCheck.roles
 
+#Return the global GUILD object
+def getGuild():
+    global GUILD
+    return GUILD
+
+#Set the guild variable
 def setGuild(inputGuild):
     global GUILD
     print("Got guild set request to: "+str(inputGuild))
     GUILD = inputGuild
 
-#Return a single role given a name
-def getRole(roleName):
-    return discord.utils.get(GUILD.roles,name=roleName)
+
+#Get a category by identifier
+def getCategory(categoryIdentifier):
+    if (type(categoryIdentifier) == int):
+        return discord.utils.get(GUILD.categories,id=categoryIdentifier)
+    else:
+        return discord.utils.get(GUILD.categories,name=categoryIdentifier)
+
+#Get channel by identifier
+def getChannel(channelIdentifier):
+    if (type(channelIdentifier) == int):
+        return discord.utils.get(GUILD.channels,id=channelIdentifier)
+    else:
+        return discord.utils.get(GUILD.channels,name=channelIdentifier)
+
+#Return a single role given a identifier
+def getRole(roleIdentifier):
+    if (type(roleIdentifier) == int):
+        return discord.utils.get(GUILD.roles, id=roleIdentifier)
+    else:
+        return discord.utils.get(GUILD.roles, name=roleIdentifier)
 
 #Get all members or get members with a specific set of roles
 def getMembers(roles=[]):
