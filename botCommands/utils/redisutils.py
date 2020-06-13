@@ -25,5 +25,7 @@ def redisPurgeUser(member: discord.Member):
         print(str(e))
 
 #Performs a get request and decodes
-def redisGetDecoded(key):
+def redisGet(key):
     return redisClient.get(key).decode('utf-8')
+
+def redisSet(key, value):

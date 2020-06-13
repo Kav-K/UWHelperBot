@@ -77,8 +77,8 @@ async def AdministrativeThread(guild):
 
 
             #Expire memberships for temporary guests
-            if (redisClient.exists(str(id)+".guestExpiry")):
-                stringExpiryTime = redisClient.get(str(id)+".guestExpiry").decode("utf-8")
+            if (db_exists(str(id)+".guestExpiry")):
+                stringExpiryTime = db_get(str(id)+".guestExpiry")
                 print("The user: "+str(member)+" has a pending membership expiry date: "+stringExpiryTime)
                 #2020-05-30 09:46:59.610027-04:00
                 stringExpiryTime = stringExpiryTime.replace("-04:00","")
@@ -153,10 +153,8 @@ class Administrative(commands.Cog, name='Administrative'):
         adminChannel = discord.utils.get(member.guild.channels, id=716954090495541248)
         await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
 
-        redisPurgeUser(member)
+        db_purgeUser(member)
         adminChannel.send("User has been purged from the database successfully.")
-
-
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
@@ -188,15 +186,13 @@ class Administrative(commands.Cog, name='Administrative'):
                 user = ctx.author
                 await pendingChannel.send("<@"+str(ctx.author.id)+"> Valid, you are now being re-validated.")
                 try:
-
-                    # redisClient.set(str(user) + ".watid", watid)
-                    redisClient.set(str(user.id) + ".watid", watid)
+                    db_set(str(user.id) + ".watid", watid)
                     await pendingChannel.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
-                    redisClient.set(str(user) + ".name", name)
+                    db_set(str(user) + ".name", name)
                     await pendingChannel.edit(nick=name)
                     await pendingChannel.send(
                         "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
-                    redisClient.set(watid, 1)
+                    db_set(watid, 1)
                     await pendingChannel.send(
                         "The WatID " + watid + " has been marked for no further verifications.")
 
@@ -248,13 +244,13 @@ class Administrative(commands.Cog, name='Administrative'):
 
 
         if (permittedAdmin(messageAuthor)):
-            if (redisClient.exists(str(channel.id)+".locked")):
+            if (db_exists(str(channel.id)+".locked")):
                 for memberRole in regularRoles:
                     await channel.set_permissions(memberRole, send_messages=True, read_messages=True, read_message_history=True)
                 await ctx.send("This channel has been unlocked. Sending messages is enabled again.")
                 redisClient.delete(str(channel.id)+".locked")
             else:
-                redisClient.set(str(channel.id)+".locked",1)
+                db_set(str(channel.id)+".locked",1)
                 for memberRole in regularRoles:
                     await channel.set_permissions(memberRole, send_messages=False, read_messages=True, read_message_history=True)
                 await ctx.send("This channel has been locked. Sending messages is disabled.")
@@ -267,7 +263,7 @@ class Administrative(commands.Cog, name='Administrative'):
             messageAuthor = ctx.author
             watid = args[0]
 
-            if (redisClient.exists(str(messageAuthor) + ".request") or redisClient.exists(str(messageAuthor.id) + ".request")):
+            if (db_exists(str(messageAuthor) + ".request") or db_exists(str(messageAuthor.id) + ".request")):
                 response = "<@" + str(
                     messageAuthor.id) + "> There is already a pending verification request for your WatID," \
                                         " please use `!confirm <code>` or do `!cancelverification`"
@@ -296,14 +292,14 @@ class Administrative(commands.Cog, name='Administrative'):
                 return
 
             try:
-                if (redisClient.exists(str(messageAuthor) + ".verified") or redisClient.exists(str(messageAuthor.id) + ".verified")):
+                if (db_exists(str(messageAuthor) + ".verified") or db_exists(str(messageAuthor.id) + ".verified")):
                     if (int(redisClient.get(str(messageAuthor) + ".verified")) == 1 or int(redisClient.get(str(messageAuthor.id) + ".verified")) == 1):
                         response = "<@" + str(messageAuthor.id) + "> You have already been verified"
                         await ctx.send(response)
                         return
             except:
                 print("Lazy nullify error.")
-            if (redisClient.exists(str(user_id))):
+            if (db_exists(str(user_id))):
                 if (int(redisClient.get(str(user_id))) == 1):
                     response = "<@" + str(
                         messageAuthor.id) + "> This user_id has already been verified. Not you? Contact an admin."
@@ -311,15 +307,14 @@ class Administrative(commands.Cog, name='Administrative'):
                     return
 
             # Mark
-            #redisClient.set(str(messageAuthor) + ".watid", user_id)
-            redisClient.set(str(messageAuthor.id) + ".watid", user_id)
-            redisClient.set(str(messageAuthor.id) + ".verified", 0)
-            redisClient.set(str(messageAuthor) + ".name", name)
-            redisClient.set(str(messageAuthor.id) + ".name", name)
+            db_set(str(messageAuthor.id) + ".watid", user_id)
+            db_set(str(messageAuthor.id) + ".verified", 0)
+            db_set(str(messageAuthor) + ".name", name)
+            db_set(str(messageAuthor.id) + ".name", name)
 
             # Generate random code
             code = random.randint(1000, 9999)
-            redisClient.set(str(messageAuthor.id) + ".code", code)
+            db_set(str(messageAuthor.id) + ".code", code)
 
             mailMessage = Mail(
                 from_email='verification@kaveenk.com',
@@ -338,7 +333,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code" \
                                                                                  " in your email and type `!confirm <code>` in discord to verify" \
                                                                                  " your account. Please check your spam and junk folders."
-            redisClient.set(str(messageAuthor.id) + ".request", 1)
+            db_set(str(messageAuthor.id) + ".request", 1)
 
             await ctx.send(response)
         except Exception as e:
@@ -356,7 +351,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
             code = args[0]
 
-            if (redisClient.exists(str(messageAuthor.id) + ".request")):
+            if (db_exists(str(messageAuthor.id) + ".request")):
 
                 if (int(code) == int(redisClient.get(str(messageAuthor.id)+".code"))):
                     response = "<@" + str(messageAuthor.id) + "> You were successfully verified."
@@ -368,12 +363,11 @@ class Administrative(commands.Cog, name='Administrative'):
                     await messageAuthor.edit(nick=str(nickname.decode('utf-8')))
 
                     # Mark user and WatID as verified
-                    redisClient.set(str(messageAuthor.id) + ".verified", 1)
-                    #redisClient.set(str(redisClient.get(str(messageAuthor) + ".watid").decode('utf-8')), 1)
-                    redisClient.set(str(redisGetDecoded(str(messageAuthor.id) + ".watid")), 1)
+                    db_set(str(messageAuthor.id) + ".verified", 1)
+                    db_set(str(db_get(str(messageAuthor.id) + ".watid")), 1)
 
-                    if (redisClient.exists(str(messageAuthor.id))): redisClient.delete(str(messageAuthor.id) + ".request")
-                    if (redisClient.exists(str(messageAuthor))): redisClient.delete(str(messageAuthor) + ".request")
+                    if (db_exists(str(messageAuthor.id))): redisClient.delete(str(messageAuthor.id) + ".request")
+                    if (db_exists(str(messageAuthor))): redisClient.delete(str(messageAuthor) + ".request")
                     # 706966831268626464
                     verifiedRole = discord.utils.get(ctx.guild.roles, name="Verified")
                     unverifiedRole = discord.utils.get(ctx.guild.roles, name="Unverified")
@@ -381,7 +375,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     await messageAuthor.remove_roles(unverifiedRole)
 
                     try:
-                        watID = redisGetDecoded(str(messageAuthor.id) + ".watid")
+                        watID = db_get(str(messageAuthor.id) + ".watid")
                         sec2Role = discord.utils.get(messageAuthor.guild.roles, name="Section 2")
                         sec1Role = discord.utils.get(messageAuthor.guild.roles, name="Section 1")
 
@@ -416,7 +410,7 @@ class Administrative(commands.Cog, name='Administrative'):
         messageAuthor = ctx.author
 
         # 706966831268626464
-        if (redisClient.exists(str(messageAuthor.id) + ".request")):
+        if (db_exists(str(messageAuthor.id) + ".request")):
             redisClient.delete(str(messageAuthor.id)+".request")
             response = "<@" + str(
                 messageAuthor.id) + "> Cancelled your on-going verification, please try again with `!verify <watid>`"
@@ -434,12 +428,12 @@ class Administrative(commands.Cog, name='Administrative'):
                 selection = args[0]
                 if (selection == "user"):
                     user = ctx.message.mentions[0]
-                    redisPurgeUser(user)
+                    db_purgeUser(user)
                     await ctx.send("Purged user from database successfully.")
 
                 elif (selection == "watid"):
                     watid = args[1]
-                    redisUnmarkWatID(watid)
+                    db_unmarkWatID(watid)
                     await ctx.send("Unmarked WatID " + watid)
                 else:
                     await ctx.send("<@" + str(
@@ -456,9 +450,9 @@ class Administrative(commands.Cog, name='Administrative'):
         verifiedRole = discord.utils.get(messageAuthor.guild.roles, name="Verified")
 
         if (permittedAdmin(messageAuthor)):
-            if (not redisClient.exists("lockdown") or redisGetDecoded("lockdown") == "0"):
+            if (not db_exists("lockdown") or db_get("lockdown") == "0"):
 
-                redisClient.set("lockdown", 1)
+                db_set("lockdown", 1)
                 propagationMessage = await ctx.send("Cycling lockdown permissions to all text channels... Status: [0/"+str(len(messageAuthor.guild.text_channels))+"]")
                 counter = 0
                 for channel in messageAuthor.guild.text_channels:
@@ -493,7 +487,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send("Lockdown mode enabled. Bot commands and user text chat has been disabled.")
             else:
 
-                redisClient.set("lockdown", 0)
+                db_set("lockdown", 0)
                 propagationMessage = await ctx.send("Cycling to remove lockdown permissions from all text channels... Status: [0/" + str(
                     len(messageAuthor.guild.text_channels))+"]")
                 counter = 0
@@ -554,17 +548,16 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send("Invalid WatID: " + watid)
                     return
 
-                #redisClient.set(str(user) + ".watid", watid)
-                redisClient.set(str(user.id) + ".watid", watid)
+                db_set(str(user.id) + ".watid", watid)
                 await ctx.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
                 if ("Verified" in ranks):
-                    redisClient.set(str(user) + ".verified", 1)
+                    db_set(str(user) + ".verified", 1)
                     await ctx.send("<@" + str(user.id) + "> has been set to Verified status")
-                redisClient.set(str(user) + ".name", name)
+                db_set(str(user) + ".name", name)
                 await user.edit(nick=name)
                 await ctx.send(
                     "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
-                redisClient.set(watid, 1)
+                db_set(watid, 1)
                 await ctx.send(
                     "The WatID " + watid + " has been marked for no further verifications.")
 
@@ -613,7 +606,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     # Find user's discord tag
                     for member in ctx.message.mentions:
                         discordID = str(member.id)
-                        watid = redisGetDecoded(discordID + ".watid")
+                        watid = db_get(discordID + ".watid")
                         break
                 apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
 
@@ -621,7 +614,7 @@ class Administrative(commands.Cog, name='Administrative'):
                                       description="Here is an internal lookup by the University of Waterloo",
                                       color=0x800080)
                 embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
-                embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+                embed.(url="https://i.imgur.com/UWyVzwu.png")
                 embed.add_field(name="Status",
                                 value=apiResponse['meta']['message'],
                                 inline=False)
@@ -690,13 +683,13 @@ class Administrative(commands.Cog, name='Administrative'):
                     continue
 
                 try:
-                    if (redisClient.exists(str(member.id)+".watid")):
-                        if (redisClient.exists(str(member.id) + ".rolevalidated")):
+                    if (db_exists(str(member.id)+".watid")):
+                        if (db_exists(str(member.id) + ".rolevalidated")):
                             continue
 
 
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
-                        watID = redisGetDecoded(str(member.id) + ".watid")
+                        watID = db_get(str(member.id) + ".watid")
                         await adminChannel.send("The WatID for user <@" + str(member.id) + "> is "+watID)
 
                         await member.remove_roles(section1Role)
@@ -707,7 +700,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         else:
                             await member.add_roles(section1Role)
                             await adminChannel.send("Added the Section 1 Role to <@" + str(member.id) + ">.")
-                        redisClient.set(str(member.id)+".rolevalidated","true")
+                        db_set(str(member.id)+".rolevalidated","true")
 
                     else:
                         await member.add_roles(pending)
@@ -750,7 +743,7 @@ class Administrative(commands.Cog, name='Administrative'):
     async def subscribermessage(self,ctx,*args):
         messageAuthor = ctx.author
         if permittedAdmin(messageAuthor):
-            subscriberList = stream(messageAuthor.guild.members).filter(lambda x: redisClient.exists(str(x.id)+".subscribed") and redisGetDecoded(str(x.id)+".subscribed")=="true").to_list()
+            subscriberList = stream(messageAuthor.guild.members).filter(lambda x: db_exists(str(x.id)+".subscribed") and db_get(str(x.id)+".subscribed")=="true").to_list()
 
             message = " ".join(args).replace("\\n","\n")
             messageToEdit = await ctx.send("Sending notifications to subscribed members. Status: [0/"+str(len(subscriberList))+"]")
@@ -772,8 +765,8 @@ class Administrative(commands.Cog, name='Administrative'):
             embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
 
             subscriberList = stream(messageAuthor.guild.members).filter(
-                lambda x: redisClient.exists(str(x.id) + ".subscribed")
-                          and redisGetDecoded(str(x.id) + ".subscribed") == "true").to_list()
+                lambda x: db_exists(str(x.id) + ".subscribed")
+                          and db_get(str(x.id) + ".subscribed") == "true").to_list()
 
             for page in paginate(map(str,subscriberList)):
                 embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)
@@ -795,10 +788,10 @@ class Administrative(commands.Cog, name='Administrative'):
                 est = timezone('US/Eastern')
                 endDate = endDate.astimezone(est)
 
-                if (redisClient.exists(str(user.id) + ".guestExpiry")):
+                if (db_exists(str(user.id) + ".guestExpiry")):
                     await ctx.send("This user is already a guest on this server!")
                 else:
-                    redisClient.set(str(user.id) + ".guestExpiry", str(endDate))
+                    db_set(str(user.id) + ".guestExpiry", str(endDate))
                     guestRole = discord.utils.get(ctx.message.guild.roles, name="Guest")
                     verifiedRole = discord.utils.get(ctx.message.guild.roles, name="Verified")
                     await user.add_roles(guestRole)

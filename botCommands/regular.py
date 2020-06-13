@@ -7,13 +7,13 @@ from datetime import timedelta
 
 from pytz import timezone
 from icalendar import Calendar
-from botCommands.utils import *
+from botCommands.utils.utils import *
+from botCommands.utils.redisutils import *
 
 import discord
 from discord.ext import commands
 
 banned_channels = ["general","faculty-general","public-discussion","offtopic"]
-redisClient = redis.Redis(host='localhost', port=6379, db=0)
 WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
 
 # Regular
@@ -359,20 +359,20 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def subscribe(self,ctx):
         messageAuthor = ctx.author
-        if (redisClient.exists(str(messageAuthor.id)+".subscribed") and redisClient.get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you are already subscribed for notifications!")
-            redisClient.set(str(messageAuthor.id)+".subscribed", "true")
+            db_set(str(messageAuthor.id)+".subscribed", "true")
         else:
-            redisClient.set(str(messageAuthor.id) + ".subscribed", "true")
+            db_set(str(messageAuthor.id) + ".subscribed", "true")
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully subscribed to notifications!")
             await send_dm(messageAuthor,"You have successfully subscribed to notifications! You will receive important push notifications from the admin team and from upcoming dates here.")
 
     @commands.command()
     async def unsubscribe(self,ctx):
         messageAuthor = ctx.author
-        if (redisClient.exists(str(messageAuthor.id)+".subscribed") and redisClient.get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully unsubscribed from all notifications")
-            redisClient.set(str(messageAuthor.id)+".subscribed", "false")
+            db_set(str(messageAuthor.id)+".subscribed", "false")
         else:
             await ctx.send("<@"+str(messageAuthor.id)+"> you are not currently subscribed to any notifications!")
 
