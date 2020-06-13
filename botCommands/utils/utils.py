@@ -1,8 +1,5 @@
 import discord
 from lazy_streams import stream
-import redis
-#TODO CLEAN THESE DATABASE THINGS UP
-redisClient = redis.Redis(host='localhost', port=6379, db=0)
 global GUILD
 GUILD = None
 
@@ -52,27 +49,6 @@ def paginate(toPaginate, linesToPaginate=20):
             paginated.append(str(line))
 
     yield paginated
-
-#Unmark a WatID
-def redisUnmarkWatID(watid):
-    redisClient.delete(watid)
-
-
-#Purge a user from database completely
-def redisPurge(member: discord.Member):
-    try:
-        watid = redisClient.get(str(member.id) + ".watid").decode('utf-8')
-        redisClient.delete(watid)
-        redisClient.delete(str(member) + ".watid")
-        redisClient.delete(str(member.id) + ".watid")
-        redisClient.delete(str(member.id) + ".verified")
-        redisClient.delete(str(member) + ".verified")
-        redisClient.delete(str(member) + ".name")
-        redisClient.delete(str(member.id) + ".name")
-        redisClient.delete(str(member))
-        redisClient.delete(str(member.id) + ".request")
-    except Exception as e:
-        print(str(e))
 
 #Send a DM
 async def send_dm(member: discord.Member, content):
