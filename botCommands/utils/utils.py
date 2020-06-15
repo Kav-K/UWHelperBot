@@ -9,7 +9,6 @@ ADMIN_ROLE_ID = 706658128409657366
 TEACHING_STAFF_ROLE_ID = 709977207401087036
 
 
-
 #Get all subscribed members to notifications
 def getSubscribers():
     return stream(GUILD.members).filter(lambda x: db_exists(str(x.id) + ".subscribed") and db_get(str(x.id) + ".subscribed") == "true").to_list()
@@ -20,12 +19,12 @@ async def sendSubscriberMessage(message):
     message = message.replace("\\n", "\n")
     messageToEdit = await getChannel("admin-chat").send(
         "Sending notifications to subscribed members. Status: [0/" + str(len(subscriberList)) + "]")
+    await getChannel("admin-chat").send("The message was: \n"+message)
     for x, subscriber in enumerate(subscriberList):
         await messageToEdit.edit(content="Sending notifications to subscribed members. Status: [" + str(x) + "/" + str(
             len(subscriberList)) + "]")
         try:
-            if (subscriber.id == 213045272048041984):
-                await send_dm(subscriber, message)
+            await send_dm(subscriber, message)
         except Exception as e:
             await getChannel("admin-chat").send("Could not send a message to <@" + str(subscriber.id) + ">: " + str(e))
 

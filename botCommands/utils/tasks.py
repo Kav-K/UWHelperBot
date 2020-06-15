@@ -14,7 +14,44 @@ COMM_THREAD_SLEEP = 1
 
 async def CommBroker(guild):
     print("Comm Broker started successfully.")
+
+    #Get the subscriber message queue
+    smSubscriber = db_get_pubsub()
+    smSubscriber.subscribe("smQueue")
+
     while True:
+        db_set("totalUsers",len(guild.members))
+        db_set("totalOnline",len(stream(guild.members).filter(lambda x: x.status != discord.Status.offline).to_list()))
+        adminRole = getRole("Admin")
+        facultyRole = getRole("Teaching Staff")
+        botRole = getRole("Bot")
+
+        db_set("facultyOnline",len(stream(guild.members).filter(lambda x: facultyRole in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()))
+        db_set("adminOnline", len(stream(guild.members).filter(lambda x: adminRole in x.roles and botRole not in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()))
+        db_set("openTickets", len(getCategory("Open Tickets").text_channels))
+
+        for textChannel in guild.channels:
+            if (db_exists(textChannel.name+".pendingMessages")):
+                messageToSend = db_get(textChannel.name+".pendingMessages")
+                db_delete(textChannel.name+".pendingMessages")
+                await textChannel.send(messageToSend)
+
+        try:
+            messageToBroadcast = smSubscriber.get_message()['data'].decode('utf-8')
+            print(messageToBroadcast)
+            await sendSubscriberMessage(messageToBroadcast)
+        except Exception as e:
+            error = e
+
+
+
+
+
+
+
+
+
+
         await asyncio.sleep(COMM_THREAD_SLEEP)
 
 async def AdministrativeThread(guild):

@@ -4,6 +4,11 @@ import redis
 #Creates an instance of the redis client
 redisClient = redis.Redis(host='localhost', port=6379, db=0)
 
+
+#Get pubsub instance
+def db_get_pubsub():
+    return redisClient.pubsub()
+
 #Unmark a WatID
 def db_unmarkWatID(watid):
     redisClient.delete(watid)
