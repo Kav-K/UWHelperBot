@@ -239,7 +239,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
                     nickname = db_get(str(messageAuthor.id) + ".name")
 
-                    await messageAuthor.edit(nick=str(nickname.decode('utf-8')))
+                    await messageAuthor.edit(nick=str(nickname))
 
                     # Mark user and WatID as verified
                     db_set(str(messageAuthor.id) + ".verified", 1)
