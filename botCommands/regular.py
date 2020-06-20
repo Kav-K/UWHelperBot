@@ -1,3 +1,4 @@
+import os
 import pytz
 import requests
 import urllib.request
@@ -15,7 +16,7 @@ import discord
 from discord.ext import commands
 
 banned_channels = ["general","faculty-general","public-discussion","offtopic"]
-WATERLOO_API_KEY = "21573cf6bf679cdfb5eb47b51033daac"
+WATERLOO_API_KEY = os.getenv("WATERLOO_API_KEY")
 
 # Regular
 class Regular(commands.Cog, name = 'Regular'):
