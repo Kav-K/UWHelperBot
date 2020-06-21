@@ -353,7 +353,7 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def subscribe(self,ctx):
         messageAuthor = ctx.author
-        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed") == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you are already subscribed for notifications!")
             db_set(str(messageAuthor.id)+".subscribed", "true")
         else:
@@ -364,7 +364,7 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def unsubscribe(self,ctx):
         messageAuthor = ctx.author
-        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed").decode("utf-8") == "true"):
+        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed") == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully unsubscribed from all notifications")
             db_set(str(messageAuthor.id)+".subscribed", "false")
         else:
