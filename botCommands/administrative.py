@@ -121,7 +121,8 @@ class Administrative(commands.Cog, name='Administrative'):
         guestRole = getRole("Guest")
         sec1Role = getRole("Section 1")
         sec2Role = getRole("Section 2")
-        regularRoles = [guestRole,sec1Role,sec2Role]
+        verifiedRole = getRole("Verified")
+        regularRoles = [guestRole,sec1Role,sec2Role,verifiedRole]
 
 
         if (permittedAdmin(messageAuthor)):
