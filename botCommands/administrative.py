@@ -40,18 +40,21 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.Cog.listener()
     async def on_member_remove(self, member):
-        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
+        guild = member.guild
+
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME,guild)
         await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
-        db_purgeUser(member)
+        db_purgeUser(member,guild)
         adminChannel.send("User has been purged from the database successfully.")
 
 
     @commands.Cog.listener()
     async def on_message(self, ctx):
-        pendingRole = getRole("pending")
-        pendingChannel = getChannel("pending")
+        guild = ctx.author.guild
+        pendingRole = getRole("pending",guild)
+        pendingChannel = getChannel("pending",guild)
 
-        if (ctx.author == self.bot.user or ctx.channel != pendingChannel or hasRoles(ctx.author,["Admin"])): return
+        if (ctx.author == self.bot.user or ctx.channel != pendingChannel or hasRoles(ctx.author,["Admin"],guild)): return
 
         try:
             watid = str(ctx.content)
@@ -65,9 +68,9 @@ class Administrative(commands.Cog, name='Administrative'):
                 await pendingChannel.send("<@"+str(ctx.author.id)+"> Valid, you are now being re-validated.")
                 try:
 
-                    db_set(str(user.id) + ".watid", watid)
+                    db_set(str(user.id) + ".watid", watid,guild)
                     await pendingChannel.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
-                    db_set(str(user) + ".name", name)
+                    db_set(str(user) + ".name", name,guild)
                     await pendingChannel.edit(nick=name)
                     await pendingChannel.send(
                         "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
@@ -92,47 +95,50 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.Cog.listener()
     async def on_ready(self):
-        setGuild(self.bot.guilds[0])
-        print("Set the guild to" + str(self.bot.guilds[0]))
+        setGuilds(self.bot.guilds)
+        print("Set the guilds to" + str(self.bot.guilds))
         print(f'{self.bot.user.name} has connected to Discord!')
-        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME, self.bot.guilds[0])
         global daemonRunning
         if not daemonRunning:
             daemonRunning = True
-            asyncio.get_event_loop().create_task(AdministrativeThread(self.bot.guilds[0]))
-            await adminChannel.send("The administrative daemon thread is now running.")
-            print('Admin thread start')
-            asyncio.get_event_loop().create_task(CommBroker(self.bot.guilds[0]))
-            await adminChannel.send("The communications broker thread is now running.")
-            print('Communications broker thread start')
+            for indv_guild in self.bot.guilds:
+                asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
+                await adminChannel.send(str(indv_guild)+": The administrative daemon thread is now running.")
+                print('Admin thread start')
+                asyncio.get_event_loop().create_task(CommBroker(indv_guild))
+                await adminChannel.send(str(indv_guild)+": The communications broker thread is now running.")
+                print('Communications broker thread start')
 
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        role = getRole("Unverified")
+        guild = member.guild
+        role = getRole("Unverified",guild)
         await member.add_roles(role)
 
     @commands.command()
     async def lock(self,ctx):
         channel = ctx.channel
         messageAuthor = ctx.author
+        guild = ctx.author.guild
 
         #lol put it into a loop later
-        guestRole = getRole("Guest")
-        sec1Role = getRole("Section 1")
-        sec2Role = getRole("Section 2")
-        verifiedRole = getRole("Verified")
+        guestRole = getRole("Guest",guild)
+        sec1Role = getRole("Section 1",guild)
+        sec2Role = getRole("Section 2",guild)
+        verifiedRole = getRole("Verified",guild)
         regularRoles = [guestRole,sec1Role,sec2Role,verifiedRole]
 
 
         if (permittedAdmin(messageAuthor)):
-            if (db_exists(str(channel.id)+".locked")):
+            if (db_exists(str(channel.id)+".locked",guild)):
                 for memberRole in regularRoles:
                     await channel.set_permissions(memberRole, send_messages=True, read_messages=True, read_message_history=True)
                 await ctx.send("This channel has been unlocked. Sending messages is enabled again.")
-                db_delete(str(channel.id)+".locked")
+                db_delete(str(channel.id)+".locked",guild)
             else:
-                db_set(str(channel.id)+".locked",1)
+                db_set(str(channel.id)+".locked",1,guild)
                 for memberRole in regularRoles:
                     await channel.set_permissions(memberRole, send_messages=False, read_messages=True, read_message_history=True)
                 await ctx.send("This channel has been locked. Sending messages is disabled.")
@@ -141,9 +147,10 @@ class Administrative(commands.Cog, name='Administrative'):
     async def verify(self, ctx, *args):
         try:
             messageAuthor = ctx.author
+            guild = messageAuthor.guild
             watid = args[0]
 
-            if (db_exists(str(messageAuthor) + ".request") or db_exists(str(messageAuthor.id) + ".request")):
+            if (db_exists(str(messageAuthor) + ".request",guild) or db_exists(str(messageAuthor.id) + ".request",guild)):
                 response = "<@" + str(
                     messageAuthor.id) + "> There is already a pending verification request for your WatID," \
                                         " please use `!confirm <code>` or do `!cancelverification`"
@@ -172,29 +179,29 @@ class Administrative(commands.Cog, name='Administrative'):
                 return
 
             try:
-                if (db_exists(str(messageAuthor) + ".verified") or db_exists(str(messageAuthor.id) + ".verified")):
-                    if (int(db_get(str(messageAuthor) + ".verified")) == 1 or int(db_get(str(messageAuthor.id) + ".verified")) == 1):
+                if (db_exists(str(messageAuthor) + ".verified",guild) or db_exists(str(messageAuthor.id) + ".verified",guild)):
+                    if (int(db_get(str(messageAuthor) + ".verified",guild)) == 1 or int(db_get(str(messageAuthor.id) + ".verified",guild)) == 1):
                         response = "<@" + str(messageAuthor.id) + "> You have already been verified"
                         await ctx.send(response)
                         return
             except:
                 print("Lazy nullify error.")
-            if (db_exists(str(user_id))):
-                if (int(db_get(str(user_id))) == 1):
+            if (db_exists(str(user_id),guild)):
+                if (int(db_get(str(user_id),guild)) == 1):
                     response = "<@" + str(
                         messageAuthor.id) + "> This user_id has already been verified. Not you? Contact an admin."
                     await ctx.send(response)
                     return
 
             # Mark
-            db_set(str(messageAuthor.id) + ".watid", user_id)
-            db_set(str(messageAuthor.id) + ".verified", 0)
-            db_set(str(messageAuthor) + ".name", name)
-            db_set(str(messageAuthor.id) + ".name", name)
+            db_set(str(messageAuthor.id) + ".watid", user_id,guild)
+            db_set(str(messageAuthor.id) + ".verified", 0,guild)
+            db_set(str(messageAuthor) + ".name", name,guild)
+            db_set(str(messageAuthor.id) + ".name", name,guild)
 
             # Generate random code
             code = random.randint(1000, 9999)
-            db_set(str(messageAuthor.id) + ".code", code)
+            db_set(str(messageAuthor.id) + ".code", code,guild)
 
             mailMessage = Mail(
                 from_email='verification@kaveenk.com',
@@ -213,7 +220,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code" \
                                                                                  " in your email and type `!confirm <code>` in discord to verify" \
                                                                                  " your account. Please check your spam and junk folders."
-            db_set(str(messageAuthor.id) + ".request", 1)
+            db_set(str(messageAuthor.id) + ".request", 1,guild)
 
             await ctx.send(response)
         except Exception as e:
@@ -228,39 +235,40 @@ class Administrative(commands.Cog, name='Administrative'):
     async def confirm(self, ctx, *args):
         try:
             messageAuthor = ctx.author
+            guild = messageAuthor.guild
 
             code = args[0]
 
-            if (db_exists(str(messageAuthor.id) + ".request")):
+            if (db_exists(str(messageAuthor.id) + ".request",guild)):
 
-                if (int(code) == int(db_get(str(messageAuthor.id)+".code"))):
+                if (int(code) == int(db_get(str(messageAuthor.id)+".code",guild))):
                     response = "<@" + str(messageAuthor.id) + "> You were successfully verified."
 
                     await ctx.send(response)
 
-                    nickname = db_get(str(messageAuthor.id) + ".name")
+                    nickname = db_get(str(messageAuthor.id) + ".name",guild)
 
                     await messageAuthor.edit(nick=str(nickname))
 
                     # Mark user and WatID as verified
-                    db_set(str(messageAuthor.id) + ".verified", 1)
-                    db_set(str(db_get(str(messageAuthor.id) + ".watid")), 1)
+                    db_set(str(messageAuthor.id) + ".verified", 1,guild)
+                    db_set(str(db_get(str(messageAuthor.id) + ".watid",guild)), 1,guild)
 
-                    if (db_exists(str(messageAuthor.id))): db_delete(str(messageAuthor.id) + ".request")
-                    if (db_exists(str(messageAuthor))): db_delete(str(messageAuthor) + ".request")
+                    if (db_exists(str(messageAuthor.id,guild))): db_delete(str(messageAuthor.id) + ".request",guild)
+                    if (db_exists(str(messageAuthor,guild))): db_delete(str(messageAuthor) + ".request",guild)
                     # 706966831268626464
-                    verifiedRole = getRole("Verified")
-                    unverifiedRole = getRole("Unverified")
+                    verifiedRole = getRole("Verified",guild)
+                    unverifiedRole = getRole("Unverified",guild)
                     await messageAuthor.add_roles(verifiedRole)
                     await messageAuthor.remove_roles(unverifiedRole)
 
                     try:
 
-                        sec2Role = getRole("Section 2")
-                        sec1Role = getRole("Section 1")
-                        watID = db_get(str(messageAuthor.id) + ".watid")
+                        sec2Role = getRole("Section 2",guild)
+                        sec1Role = getRole("Section 1",guild)
+                        watID = db_get(str(messageAuthor.id) + ".watid",guild)
 
-                        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
+                        adminChannel = getChannel(ADMIN_CHANNEL_NAME,guild)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
                         if (watID in section2List):
                             await messageAuthor.add_roles(sec2Role)
@@ -289,10 +297,11 @@ class Administrative(commands.Cog, name='Administrative'):
     async def cancelverification(self, ctx):
 
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
 
         # 706966831268626464
-        if (db_exists(str(messageAuthor.id) + ".request")):
-            db_delete(str(messageAuthor.id)+".request")
+        if (db_exists(str(messageAuthor.id) + ".request",guild)):
+            db_delete(str(messageAuthor.id)+".request",guild)
             response = "<@" + str(
                 messageAuthor.id) + "> Cancelled your on-going verification, please try again with `!verify <watid>`"
             await ctx.send(response)
@@ -304,17 +313,18 @@ class Administrative(commands.Cog, name='Administrative'):
     async def devalidate(self, ctx, *args):
 
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
         if (permittedAdmin(messageAuthor)):
             try:
                 selection = args[0]
                 if (selection == "user"):
                     user = ctx.message.mentions[0]
-                    db_purgeUser(user)
+                    db_purgeUser(user,guild)
                     await ctx.send("Purged user from database successfully.")
 
                 elif (selection == "watid"):
                     watid = args[1]
-                    db_unmarkWatID(watid)
+                    db_unmarkWatID(watid,guild)
                     await ctx.send("Unmarked WatID " + watid)
                 else:
                     await ctx.send("<@" + str(
@@ -328,12 +338,13 @@ class Administrative(commands.Cog, name='Administrative'):
     async def lockdown(self,ctx, *args):
 
         messageAuthor = ctx.author
-        verifiedRole = getRole("Verified")
+        guild = messageAuthor.guild
+        verifiedRole = getRole("Verified",guild)
 
         if (permittedAdmin(messageAuthor)):
-            if (not db_exists("lockdown") or db_get("lockdown") == "0"):
+            if (db_exists("lockdown",guild) == 0 or db_get("lockdown",guild) == "0"):
 
-                db_set("lockdown", 1)
+                db_set("lockdown", 1,guild)
                 propagationMessage = await ctx.send("Cycling lockdown permissions to all text channels... Status: [0/"+str(len(messageAuthor.guild.text_channels))+"]")
 
                 for counter, channel in enumerate(messageAuthor.guild.text_channels):
@@ -366,7 +377,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
             else:
 
-                db_set("lockdown", 0)
+                db_set("lockdown", 0,guild)
                 propagationMessage = await ctx.send("Cycling to remove lockdown permissions from all text channels... Status: [0/" + str(
                     len(messageAuthor.guild.text_channels))+"]")
                 counter = 0
@@ -406,6 +417,7 @@ class Administrative(commands.Cog, name='Administrative'):
     async def correlate(self, ctx, *args):
 
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
 
         if (permittedAdmin(messageAuthor)):
             try:
@@ -425,16 +437,16 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send("Invalid WatID: " + watid)
                     return
 
-                db_set(str(user.id) + ".watid", watid)
+                db_set(str(user.id) + ".watid", watid,guild)
                 await ctx.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
                 if ("Verified" in ranks):
-                    db_set(str(user) + ".verified", 1)
+                    db_set(str(user) + ".verified", 1,guild)
                     await ctx.send("<@" + str(user.id) + "> has been set to Verified status")
-                db_set(str(user) + ".name", name)
+                db_set(str(user) + ".name", name,guild)
                 await user.edit(nick=name)
                 await ctx.send(
                     "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
-                db_set(watid, 1)
+                db_set(watid, 1,guild)
                 await ctx.send(
                     "The WatID " + watid + " has been marked for no further verifications.")
 
@@ -472,6 +484,7 @@ class Administrative(commands.Cog, name='Administrative'):
     async def ldaplookup(self, ctx, *args):
 
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
 
         if (permittedAdmin(messageAuthor) or permittedStaff(messageAuthor)):
             try:
@@ -483,7 +496,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     # Find user's discord tag
                     for member in ctx.message.mentions:
                         discordID = str(member.id)
-                        watid = db_get(discordID + ".watid")
+                        watid = db_get(discordID + ".watid",guild)
                         break
                 apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
 
@@ -542,29 +555,30 @@ class Administrative(commands.Cog, name='Administrative'):
 
     @commands.command()
     async def validateroles(self, ctx):
-        adminChannel = getChannel(ADMIN_CHANNEL_NAME)
 
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
+        adminChannel = getChannel(ADMIN_CHANNEL_NAME,guild)
 
         if (permittedAdmin(messageAuthor)):
-            section1Role = getRole("Section 1")
-            section2Role = getRole("Section 2")
-            verifiedRole = getRole("Verified")
-            teachingRole = getRole("Teaching Staff")
-            bot = getRole("Bot")
-            pending = getRole("Pending")
+            section1Role = getRole("Section 1",guild)
+            section2Role = getRole("Section 2",guild)
+            verifiedRole = getRole("Verified",guild)
+            teachingRole = getRole("Teaching Staff",guild)
+            bot = getRole("Bot",guild)
+            pending = getRole("Pending",guild)
 
             for member in stream(ctx.author.guild.members)\
                     .filter(lambda x: teachingRole not in x.roles and verifiedRole in x.roles and bot not in x.roles).\
                     to_list():
 
                 try:
-                    if (db_exists(str(member.id)+".watid")):
-                        if (db_exists(str(member.id) + ".rolevalidated")):
+                    if (db_exists(str(member.id)+".watid",guild)):
+                        if (db_exists(str(member.id) + ".rolevalidated",guild)):
                             continue
 
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
-                        watID = db_get(str(member.id) + ".watid")
+                        watID = db_get(str(member.id) + ".watid",guild)
                         await adminChannel.send("The WatID for user <@" + str(member.id) + "> is "+watID)
 
                         await member.remove_roles(section1Role)
@@ -575,7 +589,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         else:
                             await member.add_roles(section1Role)
                             await adminChannel.send("Added the Section 1 Role to <@" + str(member.id) + ">.")
-                        db_set(str(member.id)+".rolevalidated","true")
+                        db_set(str(member.id)+".rolevalidated","true",guild)
 
                     else:
                         await member.add_roles(pending)
@@ -617,11 +631,12 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.command()
     async def sm(self,ctx,*args):
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
         if permittedAdmin(messageAuthor):
             try:
                 if (args[0].lower() == 'confirm'):
                     if (messageAuthor.id in awaitingSM):
-                        await sendSubscriberMessage(awaitingSM[messageAuthor.id])
+                        await sendSubscriberMessage(awaitingSM[messageAuthor.id],guild)
                         del awaitingSM[messageAuthor.id]
                     else:
                         await ctx.send("You do not have a pending subscriber message to send out.")
@@ -647,6 +662,7 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.command()
     async def subscribers(self,ctx):
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
         if (permittedAdmin(messageAuthor)):
             embed = discord.Embed(title="Subscribed Members",
                                   description="Here is a list of all subscribed members",
@@ -655,8 +671,8 @@ class Administrative(commands.Cog, name='Administrative'):
             embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
 
             subscriberList = stream(messageAuthor.guild.members).filter(
-                lambda x: db_exists(str(x.id) + ".subscribed")
-                          and db_get(str(x.id) + ".subscribed") == "true").to_list()
+                lambda x: db_exists(str(x.id) + ".subscribed",guild)
+                          and db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
 
             for page in paginate(map(str,subscriberList)):
                 embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)
@@ -668,6 +684,7 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.command()
     async def guest(self, ctx, *args):
         messageAuthor = ctx.author
+        guild = messageAuthor.guild
         if (permittedAdmin(messageAuthor)):
             try:
                 user = ctx.message.mentions[0]
@@ -678,13 +695,13 @@ class Administrative(commands.Cog, name='Administrative'):
                 est = timezone('US/Eastern')
                 endDate = endDate.astimezone(est)
 
-                if (db_exists(str(user.id) + ".guestExpiry")):
+                if (db_exists(str(user.id) + ".guestExpiry",guild)):
                     await ctx.send("This user is already a guest on this server!")
                 else:
 
-                    db_set(str(user.id) + ".guestExpiry", str(endDate))
-                    guestRole = getRole("Guest")
-                    verifiedRole = getRole("Verified")
+                    db_set(str(user.id) + ".guestExpiry", str(endDate),guild)
+                    guestRole = getRole("Guest",guild)
+                    verifiedRole = getRole("Verified",guild)
                     await user.add_roles(guestRole)
                     await user.add_roles(verifiedRole)
                     await ctx.send("Granted <@" + str(user.id) + "> temporary membership for " + str(time) + " hours.")

@@ -353,20 +353,22 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def subscribe(self,ctx):
         messageAuthor = ctx.author
-        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed") == "true"):
+        guild = messageAuthor.guild
+        if (db_exists(str(messageAuthor.id)+".subscribed",guild) and db_get(str(messageAuthor.id)+".subscribed",guild) == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you are already subscribed for notifications!")
-            db_set(str(messageAuthor.id)+".subscribed", "true")
+            db_set(str(messageAuthor.id)+".subscribed", "true",guild)
         else:
-            db_set(str(messageAuthor.id) + ".subscribed", "true")
+            db_set(str(messageAuthor.id) + ".subscribed", "true",guild)
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully subscribed to notifications!")
             await send_dm(messageAuthor,"You have successfully subscribed to notifications! You will receive important push notifications from the admin team and from upcoming dates here.")
 
     @commands.command()
     async def unsubscribe(self,ctx):
         messageAuthor = ctx.author
-        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed") == "true"):
+        guild = messageAuthor.guild
+        if (db_exists(str(messageAuthor.id)+".subscribed",guild) and db_get(str(messageAuthor.id)+".subscribed",guild) == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully unsubscribed from all notifications")
-            db_set(str(messageAuthor.id)+".subscribed", "false")
+            db_set(str(messageAuthor.id)+".subscribed", "false",guild)
         else:
             await ctx.send("<@"+str(messageAuthor.id)+"> you are not currently subscribed to any notifications!")
 
