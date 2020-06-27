@@ -5,8 +5,8 @@ from botCommands.utils.redisutils import *
 GUILD = None
 
 #TODO PUT THESE INTO A SETTINGS/CONFIG
-ADMIN_ROLE_ID = 706658128409657366
-TEACHING_STAFF_ROLE_ID = 709977207401087036
+ADMIN_ROLE_NAME = "Admin"
+TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
 
 #Get all subscribed members to notifications
@@ -102,8 +102,8 @@ async def send_dm(member: discord.Member, content):
 
 #See if a user is permitted to run an admin command
 def permittedAdmin(user):
-    return ADMIN_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
+    return ADMIN_ROLE_NAME in stream(user.roles).map(lambda x: x.name).to_list()
 
 #See if a user is teaching faculty
 def permittedStaff(user):
-    return TEACHING_STAFF_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
+    return TEACHING_STAFF_ROLE_NAME in stream(user.roles).map(lambda x: x.name).to_list()
