@@ -47,10 +47,10 @@ class StudyRooms(commands.Cog, name='Study Room Commands'):
                 del new_room_list[study_room[b'name']]
 
                 if len(new_room_list) == 0:
-                    db_delete('room_list')
+                    db_delete('room_list',guild)
                 else:
                     redisClient.hmset('room_list', new_room_list)
-                db_delete(redis_room_name)
+                db_delete(redis_room_name,guild)
                 await text_channel.delete()
                 await voice_channel.delete()
                 await member_role.delete()

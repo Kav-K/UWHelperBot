@@ -16,39 +16,35 @@ async def CommBroker(guild):
     print("Comm Broker started successfully.")
 
     #Get the subscriber message queue
-    smSubscriber = db_get_pubsub()
+    smSubscriber = db_get_pubsub(guild)
     smSubscriber.subscribe("smQueue")
 
     while True:
-        db_set("totalUsers",len(guild.members))
-        db_set("totalOnline",len(stream(guild.members).filter(lambda x: x.status != discord.Status.offline).to_list()))
-        adminRole = getRole("Admin")
-        facultyRole = getRole("Teaching Staff")
-        botRole = getRole("Bot")
+        db_set("totalUsers",len(guild.members),guild)
+        db_set("totalOnline",len(stream(guild.members).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
+        adminRole = getRole("Admin",guild)
+        facultyRole = getRole("Teaching Staff",guild)
+        botRole = getRole("Bot",guild)
 
-        db_set("facultyOnline",len(stream(guild.members).filter(lambda x: facultyRole in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()))
-        db_set("adminOnline", len(stream(guild.members).filter(lambda x: adminRole in x.roles and botRole not in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()))
-        db_set("openTickets", len(getCategory("Open Tickets").text_channels))
+        db_set("facultyOnline",len(stream(guild.members).filter(lambda x: facultyRole in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
+        db_set("adminOnline", len(stream(guild.members).filter(lambda x: adminRole in x.roles and botRole not in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
+        try:
+            db_set("openTickets", len(getCategory("Open Tickets",guild).text_channels),guild)
+        except:
+            print("No open tickets were found for: "+guild.name)
 
         for textChannel in guild.channels:
-            if (db_exists(textChannel.name+".pendingMessages")):
-                messageToSend = db_get(textChannel.name+".pendingMessages")
-                db_delete(textChannel.name+".pendingMessages")
+            if (db_exists(textChannel.name+".pendingMessages",guild)):
+                messageToSend = db_get(textChannel.name+".pendingMessages",guild)
+                db_delete(textChannel.name+".pendingMessages",guild)
                 await textChannel.send(messageToSend)
 
         try:
             messageToBroadcast = smSubscriber.get_message()['data'].decode('utf-8')
             print(messageToBroadcast)
-            await sendSubscriberMessage(messageToBroadcast)
+            await sendSubscriberMessage(messageToBroadcast,guild)
         except Exception as e:
             error = e
-
-
-
-
-
-
-
 
 
 
@@ -56,11 +52,11 @@ async def CommBroker(guild):
 
 async def AdministrativeThread(guild):
     try:
-        guestRole = getRole("Guest")
-        verifiedRole = getRole("Verified")
-        sec2Role = getRole("Section 2")
-        sec1Role = getRole("Section 1")
-        adminChannel = getChannel("bot-alerts")
+        guestRole = getRole("Guest",guild)
+        verifiedRole = getRole("Verified",guild)
+        sec2Role = getRole("Section 2",guild)
+        sec1Role = getRole("Section 1",guild)
+        adminChannel = getChannel("bot-alerts",guild)
 
         while True:
             est = timezone('US/Eastern')
@@ -68,20 +64,20 @@ async def AdministrativeThread(guild):
 
             #Remove verified role for professors!
             for member in guild.members:
-                if (hasRoles(member, ["Teaching Staff","Verified"])):
+                if (hasRoles(member, ["Teaching Staff","Verified"],guild)):
                     await member.remove_roles(verifiedRole)
                     await adminChannel.send("WARNING: The user <@"+str(member.id)+"> is teaching faculty and was found to have the Verified role. It has been removed.")
 
 
             #Remove section roles for guests, remove double section ranks.
             for member in guild.members:
-                if (hasRoles(member,["Section 1","Section 2"])):
+                if (hasRoles(member,["Section 1","Section 2"],guild)):
                     await member.remove_roles(sec1Role)
                     await adminChannel.send("WARNING: The user <@" + str(
                         member.id) + "> has duplicate roles. The user has been reset to the section 2 role. Section 1 role has been removed.")
 
 
-                if (hasRoles(member,["Guest","Section 2"]) or hasRoles(member,["Guest","Section 1"])):
+                if (hasRoles(member,["Guest","Section 2"],guild) or hasRoles(member,["Guest","Section 1"],guild)):
                     print("Yeet")
                     await member.remove_roles(sec2Role) if sec2Role in member.roles else await member.remove_roles(sec1Role)
                     await adminChannel.send("WARNING: The user <@" + str(
@@ -89,8 +85,8 @@ async def AdministrativeThread(guild):
 
                 #Expire memberships for temporary guests
 
-                if (db_exists(str(id)+".guestExpiry")):
-                    stringExpiryTime = db_get(str(id)+".guestExpiry")
+                if (db_exists(str(id)+".guestExpiry",guild)):
+                    stringExpiryTime = db_get(str(id)+".guestExpiry",guild)
                     print("The user: "+str(member)+" has a pending membership expiry date: "+stringExpiryTime)
                     #2020-05-30 09:46:59.610027-04:00
                     stringExpiryTime = stringExpiryTime.replace("-04:00","")
@@ -100,12 +96,12 @@ async def AdministrativeThread(guild):
                     if (expiryDate <= currentTime):
                         await member.remove_roles(guestRole)
                         await member.remove_roles(verifiedRole)
-                        db_delete(str(id)+".guestExpiry")
+                        db_delete(str(id)+".guestExpiry",guild)
 
 
             # Manage study rooms
             room_list = redisClient.hgetall('room_list')
-            unsanitized_study_rooms = getCategory(709173209722912779).text_channels
+            unsanitized_study_rooms = getCategory("Study Rooms",guild).text_channels
             study_rooms = stream(unsanitized_study_rooms).filter(lambda x: "private" not in x.name.lower()).to_list()
             for study_room in study_rooms:
                 try:
@@ -116,12 +112,12 @@ async def AdministrativeThread(guild):
                     time_difference = expiry_time - datetime.now()
 
                     if time_difference < timedelta():
-                        text_channel = getChannel(int(channel_data['text_id']))
-                        voice_channel = getChannel(int(channel_data['voice_id']))
+                        text_channel = getChannel(int(channel_data['text_id']),guild)
+                        voice_channel = getChannel(int(channel_data['voice_id']),guild)
 
-                        admin_role = getRole(int(channel_data['admin_role_id']))
+                        admin_role = getRole(int(channel_data['admin_role_id']),guild)
 
-                        member_role = getRole(int(channel_data['member_role_id']))
+                        member_role = getRole(int(channel_data['member_role_id']),guild)
 
                         new_room_list = redisClient.hgetall('room_list')
 
@@ -129,11 +125,11 @@ async def AdministrativeThread(guild):
 
                         if len(new_room_list) == 0:
 
-                            db_delete('room_list')
+                            db_delete('room_list',guild)
                         else:
                             redisClient.hmset('room_list', new_room_list)
 
-                        db_delete(room_list[study_room.name.replace('-text', '').encode()].decode())
+                        db_delete(room_list[study_room.name.replace('-text', '').encode()].decode(),guild)
                         await text_channel.delete()
                         await voice_channel.delete()
                         await member_role.delete()
@@ -155,4 +151,4 @@ async def AdministrativeThread(guild):
             await asyncio.sleep(ADMIN_THREAD_SLEEP)
     except Exception as e:
         print(str(e))
-        await getChannel("admin-chat").send("ERROR: " + str(e))
+        await getChannel("admin-chat",guild).send("ERROR: " + str(e))

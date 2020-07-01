@@ -10,6 +10,7 @@ from icalendar import Calendar
 import botCommands.checks as checks
 from botCommands.utils.utils import *
 from botCommands.utils.redisutils import *
+from botCommands.utils.ConfigObjects import *
 
 import discord
 from discord.ext import commands
@@ -48,12 +49,13 @@ class Regular(commands.Cog, name = 'Regular'):
 
     @commands.command()
     async def textbooks(self, ctx):
+        guild = ctx.author.guild
         embed = discord.Embed(title="Textbooks & Resources",
                               description="Here is a dropbox link for our collective resources. Feel free to contact the admin team if you'd like to add to it.",
                               color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
-        embed.add_field(name="Link", value="https://www.dropbox.com/sh/tg1se0xab9c9cfc/AAAdJJZXi1bkkHUoW5oYT_EAa?dl=0",
+        embed.add_field(name="Link", value=getConfigurationValue(ConfigObjects.TEXTBOOKS_LINK,guild),
                         inline=False)
         await ctx.send(embed=embed)
 
@@ -62,10 +64,11 @@ class Regular(commands.Cog, name = 'Regular'):
     async def upcoming(self, ctx):
         dateMap = {}
         dateList = []
+        guild = ctx.author.guild
 
         # Opens the URL
         calendar = urllib.request.urlopen(
-            'https://calendar.google.com/calendar/ical/k5kumara%40edu.uwaterloo.ca/public/basic.ics')
+            getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild))
         gcal = Calendar.from_ical(calendar.read())
         dateRangeEnd = datetime.now() + timedelta(days=7)
 
@@ -196,7 +199,7 @@ class Regular(commands.Cog, name = 'Regular'):
             embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
             embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
             embed.add_field(name="Link",
-                            value="https://calendar.google.com/calendar/embed?src=ag2veuvcsc5k4kaqpsv7sp7e04%40group.calendar.google.com&ctz=America%2FToronto",
+                            value=getConfigurationValue(ConfigObjects.SCHEDULE_LINK,messageAuthor.guild),
                             inline=False)
             await ctx.send(embed=embed)
 
@@ -294,13 +297,14 @@ class Regular(commands.Cog, name = 'Regular'):
 
     @commands.command()
     async def importantdates(self, ctx):
+        guild = ctx.author.guild
         embed = discord.Embed(title="Due/Important Dates",
                               description="Here is a link to a calendar with important dates. Please contact the admin team if there is anything missing",
                               color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="Link",
-                        value="https://calendar.google.com/calendar/embed?src=k5kumara%40edu.uwaterloo.ca&ctz=America%2FToronto",
+                        value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild),
                         inline=False)
         await ctx.send(embed=embed)
 
@@ -353,20 +357,22 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def subscribe(self,ctx):
         messageAuthor = ctx.author
-        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed") == "true"):
+        guild = messageAuthor.guild
+        if (db_exists(str(messageAuthor.id)+".subscribed",guild) and db_get(str(messageAuthor.id)+".subscribed",guild) == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you are already subscribed for notifications!")
-            db_set(str(messageAuthor.id)+".subscribed", "true")
+            db_set(str(messageAuthor.id)+".subscribed", "true",guild)
         else:
-            db_set(str(messageAuthor.id) + ".subscribed", "true")
+            db_set(str(messageAuthor.id) + ".subscribed", "true",guild)
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully subscribed to notifications!")
             await send_dm(messageAuthor,"You have successfully subscribed to notifications! You will receive important push notifications from the admin team and from upcoming dates here.")
 
     @commands.command()
     async def unsubscribe(self,ctx):
         messageAuthor = ctx.author
-        if (db_exists(str(messageAuthor.id)+".subscribed") and db_get(str(messageAuthor.id)+".subscribed") == "true"):
+        guild = messageAuthor.guild
+        if (db_exists(str(messageAuthor.id)+".subscribed",guild) and db_get(str(messageAuthor.id)+".subscribed",guild) == "true"):
             await ctx.send("<@"+str(messageAuthor.id)+"> you have successfully unsubscribed from all notifications")
-            db_set(str(messageAuthor.id)+".subscribed", "false")
+            db_set(str(messageAuthor.id)+".subscribed", "false",guild)
         else:
             await ctx.send("<@"+str(messageAuthor.id)+"> you are not currently subscribed to any notifications!")
 
