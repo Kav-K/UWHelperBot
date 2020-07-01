@@ -30,8 +30,9 @@ async def CommBroker(guild):
         db_set("adminOnline", len(stream(guild.members).filter(lambda x: adminRole in x.roles and botRole not in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
         try:
             db_set("openTickets", len(getCategory("Open Tickets",guild).text_channels),guild)
-        except:
-            print("No open tickets were found for: "+guild.name)
+        except Exception as e:
+            pass
+
 
         for textChannel in guild.channels:
             if (db_exists(textChannel.name+".pendingMessages",guild)):
@@ -44,7 +45,7 @@ async def CommBroker(guild):
             print(messageToBroadcast)
             await sendSubscriberMessage(messageToBroadcast,guild)
         except Exception as e:
-            error = e
+            pass
 
 
 

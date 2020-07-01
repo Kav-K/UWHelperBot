@@ -215,7 +215,8 @@ class Administrative(commands.Cog, name='Administrative'):
                 mailResponse = sg.send(mailMessage)
                 # TODO: Validate mail response
             except Exception as e:
-                print(e.message)
+                print(str(e))
+                await getChannel("admin-chat", guild).send("ERROR: " + str(e))
 
             response = "<@" + str(
                 messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code" \
@@ -279,6 +280,7 @@ class Administrative(commands.Cog, name='Administrative'):
                             await adminChannel.send("Added the Section 1 Role to <@" + str(messageAuthor.id) + ">.")
                     except Exception as e:
                         print(str(e))
+                        await getChannel("admin-chat", guild).send("ERROR: " + str(e))
 
                 else:
                     response = "<@" + str(messageAuthor.id) + "> Invalid verification code."
@@ -290,6 +292,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send(response)
         except Exception as e:
             print(e)
+            await getChannel("admin-chat", guild).send("ERROR: <@&706658128409657366>: " + str(e))
             response = "<@" + str(
                 messageAuthor.id) + "> There was an error while verifying your user, or your code was invalid."
             await ctx.send(response)
@@ -478,6 +481,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send("All tasks completed successfully")
             except Exception as e:
                 print(str(e))
+                await getChannel("admin-chat", guild).send("ERROR: " + str(e))
                 await ctx.send("<@" + str(
                     messageAuthor.id) + "> You have entered invalid syntax, or the user you are trying to correlate is invalid. `!correlate <USER MENTION> <WatID>`")
 
@@ -657,6 +661,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         await ctx.send("You already have a pending subscriber message request. Please `!sm confirm` or `!sm cancel`")
             except Exception as e:
                 print(e)
+                await getChannel("admin-chat", guild).send("ERROR: " + str(e))
 
 
 
@@ -680,12 +685,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
-
-    @commands.command()
-    async def testing123(self,ctx,*args):
-        messageAuthor = ctx.author
-        guild = messageAuthor.guild
-        await ctx.send(str(getConfigurationValue(ConfigObjects.ID_LINK)))
 
     @commands.command()
     async def guest(self, ctx, *args):
@@ -713,5 +712,6 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send("Granted <@" + str(user.id) + "> temporary membership for " + str(time) + " hours.")
             except Exception as e:
                 print(str(e))
+                await getChannel("admin-chat", guild).send("ERROR: " + str(e))
                 await ctx.send("<@" + str(
                     messageAuthor.id) + " Invalid usage or an exception has occurred, please use: `!guest @MEMBER <time in hours>`")
