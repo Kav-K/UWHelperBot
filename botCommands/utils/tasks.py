@@ -28,7 +28,10 @@ async def CommBroker(guild):
 
         db_set("facultyOnline",len(stream(guild.members).filter(lambda x: facultyRole in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
         db_set("adminOnline", len(stream(guild.members).filter(lambda x: adminRole in x.roles and botRole not in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
-        db_set("openTickets", len(getCategory("Open Tickets",guild).text_channels),guild)
+        try:
+            db_set("openTickets", len(getCategory("Open Tickets",guild).text_channels),guild)
+        except:
+            print("No open tickets were found for: "+guild.name)
 
         for textChannel in guild.channels:
             if (db_exists(textChannel.name+".pendingMessages",guild)):
@@ -42,13 +45,6 @@ async def CommBroker(guild):
             await sendSubscriberMessage(messageToBroadcast,guild)
         except Exception as e:
             error = e
-
-
-
-
-
-
-
 
 
 
@@ -105,7 +101,7 @@ async def AdministrativeThread(guild):
 
             # Manage study rooms
             room_list = redisClient.hgetall('room_list')
-            unsanitized_study_rooms = getCategory(709173209722912779,guild).text_channels
+            unsanitized_study_rooms = getCategory("Study Rooms",guild).text_channels
             study_rooms = stream(unsanitized_study_rooms).filter(lambda x: "private" not in x.name.lower()).to_list()
             for study_room in study_rooms:
                 try:

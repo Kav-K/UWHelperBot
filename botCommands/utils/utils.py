@@ -108,3 +108,6 @@ def permittedAdmin(user):
 #See if a user is teaching faculty
 def permittedStaff(user):
     return TEACHING_STAFF_ROLE_NAME in stream(user.roles).map(lambda x: x.name).to_list()
+
+def getConfigurationValue(configObjectEnum,guild):
+    return db_get(configObjectEnum.value,guild)

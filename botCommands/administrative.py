@@ -9,6 +9,7 @@ from sendgrid.helpers.mail import Mail
 from botCommands.utils.utils import *
 from botCommands.utils.redisutils import *
 from botCommands.utils.tasks import *
+from botCommands.utils.ConfigObjects import *
 
 import discord
 from discord.ext import commands
@@ -254,8 +255,8 @@ class Administrative(commands.Cog, name='Administrative'):
                     db_set(str(messageAuthor.id) + ".verified", 1,guild)
                     db_set(str(db_get(str(messageAuthor.id) + ".watid",guild)), 1,guild)
 
-                    if (db_exists(str(messageAuthor.id,guild))): db_delete(str(messageAuthor.id) + ".request",guild)
-                    if (db_exists(str(messageAuthor,guild))): db_delete(str(messageAuthor) + ".request",guild)
+                    if (db_exists(str(messageAuthor.id),guild)): db_delete(str(messageAuthor.id) + ".request",guild)
+                    if (db_exists(str(messageAuthor),guild)): db_delete(str(messageAuthor) + ".request",guild)
                     # 706966831268626464
                     verifiedRole = getRole("Verified",guild)
                     unverifiedRole = getRole("Unverified",guild)
@@ -680,6 +681,11 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
 
+    @commands.command()
+    async def testing123(self,ctx,*args):
+        messageAuthor = ctx.author
+        guild = messageAuthor.guild
+        await ctx.send(str(getConfigurationValue(ConfigObjects.ID_LINK)))
 
     @commands.command()
     async def guest(self, ctx, *args):
