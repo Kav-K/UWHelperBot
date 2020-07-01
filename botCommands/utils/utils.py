@@ -1,21 +1,21 @@
 import discord
 from lazy_streams import stream
-global GUILD
+global GUILDS
 from botCommands.utils.redisutils import *
-GUILD = None
+GUILDS = []
 
 #TODO PUT THESE INTO A SETTINGS/CONFIG
-ADMIN_ROLE_ID = 706658128409657366
-TEACHING_STAFF_ROLE_ID = 709977207401087036
+ADMIN_ROLE_NAME = "Admin"
+TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
 
 #Get all subscribed members to notifications
-def getSubscribers():
-    return stream(GUILD.members).filter(lambda x: db_exists(str(x.id) + ".subscribed") and db_get(str(x.id) + ".subscribed") == "true").to_list()
+def getSubscribers(guild):
+    return stream(guild.members).filter(lambda x: db_exists(str(x.id) + ".subscribed") and db_get(str(x.id) + ".subscribed") == "true").to_list()
 
 #Send a subscriber message
-async def sendSubscriberMessage(message):
-    subscriberList = getSubscribers()
+async def sendSubscriberMessage(message,guild):
+    subscriberList = getSubscribers(guild)
     message = message.replace("\\n", "\n")
     messageToEdit = await getChannel("admin-chat").send(
         "Sending notifications to subscribed members. Status: [0/" + str(len(subscriberList)) + "]")
@@ -29,57 +29,58 @@ async def sendSubscriberMessage(message):
             await getChannel("admin-chat").send("Could not send a message to <@" + str(subscriber.id) + ">: " + str(e))
 
 #Check if a user has a set of roles
-def hasRoles(memberToCheck,roleNames):
+def hasRoles(memberToCheck,roleNames,guild):
     if (len(roleNames)< 2):
-        return getRole(roleNames[0]) in memberToCheck.roles
+        return getRole(roleNames[0],guild) in memberToCheck.roles
     else:
-        mappedRoles = stream(roleNames).map(lambda x: getRole(x)).to_list()
+        mappedRoles = stream(roleNames).map(lambda x: getRole(x,guild)).to_list()
         return set(mappedRoles).issubset(memberToCheck.roles)
 
 #Self explanatory
-def isVerified(memberToCheck):
-    return getRole("Verified") in memberToCheck.roles
+def isVerified(memberToCheck,guild):
+    return getRole("Verified",guild) in memberToCheck.roles
 
 
 #Return the global GUILD object
 def getGuild():
-    global GUILD
-    return GUILD
-def setGuild(inputGuild):
-    global GUILD
-    print("Got guild set request to: "+str(inputGuild))
-    GUILD = inputGuild
+    global GUILDS
+    return GUILDS
+def setGuilds(inputGuilds):
+    global GUILDS
+    print("Got guilds set request to: "+str(inputGuilds))
+    GUILDS = inputGuilds
+    redisSetGuilds(GUILDS)
 
 
 #Get a category by identifier
-def getCategory(categoryIdentifier):
+def getCategory(categoryIdentifier,guild):
     if (type(categoryIdentifier) == int):
-        return discord.utils.get(GUILD.categories,id=categoryIdentifier)
+        return discord.utils.get(guild.categories,id=categoryIdentifier)
     else:
-        return discord.utils.get(GUILD.categories,name=categoryIdentifier)
+        return discord.utils.get(guild.categories,name=categoryIdentifier)
 
 #Get channel by identifier
-def getChannel(channelIdentifier):
+def getChannel(channelIdentifier,guild):
     if (type(channelIdentifier) == int):
-        return discord.utils.get(GUILD.channels,id=channelIdentifier)
+        return discord.utils.get(guild.channels,id=channelIdentifier)
     else:
-        return discord.utils.get(GUILD.channels,name=channelIdentifier)
+        return discord.utils.get(guild.channels,name=channelIdentifier)
 
 #Return a single role given a identifier
-def getRole(roleIdentifier):
+def getRole(roleIdentifier,guild):
     if (type(roleIdentifier) == int):
-        return discord.utils.get(GUILD.roles, id=roleIdentifier)
+        return discord.utils.get(guild.roles, id=roleIdentifier)
     else:
-        return discord.utils.get(GUILD.roles, name=roleIdentifier)
+        return discord.utils.get(guild.roles, name=roleIdentifier)
 
 
 #Get all members or get members with a specific set of roles
-def getMembers(roles=[]):
+def getMembers(guild,roles=[]):
     if (len(roles)<1):
-        return GUILD.members
+        return guild.members
     else:
-        mappedRoles = stream(roles).map(lambda x: getRole(x)).to_list()
-        membersWithRoles = stream(GUILD.members).filter(lambda x: set(mappedRoles).issubset(x.roles)).to_list()
+        mappedRoles = stream(roles).map(lambda x: getRole(x,guild)).to_list()
+        membersWithRoles = stream(guild.members).filter(lambda x: set(mappedRoles).issubset(x.roles)).to_list()
         return membersWithRoles
 
 #Paginate a list!
@@ -102,8 +103,13 @@ async def send_dm(member: discord.Member, content):
 
 #See if a user is permitted to run an admin command
 def permittedAdmin(user):
-    return ADMIN_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
+    return ADMIN_ROLE_NAME in stream(user.roles).map(lambda x: x.name).to_list()
 
 #See if a user is teaching faculty
 def permittedStaff(user):
-    return TEACHING_STAFF_ROLE_ID in stream(user.roles).map(lambda x: x.id).to_list()
+    return TEACHING_STAFF_ROLE_NAME in stream(user.roles).map(lambda x: x.name).to_list()
+
+#Get a configuration value from the database
+def getConfigurationValue(configObjectEnum,guild):
+    return db_get(configObjectEnum.value,guild)
+
