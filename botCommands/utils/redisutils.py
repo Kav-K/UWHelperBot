@@ -1,11 +1,11 @@
+import os
 import discord
 import redis
+
+redisClient = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0)
 #Creates an instance of the redis client
 DATABASE_HARD_LIMIT = 15
 database_instances = {}
-redisClient = redis.Redis(host='localhost',port=6379)
-
-
 
 def redisSetGuilds(GUILDS):
     for GUILD in GUILDS:
@@ -18,6 +18,7 @@ def redisSetGuilds(GUILDS):
             except Exception as e:
                 print(str(e))
                 continue
+
 
 #Get pubsub instance
 def db_get_pubsub(guild):
@@ -42,6 +43,7 @@ def db_purgeUser(member: discord.Member,guild):
         database_instances[guild.id].delete(str(member.id) + ".request")
     except Exception as e:
         print(str(e))
+
 
 #Performs a get request and decodes
 def db_get(key,guild):
