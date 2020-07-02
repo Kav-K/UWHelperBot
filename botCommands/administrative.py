@@ -75,7 +75,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     await pendingChannel.edit(nick=name)
                     await pendingChannel.send(
                         "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
-                    db_set(watid, 1)
+                    db_set(watid, 1,guild)
                     await pendingChannel.send(
                         "The WatID " + watid + " has been marked for no further verifications.")
 
@@ -654,6 +654,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 else:
                     if (messageAuthor.id not in awaitingSM):
                         message = " ".join(args)
+                        message = message.replace("\"","'")
                         await ctx.send(message.replace("\\n", "\n"))
                         await ctx.send("This is a preview of the message you are about to send. To send, please type `!sm confirm`")
                         awaitingSM[messageAuthor.id] = message
