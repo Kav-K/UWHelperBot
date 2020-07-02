@@ -11,22 +11,22 @@ TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
 #Get all subscribed members to notifications
 def getSubscribers(guild):
-    return stream(guild.members).filter(lambda x: db_exists(str(x.id) + ".subscribed") and db_get(str(x.id) + ".subscribed") == "true").to_list()
+    return stream(guild.members).filter(lambda x: db_exists(str(x.id) + ".subscribed",guild) and db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
 
 #Send a subscriber message
 async def sendSubscriberMessage(message,guild):
     subscriberList = getSubscribers(guild)
     message = message.replace("\\n", "\n")
-    messageToEdit = await getChannel("admin-chat").send(
+    messageToEdit = await getChannel("admin-chat",guild).send(
         "Sending notifications to subscribed members. Status: [0/" + str(len(subscriberList)) + "]")
-    await getChannel("admin-chat").send("The message was: \n"+message)
+    await getChannel("admin-chat",guild).send("The message was: \n"+message)
     for x, subscriber in enumerate(subscriberList):
         await messageToEdit.edit(content="Sending notifications to subscribed members. Status: [" + str(x) + "/" + str(
             len(subscriberList)) + "]")
         try:
             await send_dm(subscriber, message)
         except Exception as e:
-            await getChannel("admin-chat").send("Could not send a message to <@" + str(subscriber.id) + ">: " + str(e))
+            await getChannel("admin-chat",guild).send("Could not send a message to <@" + str(subscriber.id) + ">: " + str(e))
 
 #Check if a user has a set of roles
 def hasRoles(memberToCheck,roleNames,guild):
