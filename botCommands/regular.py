@@ -46,7 +46,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.add_field(name="=wolf <QUERY>", value="Use the wolfram engine to search something up or calculate", inline=False)
         embed.add_field(name="!assignments <140 OR 124>", value="View assignment questions for 124 and 140 from the textbook", inline=False)
         embed.add_field(name="!breakdown <course number>", value="View the grading scheme breakdown for a course", inline=False)
-        embed.add_field(name="!examinfo", value="Information about ECE 140",
+        embed.add_field(name="!examinfo", value="Information about ECE exams",
                         inline=False)
         await ctx.send(embed=embed)
 
