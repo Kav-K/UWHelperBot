@@ -46,6 +46,8 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.add_field(name="=wolf <QUERY>", value="Use the wolfram engine to search something up or calculate", inline=False)
         embed.add_field(name="!assignments <140 OR 124>", value="View assignment questions for 124 and 140 from the textbook", inline=False)
         embed.add_field(name="!breakdown <course number>", value="View the grading scheme breakdown for a course", inline=False)
+        embed.add_field(name="!examinfo", value="Information about ECE 140",
+                        inline=False)
         await ctx.send(embed=embed)
 
     @commands.command()
@@ -376,6 +378,22 @@ class Regular(commands.Cog, name = 'Regular'):
             db_set(str(messageAuthor.id)+".subscribed", "false",guild)
         else:
             await ctx.send("<@"+str(messageAuthor.id)+"> you are not currently subscribed to any notifications!")
+
+    @commands.command()
+    async def examinfo(self, ctx):
+        embed = discord.Embed(title="Exam Information", color=0x800080)
+        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
+
+        embed.add_field(name="ECE 192:", value="Thursday, August 6th at 1:25pm", inline=False)
+        embed.add_field(name="MATH 119:", value="Begins on Friday, August 7th at 9:00am and submission required by Tuesday, August 11th at 9:00pm", inline=False)
+        embed.add_field(name="ECE 106:", value="Begins Monday, August 10th but can start up until sometime on Tuesday, August 11th. Once started, there will be a limited time. ", inline=False)
+        embed.add_field(name="ECE 124:", value="Begins Tuesday, August 11th at 12:00am and submission required by Wednesday, August 12th at 11:59pm", inline=False)
+        embed.add_field(name="ECE 140:", value="Final Exam (is on/begins) Wednesday, August 12th", inline=False)
+        embed.add_field(name="ECE 108:", value="Begins Wednesday, August 12th at 12:00am and submission is required by Thursday, August 13th at 11:59pm", inline=False)
+
+        await ctx.send(embed=embed)
+
 
 
 
