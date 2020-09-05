@@ -211,7 +211,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 html_content='<strong>Your verification code is: ' + str(
                     code) + '. Please go back into discord and type !confirm (your code)</strong>')
             try:
-                sg = SendGridAPIClient('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')
+                sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
                 mailResponse = sg.send(mailMessage)
                 # TODO: Validate mail response
             except Exception as e:
