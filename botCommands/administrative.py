@@ -273,16 +273,17 @@ class Administrative(commands.Cog, name='Administrative'):
 
                         adminChannel = getChannel(ADMIN_CHANNEL_NAME,guild)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
-                        if (watID in section2List):
-                            await messageAuthor.add_roles(sec2Role)
-                            await adminChannel.send("Added the Section 2 Role to <@" + str(messageAuthor.id) + ">.")
-                        else:
-                            try:
-                                await messageAuthor.add_roles(stream8Role)
-                                await adminChannel.send("Added the Section 1 Role to <@" + str(messageAuthor.id) + ">.")
-                            except:
-                                print("User verified in non-main server")
-                                #Don't really do anything lol.
+                        if (str(guild.id)  == "706657592578932797"):
+                            if (watID in section2List):
+                                await messageAuthor.add_roles(sec2Role)
+                                await adminChannel.send("Added the Section 2 Role to <@" + str(messageAuthor.id) + ">.")
+                            else:
+                                try:
+                                    await messageAuthor.add_roles(stream8Role)
+                                    await adminChannel.send("Added the Section 1 Role to <@" + str(messageAuthor.id) + ">.")
+                                except:
+                                    print("User verified in non-main server")
+                                    #Don't really do anything lol.
                     except Exception as e:
                         print(str(e))
                         await getChannel("bot-alerts", guild).send("ERROR: " + str(e))
