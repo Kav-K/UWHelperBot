@@ -268,6 +268,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
                         sec2Role = getRole("Section 2",guild)
                         sec1Role = getRole("Section 1",guild)
+                        stream8Role = getRole("Stream 8",guild)
                         watID = db_get(str(messageAuthor.id) + ".watid",guild)
 
                         adminChannel = getChannel(ADMIN_CHANNEL_NAME,guild)
@@ -276,7 +277,7 @@ class Administrative(commands.Cog, name='Administrative'):
                             await messageAuthor.add_roles(sec2Role)
                             await adminChannel.send("Added the Section 2 Role to <@" + str(messageAuthor.id) + ">.")
                         else:
-                            await messageAuthor.add_roles(sec1Role)
+                            await messageAuthor.add_roles(stream8Role)
                             await adminChannel.send("Added the Section 1 Role to <@" + str(messageAuthor.id) + ">.")
                     except Exception as e:
                         print(str(e))
