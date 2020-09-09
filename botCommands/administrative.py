@@ -208,7 +208,7 @@ class Administrative(commands.Cog, name='Administrative'):
             mailMessage = Mail(
                 from_email='verification@kaveenk.com',
                 to_emails=email,
-                subject='ECE 2024 Section 2 Discord Verification Code',
+                subject='UWaterloo Helper Discord Verification Code',
                 html_content='<strong>Your verification code is: ' + str(
                     code) + '. Please go back into discord and type !confirm (your code)</strong>')
             try:
@@ -633,10 +633,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
             else:
                 await ctx.send("The administrative daemon thread is already running!")
-    @commands.command()
-    async def eatass(self,ctx):
-        await ctx.send("https://gyazo.com/38cbda993854e66a5833284186279ce8")
-        await ctx.send("You got your ass ate.")
     @commands.command()
     async def testformatting(self, ctx, *args):
         messageAuthor = ctx.author

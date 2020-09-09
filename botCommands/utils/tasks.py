@@ -57,6 +57,7 @@ async def AdministrativeThread(guild):
         verifiedRole = getRole("Verified",guild)
         sec2Role = getRole("Section 2",guild)
         sec1Role = getRole("Section 1",guild)
+        s8Role = getRole("Stream 8",guild)
         adminChannel = getChannel("bot-alerts",guild)
 
         while True:
@@ -72,6 +73,13 @@ async def AdministrativeThread(guild):
 
             #Remove section roles for guests, remove double section ranks.
             for member in guild.members:
+                if (hasRoles(member,["Section 1","Stream 8"],guild) or hasRoles(member,["Section 2","Stream 8"],guild)):
+
+                    await member.remove_roles(s8Role)
+                    await adminChannel.send("WARNING: The user <@" + str(
+                        member.id) + "> has duplicate roles. The user has been reset to the section 1 or 2 role. Stream 8 role has been removed.")
+
+
                 if (hasRoles(member,["Section 1","Section 2"],guild)):
                     await member.remove_roles(sec1Role)
                     await adminChannel.send("WARNING: The user <@" + str(
