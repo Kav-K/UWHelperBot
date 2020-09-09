@@ -73,7 +73,7 @@ async def AdministrativeThread(guild):
 
             #Remove section roles for guests, remove double section ranks.
             for member in guild.members:
-                if (hasRoles(member,["Section 1","Stream 8"]) or hasRoles(member,["Section 2","Stream 8"])):
+                if (hasRoles(member,["Section 1","Stream 8"],guild) or hasRoles(member,["Section 2","Stream 8"],guild)):
 
                     await member.remove_roles(s8Role)
                     await adminChannel.send("WARNING: The user <@" + str(
