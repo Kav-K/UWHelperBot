@@ -424,6 +424,12 @@ class Regular(commands.Cog, name = 'Regular'):
             await ctx.send("<@"+str(messageAuthor.id)+"> you are not currently subscribed to any notifications!")
 
     @commands.command()
+    async def s8(self,ctx):
+        s8Role = getRole("Stream 8",ctx.author.guild)
+
+        await ctx.author.add_roles(s8Role)
+        await ctx.send("<@"+str(ctx.author.id)+"> You have been given the Stream 8 role!")
+    @commands.command()
     async def examinfo(self, ctx):
         embed = discord.Embed(title="Exam Information", color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
