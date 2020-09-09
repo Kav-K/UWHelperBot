@@ -596,6 +596,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
                         await member.remove_roles(section1Role)
                         await member.remove_roles(section2Role)
+                        await member.remove_role(s8Role)
                         if (watID in section2List):
                             await member.add_roles(section2Role)
                             await adminChannel.send("Added the Section 2 Role to <@"+str(member.id)+">.")
