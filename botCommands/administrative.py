@@ -21,6 +21,7 @@ WATERLOO_API_KEY = os.getenv("WATERLOO_API_KEY")
 WATERLOO_API_URL = os.getenv("WATERLOO_API_URL")
 
 section2List = ["saaliyan","a9ahluwa","yhahn","kalatras","d22an","n22arora","j24au","g4aujla","s3aulakh","mavolio","e2baek","x53bai","d22baker","nbeilis","j39bi","ebilaver","jbodner","a23bose","j24brar","j6braun","r6bui","gbylykba","achalakk","v5chaudh","ichellad","h596chen","ly23chen","h559chen","ncherish","jchik","jchitkar","skcho","kchoa","e25chu","nchunghu","m24coope","asdhiman","j3enrigh","derisogl","d24ferna","lfournie","n6franci","agabuniy","a57garg","mgionet","sgoodarz","c2gravel","m8guan","a324gupt","wharris","a29he","c55he","chenfrey","e44ho","rhoffman","p23hu","h338huan","l247huan","a73huang","a226jain","z242jian","h56jin","pkachhia","kkalathi","e2koh","k5kumara","jklkundn","k26le","j763lee","d267lee","k323lee","rlevesqu","a284li","r374li","k36liang","j352lu","b49lu","mlysenko","vmago","smanakta","j78marti","rhmayilv","a47mehta","d36mehta","a2mladen","d6moon","a27nadee","b42nguye","dnnnguye","b43nguye","m22niu","snuraniv","t5oliver","motchet","m332pate","v227pate","b36peng","bphu","npotdar","m98rahma","msraihaa","jrintjem","rrouhana","o3salem","apsalvad","s5santhi","hsayedal","tshahjah","s4shahri","r4sim","a553sing","a558sing","ll3smith","j225smit","kb2son","dsribala","tstauffe","a6su","ssubbara","m38syed","w29tam","c46tan","w4tao","s4thapa","ctraxler","etroci","a2vaseeh","j23vuong","d7wan","j23weng","t54wong","yy8wong","y657wu","j478wu","cy2xi","c7xiang","k233yang","j52yoon","i6zhang","cf3zhang","c624zhan","z963zhan"]
+stream8List = ["mnabedin","msachuot","dm2adams","jaftab","s55agarw","s3agha","a2ahilan","a2aissao","aialam","talguind","h4altaf","aanavady","jsarbour","carjune","u3asif","js2bedi","m6begum","a4bello","mbenyahy","wbilal","dbown","bcarrion","c268chan","c465chen","sy36chen","s655chen","v22chen","w356chen","n9choi","bcimring","g3clarke","kcofini","mldai","sndave","gdecena","sdharask","cvdioned","y97du","k4dyck","nelgawis","yfahmi","j48fang","s34fang","a43ghosh","y95han","smhanif","s24hao","a39hasan","j223ho","r27ho","a36hu","t53hu","h328huan","y629huan","k25hung","k33huynh","njandala","jhjiao","d35jones","j2kambul","rkassama","s2kelash","h222khan","t54khan","nckhoras","dj6kim","k27le","j38lei","e44li","jy36li","jy26lin","r48lin","a229liu","ndliu","p99liu","sq3liu","z65luo","emach","b3mah","rmah","a3mahto","rmajeed","sdmajumd","a35malho","s73malik","r6mangat","amathise","dmehic","a47mehta","d2naik","sa6naqvi","mnasar","snavajee","h3ngai","j245nguy","s45oh","z2omer","mpanizza","aparasch","hn6patel","s23patha","t2pathan","m3pavlov","spetrevs","ehpropp","y2qie","q3qu","nquintan","a9rajkum","trampura","cj4rober","krogut","y3said","csariyil","f2sarker","ssenthur","a239shah","j36shah","r2shanbh","m85sharm","r43shi","y25singh","w5so","h77song","lxsong","134531.teststudent1","134531.teststudent2","vsudhaka","psurendr","ltahvild","me2tan","c223tang","s224tang","x29tao","dthero","jthota","k7to","etou","a2truong","evlahos","m6waheed","a242wang","s873wang","t384wang","yt24wang","h38wei","wwindhol","lhwu","p66wu","j59xiao","p9xie","y754yang","r22ye","zzyin","a56yu","t98yu","m27zafar","zzakiull","h664zhan","m375zhan","yz8zhang","z958zhan","w246zhao","b54zhu","mh2zhu"]
 user_text_channels = [706657592578932800, 706659318883156069, 706659290072743977, 707029428043120721, 707017400226283570, 707028983346364447, 707029364511866890, 706658348522537041, 706658374221299742, 706658405875449868, 706658430819106847, 706658454252552323, 706658481683300383, 707777895745192017, 707777914594132019, 707777928137670666, 710408899336863805, 709975299059875872, 709975393167212614]
 user_voice_channels = [706657592578932801,706659058115018863,706663233943109712,706659396146430002,707777965630554123,706658429892296714,706658540709740546,706658731697504286,706658766585724950,706658831437922396,706658925826801684]
 whitelist_channel_names = ["faculty-general","create-a-ticket"]
@@ -576,6 +577,7 @@ class Administrative(commands.Cog, name='Administrative'):
             section2Role = getRole("Section 2",guild)
             verifiedRole = getRole("Verified",guild)
             teachingRole = getRole("Teaching Staff",guild)
+            s8Role = getRole("Stream 8",guild)
             bot = getRole("Bot",guild)
             pending = getRole("Pending",guild)
 
@@ -585,8 +587,8 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 try:
                     if (db_exists(str(member.id)+".watid",guild)):
-                        if (db_exists(str(member.id) + ".rolevalidated",guild)):
-                            continue
+                        # if (db_exists(str(member.id) + ".rolevalidated",guild)):
+                        #     continue
 
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
                         watID = db_get(str(member.id) + ".watid",guild)
@@ -597,6 +599,9 @@ class Administrative(commands.Cog, name='Administrative'):
                         if (watID in section2List):
                             await member.add_roles(section2Role)
                             await adminChannel.send("Added the Section 2 Role to <@"+str(member.id)+">.")
+                        elif watID in stream8List:
+                            await member.add_roles(s8Role)
+                            await adminChannel.send("Added the Stream 8 role to <@"+str(member.id)+">.")
                         else:
                             await member.add_roles(section1Role)
                             await adminChannel.send("Added the Section 1 Role to <@" + str(member.id) + ">.")
@@ -608,7 +613,7 @@ class Administrative(commands.Cog, name='Administrative'):
                             member.id) + "> please investigate.")
 
                 except:
-                    await adminChannel.send("<@&706658128409657366> There was an error retriving the WatID for: <@"+str(member.id)+"> please investigate.")
+                    await adminChannel.send("<@&706658128409657366> There was an error retrieving the WatID for: <@"+str(member.id)+"> please investigate.")
 
 
 
