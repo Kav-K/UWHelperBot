@@ -30,14 +30,14 @@ class Regular(commands.Cog, name = 'Regular'):
 
     @commands.command()
     async def help(self, ctx):
-        embed = discord.Embed(title="Commands", description="Here are a list of commands for the stream 4 bot",
+        embed = discord.Embed(title="Commands", description="Here are a list of commands for the waterloo helper bot",
                               color=0x800080)
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="!textbooks", value="Get a link to the textbooks and shared resources", inline=False)
         embed.add_field(name="!upcoming", value="Get a list of upcoming due dates for the next 7 days", inline=False)
         embed.add_field(name="!verify <watid>", value="Verify your account to use this discord", inline=False)
-        embed.add_field(name="!piazza", value="Get our relevant piazza links", inline=False)
+        #embed.add_field(name="!piazza", value="Get our relevant piazza links", inline=False)
         embed.add_field(name="!schedule <OPTIONAL (course number)>", value="View a continuously updating class/lab schedule, or specify a course code for a more specific content/labs/etc schedule.", inline=False)
         embed.add_field(name="!importantdates", value="Get a full calendar with important dates and due dates",
                         inline=False)
@@ -135,65 +135,70 @@ class Regular(commands.Cog, name = 'Regular'):
 
         try:
             selection = args[0]
-            if (selection == "119"):
+            if (selection == "205"):
                 embed = discord.Embed()
-                embed.add_field(name="MATH 119",
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for MATH 119",
+                embed.add_field(name="ECE 205",
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 205",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/119schedule1.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/205schedule.png")
                 await ctx.send(embed=embed)
-                embed2 = discord.Embed()
-                embed2.set_image(url="https://api.kaveenk.com/bot/119schedule2.png")
-                await ctx.send(embed=embed2)
-            elif (selection == "106"):
+
+            elif (selection == "240"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 106",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 106",
+                embed.add_field(name="ECE 240",
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 240",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/106schedule1.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/240schedule.png")
                 await ctx.send(embed=embed)
+
+            elif (selection == "204"):
+
+                embed = discord.Embed()
+
+                embed.add_field(name="ECE 204",
+
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 204",
+
+                                inline=False)
+
+                embed.set_image(url="https://api.kaveenk.com/bot/204schedule-1.png")
+
+                await ctx.send(embed=embed)
+
                 embed2 = discord.Embed()
-                embed2.set_image(url="https://api.kaveenk.com/bot/106schedule2.png")
+
+                embed2.set_image(url="https://api.kaveenk.com/bot/204schedule-2.png")
+
                 await ctx.send(embed=embed2)
+
                 embed3 = discord.Embed()
-                embed3.set_image(url="https://api.kaveenk.com/bot/106schedule3.png")
+
+                embed3.set_image(url="https://api.kaveenk.com/bot/204schedule-3.png")
+
                 await ctx.send(embed=embed3)
-                embed4 = discord.Embed()
-                embed4.add_field(name="Quizzes",
-                                value="Quizzes are every monday from 12AM to midnight.",
-                                inline=False)
-                await ctx.send(embed=embed4)
-            elif (selection == "140"):
+            elif (selection == "109"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 140",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 140",
+                embed.add_field(name="ECE 109",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 109",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/140schedule1.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/109schedule.png")
                 await ctx.send(embed=embed)
-            elif (selection == "124"):
+            elif (selection == "250"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 124",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 124",
+                embed.add_field(name="ECE 250",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 250",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/124schedule1.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/250schedule.png")
                 await ctx.send(embed=embed)
-            elif (selection == "108"):
-                embed = discord.Embed()
-                embed.add_field(name="ECE 108",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 108",
-                                inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/108schedule1.png")
-                await ctx.send(embed=embed)
-            elif (selection == "192"):
+            elif (selection == "222"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 192",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 192",
+                                value="No schedule information provided for this course, sorry :(",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/192schedule1.png")
                 await ctx.send(embed=embed)
             else:
                 await ctx.send("<@" + str(
-                    messageAuthor.id) + "> You must enter a valid course to view a specific course schedule, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`. Type the command without any options to get a lecture and live session calendar.")
+                    messageAuthor.id) + "> You must enter a valid course to view a specific course schedule, valid entries are valid entries are `240`, `250`, `204`, `205`, `109`, and `222`. Type the command without any options to get a lecture and live session calendar.")
 
         except:
             embed = discord.Embed(title="Class Schedule",
@@ -211,53 +216,53 @@ class Regular(commands.Cog, name = 'Regular'):
         messageAuthor = ctx.author
         try:
             selection = args[0]
-            if (selection == "140"):
+            if (selection == "205"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 140",
-                                value="Here is a marking scheme breakdown for ECE 140",
+                embed.add_field(name="ECE 205",
+                                value="Here is a marking scheme breakdown for ECE 205",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/140breakdown.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/205breakdown.png")
                 await ctx.send(embed=embed)
-            elif (selection == "124"):
+            elif (selection == "240"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 124",
-                                value="Here is a marking scheme breakdown for ECE 124",
+                embed.add_field(name="ECE 240",
+                                value="Here is a marking scheme breakdown for ECE 240",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/124breakdown.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/240breakdown.png")
                 await ctx.send(embed=embed)
-            elif (selection == "106"):
+            elif (selection == "204"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 106",
-                                value="Here is a marking scheme breakdown for ECE 106",
+                embed.add_field(name="ECE 204",
+                                value="Here is a marking scheme breakdown for ECE 204",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/106breakdown.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/204breakdown.png")
                 await ctx.send(embed=embed)
-            elif (selection == "108"):
+            elif (selection == "109"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 108",
-                                value="Here is a marking scheme breakdown for ECE 108",
+                embed.add_field(name="ECE 109",
+                                value="Here is a marking scheme breakdown for ECE 109",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/108breakdown.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/109breakdown.png")
                 await ctx.send(embed=embed)
-            elif (selection == "192"):
+            elif (selection == "250"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 192",
-                                value="Here is a marking scheme breakdown for ECE 192",
+                embed.add_field(name="ECE 250",
+                                value="Here is a marking scheme breakdown for ECE 250",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/192breakdown.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/250breakdown.png")
                 await ctx.send(embed=embed)
-            elif (selection == "119"):
+            elif (selection == "222"):
                 embed = discord.Embed()
-                embed.add_field(name="MATH 119",
-                                value="Here is a marking scheme breakdown for MATH 119",
+                embed.add_field(name="MATH 222",
+                                value="Here is a marking scheme breakdown for ECE 222",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/119breakdown.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/222breakdown.png")
                 await ctx.send(embed=embed)
             else:
 
-                await ctx.send("<@" + str(messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`")
+                await ctx.send("<@" + str(messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `240`, `250`, `204`, `205`, `109`, and `222`")
         except:
-            await ctx.send("<@" + str(messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `140`, `124`, `106`, `119`, `192`, and `108`")
+            await ctx.send("<@" + str(messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `240`, `250`, `204`, `205`, `109`, and `222`")
 
     @checks.channel_check()
     @commands.command()
@@ -267,25 +272,67 @@ class Regular(commands.Cog, name = 'Regular'):
         try:
             selection = args[0]
 
-            if (selection == "140"):
+            if (selection == "205"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 140",
-                                value="Here are the week-based assignment questions for ECE 140",
+                embed.add_field(name="ECE 204",
+                                value="Here's some assignment information for ECE 205",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/140assignments.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/205assignments.png")
                 await ctx.send(embed=embed)
-            elif (selection =="124"):
+            elif (selection =="240"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 124",
-                                value="Here are the week-based assignment questions for ECE 124",
+                embed.add_field(name="ECE 240",
+                                value="Here's some assignment information for ECE 240",
                                 inline=False)
-                embed.set_image(url="https://api.kaveenk.com/bot/124assignments.png")
+                embed.set_image(url="https://api.kaveenk.com/bot/240assignments.png")
+                await ctx.send(embed=embed)
+            elif (selection =="204"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 204",
+                                value="Here's some assignment information for ECE 204",
+                                inline=False)
+                embed.set_image(url="https://api.kaveenk.com/bot/204assignments.png")
+                await ctx.send(embed=embed)
+            elif (selection =="109"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 109",
+                                value="Here's some assignment information for ECE 109",
+                                inline=False)
+                embed.set_image(url="https://api.kaveenk.com/bot/109assignments.png")
+                await ctx.send(embed=embed)
+
+            elif (selection =="109"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 109",
+                                value="Here's some assignment information for ECE 109",
+                                inline=False)
+                embed.set_image(url="https://api.kaveenk.com/bot/109assignments.png")
+                await ctx.send(embed=embed)
+            elif (selection == "250"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 250",
+                                value="Here are some information about ECE 250 labs and quizzes/assignments",
+                                inline=False)
+                embed.set_image(url="https://api.kaveenk.com/bot/250assignments-1.png")
+                await ctx.send(embed=embed)
+                embed2 = discord.Embed()
+                embed2.set_image(url="https://api.kaveenk.com/bot/250assignments-2.png")
+                await ctx.send(embed=embed2)
+                embed3 = discord.Embed()
+                embed3.set_image(url="https://api.kaveenk.com/bot/250assignments-4.png")
+                await ctx.send(embed=embed3)
+            elif (selection =="222"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 222",
+                                value="Here's some lab information for ECE 222 (No assignment info available)",
+                                inline=False)
+                embed.set_image(url="https://api.kaveenk.com/bot/222assignments.png")
                 await ctx.send(embed=embed)
             else:
-                await ctx.send("<@"+str(messageAuthor.id)+"> you've made an invalid selection! The available courses to view assignments for are `140` and `124`")
+                await ctx.send("<@"+str(messageAuthor.id)+"> you've made an invalid selection! valid entries are `240`, `250`, `204`, `205`, `109`, and `222`")
 
         except:
-            await ctx.send("<@"+str(messageAuthor.id)+"> You must enter a course to view assignment sets for, valid entries are `140` and `124`")
+            await ctx.send("<@"+str(messageAuthor.id)+"> You must enter a course to view assignment sets for, `240`, `250`, `204`, `205`, `109`, and `222`")
 
     @commands.command()
     async def piazza(self, ctx):
@@ -349,13 +396,10 @@ class Regular(commands.Cog, name = 'Regular'):
 
         await ctx.send(embed=embed)
     @commands.command()
-    async def superposition(self, ctx):
-        await ctx.send("Superposition is false.")
-    @commands.command()
     async def fml(self, ctx):
-        # Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
-        # finalExamDate = datetime.strptime("2020-08-07", "%Y-%m-%d")
-        encouragingMessage = "Good luck on your exams!" # "Hang in there! You've got about " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
+         #Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
+        finalExamDate = datetime.strptime("2020-12-23", "%Y-%m-%d")
+        encouragingMessage =  "Hang in there! You've got about " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
         await ctx.send(encouragingMessage)
     @commands.command()
     async def subscribe(self,ctx):
@@ -385,12 +429,12 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
 
-        embed.add_field(name="ECE 192:", value="Thursday, August 6th at 1:25pm", inline=False)
-        embed.add_field(name="MATH 119:", value="Begins on Friday, August 7th at 9:00am and submission required by Tuesday, August 11th at 9:00pm", inline=False)
-        embed.add_field(name="ECE 106:", value="Begins Monday, August 10th but can start up until sometime on Tuesday, August 11th. Once started, there will be a limited time. ", inline=False)
-        embed.add_field(name="ECE 124:", value="Begins Tuesday, August 11th at 12:00am and submission required by Wednesday, August 12th at 11:59pm", inline=False)
-        embed.add_field(name="ECE 140:", value="Final Exam (is on/begins) Wednesday, August 12th", inline=False)
-        embed.add_field(name="ECE 108:", value="Begins Wednesday, August 12th at 12:00am and submission is required by Thursday, August 13th at 11:59pm", inline=False)
+        embed.add_field(name="EXAM INFO", value="None available currently", inline=False)
+        # embed.add_field(name="MATH 119:", value="Begins on Friday, August 7th at 9:00am and submission required by Tuesday, August 11th at 9:00pm", inline=False)
+        # embed.add_field(name="ECE 106:", value="Begins Monday, August 10th but can start up until sometime on Tuesday, August 11th. Once started, there will be a limited time. ", inline=False)
+        # embed.add_field(name="ECE 124:", value="Begins Tuesday, August 11th at 12:00am and submission required by Wednesday, August 12th at 11:59pm", inline=False)
+        # embed.add_field(name="ECE 140:", value="Final Exam (is on/begins) Wednesday, August 12th", inline=False)
+        # embed.add_field(name="ECE 108:", value="Begins Wednesday, August 12th at 12:00am and submission is required by Thursday, August 13th at 11:59pm", inline=False)
 
         await ctx.send(embed=embed)
 
