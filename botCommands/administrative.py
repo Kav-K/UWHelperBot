@@ -187,7 +187,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         await ctx.send(response)
                         return
             except:
-                print("Lazy nullify error.")
+                pass
             if (db_exists(str(user_id),guild)):
                 if (int(db_get(str(user_id),guild)) == 1):
                     response = "<@" + str(
@@ -593,10 +593,12 @@ class Administrative(commands.Cog, name='Administrative'):
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
                         watID = db_get(str(member.id) + ".watid",guild)
                         await adminChannel.send("The WatID for user <@" + str(member.id) + "> is "+watID)
-
-                        await member.remove_roles(section1Role)
-                        await member.remove_roles(section2Role)
-                        await member.remove_role(s8Role)
+                        try:
+                            await member.remove_roles(section1Role)
+                            await member.remove_roles(section2Role)
+                            await member.remove_role(s8Role)
+                        except:
+                            pass
                         if (watID in section2List):
                             await member.add_roles(section2Role)
                             await adminChannel.send("Added the Section 2 Role to <@"+str(member.id)+">.")
