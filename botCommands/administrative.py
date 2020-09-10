@@ -515,7 +515,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 embed = discord.Embed(title="LDAP Lookup",
                                       description="Here is an internal lookup by the University of Waterloo",
                                       color=0x800080)
-                embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+                embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
                 embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
                 embed.add_field(name="Status",
                                 value=apiResponse['meta']['message'],
@@ -684,7 +684,7 @@ class Administrative(commands.Cog, name='Administrative'):
             embed = discord.Embed(title="Subscribed Members",
                                   description="Here is a list of all subscribed members",
                                   color=0x800080)
-            embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+            embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
             embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
 
             subscriberList = stream(messageAuthor.guild.members).filter(

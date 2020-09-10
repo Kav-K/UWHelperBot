@@ -32,7 +32,7 @@ class Regular(commands.Cog, name = 'Regular'):
     async def help(self, ctx):
         embed = discord.Embed(title="Commands", description="Here are a list of commands for the waterloo helper bot",
                               color=0x800080)
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="!textbooks", value="Get a link to the textbooks and shared resources", inline=False)
         embed.add_field(name="!upcoming", value="Get a list of upcoming due dates for the next 7 days", inline=False)
@@ -56,7 +56,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed = discord.Embed(title="Textbooks & Resources",
                               description="Here is a dropbox link for our collective resources. Feel free to contact the admin team if you'd like to add to it.",
                               color=0x800080)
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="Link", value=getConfigurationValue(ConfigObjects.TEXTBOOKS_LINK,guild),
                         inline=False)
@@ -116,7 +116,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed = discord.Embed(title="Upcoming Important Dates",
                               description="These are all upcoming quizzes, due dates, and other important dates. Please contact the admin team if there are any issues.",
                               color=0x800080)
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
 
         for idate in dateList:
@@ -204,7 +204,7 @@ class Regular(commands.Cog, name = 'Regular'):
             embed = discord.Embed(title="Class Schedule",
                                   description="Here is a link to a calendar with class schedules for live lectures and Q&A Sessions. Please contact the admin team if there is anything missing.",
                                   color=0x800080)
-            embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+            embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
             embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
             embed.add_field(name="Link",
                             value=getConfigurationValue(ConfigObjects.SCHEDULE_LINK,messageAuthor.guild),
@@ -337,7 +337,7 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def piazza(self, ctx):
         embed = discord.Embed(title="Piazza Links", description="Here are our relevant piazza links.", color=0x800080)
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="FYE", value="https://piazza.com/class/k9rmr76sakf74o", inline=False)
         embed.add_field(name="ECE 140", value="https://piazza.com/class/k9u2in2foal48e", inline=False)
@@ -351,7 +351,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed = discord.Embed(title="Due/Important Dates",
                               description="Here is a link to a calendar with important dates. Please contact the admin team if there is anything missing",
                               color=0x800080)
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
         embed.add_field(name="Link",
                         value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild),
@@ -391,7 +391,7 @@ class Regular(commands.Cog, name = 'Regular'):
             embed.add_field(name=event['employer'], value = combinedDescription,
                         inline=False)
 
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
 
         await ctx.send(embed=embed)
@@ -432,7 +432,7 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def examinfo(self, ctx):
         embed = discord.Embed(title="Exam Information", color=0x800080)
-        embed.set_footer(text="An ECE 2024 Stream 4 bot :)")
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url="https://api.kaveenk.com/bot/logo.png")
 
         embed.add_field(name="EXAM INFO", value="None available currently", inline=False)
