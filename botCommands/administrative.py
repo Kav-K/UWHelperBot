@@ -100,11 +100,11 @@ class Administrative(commands.Cog, name='Administrative'):
         setGuilds(self.bot.guilds)
         print("Set the guilds to" + str(self.bot.guilds))
         print(f'{self.bot.user.name} has connected to Discord!')
-        adminChannel = getChannel(ADMIN_CHANNEL_NAME, self.bot.guilds[0])
         global daemonRunning
         if not daemonRunning:
             daemonRunning = True
             for indv_guild in self.bot.guilds:
+                adminChannel = getChannel(ADMIN_CHANNEL_NAME,indv_guild)
                 asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
                 await adminChannel.send(str(indv_guild)+": The administrative daemon thread is now running.")
                 print('Admin thread start')
@@ -699,7 +699,7 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.command()
     async def dev(self,ctx):
         if (permittedAdmin(ctx.author)):
-            await ctx.send("The redis instance for this guild is: "+getCorrespondingDatabase(ctx.author.guild))
+            await ctx.send("The redis instance for this guild is: "+str(getCorrespondingDatabase(ctx.author.guild)))
 
     @commands.command()
     async def guest(self, ctx, *args):
