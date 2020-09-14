@@ -6,6 +6,7 @@ redisClient = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PO
 #Creates an instance of the redis client
 DATABASE_HARD_LIMIT = 15
 database_instances = {}
+database_instances_identifier = {}
 
 def redisSetGuilds(GUILDS):
     for GUILD in GUILDS:
@@ -14,11 +15,13 @@ def redisSetGuilds(GUILDS):
                 redisClient = redis.Redis(host='localhost', port=6379, db=x)
                 if (redisClient.get("SERVER_ID").decode('utf-8') == str(GUILD.id)):
                     database_instances[GUILD.id] = redisClient
+                    database_instances_identifier[GUILD.id] = x
                     print("Successfully found a matching database: "+str(x))
             except Exception as e:
                 print(str(e))
                 continue
-
+def getCorrespondingDatabase(guild):
+    return database_instances_identifier[guild.id]
 
 #Get pubsub instance
 def db_get_pubsub(guild):

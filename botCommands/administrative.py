@@ -696,6 +696,10 @@ class Administrative(commands.Cog, name='Administrative'):
 
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
+    @commands.command()
+    async def dev(self,ctx):
+        if (permittedAdmin(ctx.author)):
+            await ctx.send("The redis instance for this guild is: "+getCorrespondingDatabase(ctx.author.guild))
 
     @commands.command()
     async def guest(self, ctx, *args):
