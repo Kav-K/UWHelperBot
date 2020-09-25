@@ -567,3 +567,5 @@ class Administrative(commands.Cog, name='Administrative'):
     async def dev(self,ctx):
         if (permittedAdmin(ctx.author)):
             await ctx.send("The redis instance for this guild is: "+str(getCorrespondingDatabase(ctx.author.guild)))
+
+
