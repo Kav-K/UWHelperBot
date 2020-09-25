@@ -26,6 +26,7 @@ stream8List = ["mnabedin","msachuot","dm2adams","jaftab","s55agarw","s3agha","a2
 
 VERBOSE_CHANNEL_NAME = "bot-alerts"
 awaitingSM = {}
+THUMBNAIL_LINK = "https://i.imgur.com/Uusxfqa.png"
 
 
 
@@ -391,7 +392,7 @@ class Administrative(commands.Cog, name='Administrative'):
                                       description="Here is an internal lookup by the University of Waterloo",
                                       color=0x800080)
                 embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
-                embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+                embed.set_thumbnail(url=THUMBNAIL_LINK)
                 embed.add_field(name="Status",
                                 value=apiResponse['meta']['message'],
                                 inline=False)
@@ -550,7 +551,7 @@ class Administrative(commands.Cog, name='Administrative'):
                                   description="Here is a list of all subscribed members",
                                   color=0x800080)
             embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
-            embed.set_thumbnail(url="https://i.imgur.com/UWyVzwu.png")
+            embed.set_thumbnail(url=THUMBNAIL_LINK)
 
             subscriberList = stream(messageAuthor.guild.members).filter(
                 lambda x: db_exists(str(x.id) + ".subscribed",guild)
@@ -562,10 +563,36 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
 
-
+#https://api.github.com/repos/Kav-K/Stream4Bot/commits
     @commands.command()
     async def dev(self,ctx):
         if (permittedAdmin(ctx.author)):
-            await ctx.send("The redis instance for this guild is: "+str(getCorrespondingDatabase(ctx.author.guild)))
+            import requests
+
+
+            #Get information about last commit
+            res = requests.get("https://api.github.com/repos/Kav-K/Stream4Bot/commits").json()
+            commitAuthor = res[0]["commit"]["author"]["name"]
+            commitMessage = res[0]["commit"]["message"]
+            commitURL = res[0]["commit"]["url"]
+            embed = discord.Embed(title="Developer Information",
+                                      description="Internal information",
+                                      color=0x800080)
+            embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
+            embed.set_thumbnail(url=THUMBNAIL_LINK)
+            embed.add_field(name="Redis Instance",
+                            value=str(getCorrespondingDatabase(ctx.author.guild)),
+                            inline=False)
+            embed.add_field(name="Last Commit",
+                            value=commitURL,
+                            inline=False)
+            embed.add_field(name="Last Commit Author",
+                            value=commitAuthor,
+                            inline=False)
+            embed.add_field(name="Last Commit Message",
+                            value=commitMessage,
+                            inline=False)
+            await ctx.send(embed=embed)
+
 
 
