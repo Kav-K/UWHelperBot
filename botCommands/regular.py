@@ -69,6 +69,8 @@ class Regular(commands.Cog, name = 'Regular'):
                         inline=False)
         await ctx.send(embed=embed)
 
+    #TODO Currently, I'm using python workarounds to account for things like full-day events, no end dates, timezones, etc, TODO is to
+    # figure out how to use inbuilt iCal features to do this and to shorten this code.
     @checks.channel_check()
     @commands.command()
     async def upcoming(self, ctx):
@@ -90,13 +92,17 @@ class Regular(commands.Cog, name = 'Regular'):
                 # Populates info
                 summary = component.get('summary')
                 startdate = component.get('dtstart').dt
-                enddate = component.get('dtend').dt
-                # print(summary)
+
+                # If there is no end date specified
+                try:
+                    enddate = component.get('dtend').dt
+                except:
+                    enddate = startdate
 
                 # Initialize timezone
                 est = timezone('US/Eastern')
 
-
+                #Account for if there's no actual time info (e.g all day event?)
                 try:
                     finalStartDate = startdate.replace(tzinfo=pytz.utc).astimezone(est)
                     finalEndDate = enddate.replace(tzinfo=pytz.utc).astimezone(est)
@@ -107,12 +113,15 @@ class Regular(commands.Cog, name = 'Regular'):
                                             minute=0).astimezone(est)
 
                 # Configures the message with the dates
-                finalMessage = str(
-                    finalStartDate.strftime("%A, %B %d at %-I:%M %p")) + " to " + str(
-                    finalEndDate.strftime("%A, %B %d at %-I:%M %p") + ";" + summary)
+                if (startdate != enddate):
+                    finalMessage = str(
+                        finalStartDate.strftime("%A, %B %d at %-I:%M %p")) + " to " + str(
+                        finalEndDate.strftime("%A, %B %d at %-I:%M %p") + ";" + summary)
+                else:
+                    finalMessage = str(
+                        finalStartDate.strftime("%A, %B %d at %-I:%M %p")+ ";" + summary)
 
                 # Create a sorted mapping between date and message
-                # TODO Map using #stream.map() later somehow?
                 if (datetime.now().date() <= finalStartDate.date() <= dateRangeEnd.date()):
                     if (finalStartDate not in dateMap):
                         dateMap[finalStartDate] = []

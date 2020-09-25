@@ -568,8 +568,6 @@ class Administrative(commands.Cog, name='Administrative'):
     async def dev(self,ctx):
         if (permittedAdmin(ctx.author)):
             import requests
-
-
             #Get information about last commit
             res = requests.get("https://api.github.com/repos/Kav-K/Stream4Bot/commits").json()
             commitAuthor = res[0]["commit"]["author"]["name"]
