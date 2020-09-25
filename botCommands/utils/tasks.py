@@ -11,7 +11,7 @@ import discord
 ADMIN_THREAD_SLEEP = 5
 COMM_THREAD_SLEEP = 1
 
-
+# THESE FUNCTIONALITIES ARE A WORK IN PROGRESS CURRENTLY!
 async def CommBroker(guild):
     print("Comm Broker started successfully.")
 
@@ -52,6 +52,10 @@ async def CommBroker(guild):
         await asyncio.sleep(COMM_THREAD_SLEEP)
 
 async def AdministrativeThread(guild):
+    # ONLY FOR THE ECE 2024 SERVER!
+    if (str(guild.id) != "706657592578932797"):
+        return
+
     try:
         guestRole = getRole("Guest",guild)
         verifiedRole = getRole("Verified",guild)
@@ -91,21 +95,6 @@ async def AdministrativeThread(guild):
                     await member.remove_roles(sec2Role) if sec2Role in member.roles else await member.remove_roles(sec1Role)
                     await adminChannel.send("WARNING: The user <@" + str(
                         member.id) + "> is a guest and was found to have a sectional rank. It has been removed.")
-
-                #Expire memberships for temporary guests
-
-                if (db_exists(str(id)+".guestExpiry",guild)):
-                    stringExpiryTime = db_get(str(id)+".guestExpiry",guild)
-                    print("The user: "+str(member)+" has a pending membership expiry date: "+stringExpiryTime)
-                    #2020-05-30 09:46:59.610027-04:00
-                    stringExpiryTime = stringExpiryTime.replace("-04:00","")
-                    #TODO make this into a function in utils.py
-                    expiryDate = datetime.strptime(stringExpiryTime,"%Y-%m-%d %H:%M:%S.%f").astimezone(est) + timedelta(hours=4) #fuck timezones
-
-                    if (expiryDate <= currentTime):
-                        await member.remove_roles(guestRole)
-                        await member.remove_roles(verifiedRole)
-                        db_delete(str(id)+".guestExpiry",guild)
 
 
             # Manage study rooms

@@ -8,7 +8,6 @@ GUILDS = []
 ADMIN_ROLE_NAME = "Admin"
 TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
-
 #Get all subscribed members to notifications
 def getSubscribers(guild):
     return stream(guild.members).filter(lambda x: db_exists(str(x.id) + ".subscribed",guild) and db_get(str(x.id) + ".subscribed",guild) == "true").to_list()

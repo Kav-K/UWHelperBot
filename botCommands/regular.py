@@ -1,3 +1,9 @@
+# A LOT OF THE COMMANDS IN THIS FILE ARE SPECIFIC TO THE ECE 2024 SERVER!
+# Some of them will be made configurable at a later time :)
+#
+#
+#
+
 import os
 import pytz
 import requests
