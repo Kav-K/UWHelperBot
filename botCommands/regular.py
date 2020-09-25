@@ -130,7 +130,7 @@ class Regular(commands.Cog, name = 'Regular'):
                     dateMap[finalStartDate].append(finalMessage)
         dateList.sort()
         embed = discord.Embed(title="Upcoming Important Dates",
-                              description="These are all upcoming quizzes, due dates, and other important dates. Please contact the admin team if there are any issues.",
+                              description="These are all upcoming quizzes, due dates, and other important dates for the upcoming week. Please contact the admin team if there are any issues.",
                               color=0x800080)
         embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url=THUMBNAIL_LINK)
