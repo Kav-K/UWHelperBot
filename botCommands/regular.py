@@ -459,7 +459,27 @@ class Regular(commands.Cog, name = 'Regular'):
         # embed.add_field(name="ECE 108:", value="Begins Wednesday, August 12th at 12:00am and submission is required by Thursday, August 13th at 11:59pm", inline=False)
 
         await ctx.send(embed=embed)
+    @commands.command()
+    async def covid(self,ctx):
+        URL_COUNTRY_ALL_STATUS = "https://api.covid19api.com/total/country/canada"
 
+        res = requests.get(URL_COUNTRY_ALL_STATUS).json()
+
+        totalConfirmed = res[len(res) - 1]["Confirmed"]
+        totalDead = res[len(res) - 1]["Deaths"]
+        totalRecovered = res[len(res) - 1]["Recovered"]
+        totalActive = res[len(res) - 1]["Active"]
+
+        embed = discord.Embed(title="COVID19 Information Canada", color=0x800080)
+        embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
+        embed.set_thumbnail(url=THUMBNAIL_LINK)
+
+        embed.add_field(name="Total Confirmed Cases", value=str(totalConfirmed), inline=False)
+        embed.add_field(name="Total Active Cases", value=str(totalActive), inline=False)
+        embed.add_field(name="Total Recovered", value=str(totalRecovered), inline=False)
+        embed.add_field(name="Total Deaths", value=str(totalDead), inline=False)
+
+        await ctx.send(embed = embed)
 
 
 
