@@ -1,9 +1,6 @@
 # A LOT OF THE COMMANDS IN THIS FILE ARE SPECIFIC TO THE ECE 2024 SERVER!
 # Some of them will be made configurable at a later time :)
 #
-#
-#
-
 import os
 import pytz
 import requests
@@ -462,13 +459,17 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def covid(self,ctx):
         URL_COUNTRY_ALL_STATUS = "https://api.covid19api.com/total/country/canada"
+        URL_CANADA_TRACKER = "https://api.covid19tracker.ca/summary"
 
-        res = requests.get(URL_COUNTRY_ALL_STATUS).json()
+        all_status = requests.get(URL_COUNTRY_ALL_STATUS).json()
+        canada_tracker = requests.get(URL_CANADA_TRACKER).json()
 
-        totalConfirmed = res[len(res) - 1]["Confirmed"]
-        totalDead = res[len(res) - 1]["Deaths"]
-        totalRecovered = res[len(res) - 1]["Recovered"]
-        totalActive = res[len(res) - 1]["Active"]
+        totalConfirmed = all_status[len(all_status) - 1]["Confirmed"]
+        totalDead = all_status[len(all_status) - 1]["Deaths"]
+        totalRecovered = all_status[len(all_status) - 1]["Recovered"]
+        totalActive = all_status[len(all_status) - 1]["Active"]
+
+        
 
         embed = discord.Embed(title="COVID19 Information Canada", color=0x800080)
         embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")

@@ -330,6 +330,10 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 if ("Verified" in ranks):
                     db_set(str(user) + ".verified", 1,guild)
+                    try:
+                        await user.remove_roles(getRole("Unverified",guild))
+                    except:
+                        pass
                     await ctx.send("<@" + str(user.id) + "> has been set to Verified status")
 
                 db_set(str(user) + ".name", name,guild)
