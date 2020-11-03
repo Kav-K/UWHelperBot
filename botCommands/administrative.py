@@ -228,6 +228,13 @@ class Administrative(commands.Cog, name='Administrative'):
                         adminChannel = getChannel(VERBOSE_CHANNEL_NAME, guild)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
 
+                        #This is only for the BUGS server, add a verified-science role if they are in science!
+                        if (str(guild.id) == "707632982961160282"):
+                            apiResponse = requests.get(WATERLOO_API_URL + watID + ".json?key=" + WATERLOO_API_KEY).json()
+                            if (apiResponse['data']['department'] == "SCI/Science"):
+                                await messageAuthor.add_roles(getRole("Verified-Science",guild))
+                                await adminChannel.send("Added the Verified-Science Role to <@" + str(messageAuthor.id) + ">.")
+
                         #Only add sections if the server is the ECE 2024 server!
                         if (str(guild.id)  == "706657592578932797"):
                             if (watID in section2List):
@@ -340,6 +347,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 await user.edit(nick=name)
                 await ctx.send(
                     "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
+                db_set(watid, 1,guild)
                 db_set(watid, 1,guild)
                 await ctx.send(
                     "The WatID " + watid + " has been marked for no further verifications.")
