@@ -20,14 +20,9 @@ daemonRunning = False
 WATERLOO_API_KEY = os.getenv("WATERLOO_API_KEY")
 WATERLOO_API_URL = os.getenv("WATERLOO_API_URL")
 
-# These are only for the ECE 2024 server! The only possible way that we found to automatically assign sections and streams.
-section2List = ["saaliyan","a9ahluwa","yhahn","kalatras","d22an","n22arora","j24au","g4aujla","s3aulakh","mavolio","e2baek","x53bai","d22baker","nbeilis","j39bi","ebilaver","jbodner","a23bose","j24brar","j6braun","r6bui","gbylykba","achalakk","v5chaudh","ichellad","h596chen","ly23chen","h559chen","ncherish","jchik","jchitkar","skcho","kchoa","e25chu","nchunghu","m24coope","asdhiman","j3enrigh","derisogl","d24ferna","lfournie","n6franci","agabuniy","a57garg","mgionet","sgoodarz","c2gravel","m8guan","a324gupt","wharris","a29he","c55he","chenfrey","e44ho","rhoffman","p23hu","h338huan","l247huan","a73huang","a226jain","z242jian","h56jin","pkachhia","kkalathi","e2koh","k5kumara","jklkundn","k26le","j763lee","d267lee","k323lee","rlevesqu","a284li","r374li","k36liang","j352lu","b49lu","mlysenko","vmago","smanakta","j78marti","rhmayilv","a47mehta","d36mehta","a2mladen","d6moon","a27nadee","b42nguye","dnnnguye","b43nguye","m22niu","snuraniv","t5oliver","motchet","m332pate","v227pate","b36peng","bphu","npotdar","m98rahma","msraihaa","jrintjem","rrouhana","o3salem","apsalvad","s5santhi","hsayedal","tshahjah","s4shahri","r4sim","a553sing","a558sing","ll3smith","j225smit","kb2son","dsribala","tstauffe","a6su","ssubbara","m38syed","w29tam","c46tan","w4tao","s4thapa","ctraxler","etroci","a2vaseeh","j23vuong","d7wan","j23weng","t54wong","yy8wong","y657wu","j478wu","cy2xi","c7xiang","k233yang","j52yoon","i6zhang","cf3zhang","c624zhan","z963zhan"]
-stream8List = ["mnabedin","msachuot","dm2adams","jaftab","s55agarw","s3agha","a2ahilan","a2aissao","aialam","talguind","h4altaf","aanavady","jsarbour","carjune","u3asif","js2bedi","m6begum","a4bello","mbenyahy","wbilal","dbown","bcarrion","c268chan","c465chen","sy36chen","s655chen","v22chen","w356chen","n9choi","bcimring","g3clarke","kcofini","mldai","sndave","gdecena","sdharask","cvdioned","y97du","k4dyck","nelgawis","yfahmi","j48fang","s34fang","a43ghosh","y95han","smhanif","s24hao","a39hasan","j223ho","r27ho","a36hu","t53hu","h328huan","y629huan","k25hung","k33huynh","njandala","jhjiao","d35jones","j2kambul","rkassama","s2kelash","h222khan","t54khan","nckhoras","dj6kim","k27le","j38lei","e44li","jy36li","jy26lin","r48lin","a229liu","ndliu","p99liu","sq3liu","z65luo","emach","b3mah","rmah","a3mahto","rmajeed","sdmajumd","a35malho","s73malik","r6mangat","amathise","dmehic","a47mehta","d2naik","sa6naqvi","mnasar","snavajee","h3ngai","j245nguy","s45oh","z2omer","mpanizza","aparasch","hn6patel","s23patha","t2pathan","m3pavlov","spetrevs","ehpropp","y2qie","q3qu","nquintan","a9rajkum","trampura","cj4rober","krogut","y3said","csariyil","f2sarker","ssenthur","a239shah","j36shah","r2shanbh","m85sharm","r43shi","y25singh","w5so","h77song","lxsong","134531.teststudent1","134531.teststudent2","vsudhaka","psurendr","ltahvild","me2tan","c223tang","s224tang","x29tao","dthero","jthota","k7to","etou","a2truong","evlahos","m6waheed","a242wang","s873wang","t384wang","yt24wang","h38wei","wwindhol","lhwu","p66wu","j59xiao","p9xie","y754yang","r22ye","zzyin","a56yu","t98yu","m27zafar","zzakiull","h664zhan","m375zhan","yz8zhang","z958zhan","w246zhao","b54zhu","mh2zhu"]
-
 VERBOSE_CHANNEL_NAME = "bot-alerts"
 awaitingSM = {}
 THUMBNAIL_LINK = "https://i.imgur.com/Uusxfqa.png"
-
 
 
 # Administrative
@@ -269,15 +264,6 @@ class Administrative(commands.Cog, name='Administrative'):
                             if (apiResponse['data']['department'] == "SCI/Science"):
                                 await messageAuthor.add_roles(getRole("Verified-Science",guild))
                                 await adminChannel.send("Added the Verified-Science Role to <@" + str(messageAuthor.id) + ">.")
-
-                        #Only add sections if the server is the ECE 2024 server!
-                        if (str(guild.id)  == "706657592578932797"):
-                            if (watID in section2List):
-                                await messageAuthor.add_roles(sec2Role)
-                                await adminChannel.send("Added the Section 2 Role to <@" + str(messageAuthor.id) + ">.")
-                            else:
-                                await messageAuthor.add_roles(stream8Role)
-                                await adminChannel.send("Added the Section 1 Role to <@" + str(messageAuthor.id) + ">.")
 
 
                     except Exception as e:
@@ -525,15 +511,6 @@ class Administrative(commands.Cog, name='Administrative'):
                             await member.remove_role(s8Role)
                         except:
                             pass
-                        if (watID in section2List):
-                            await member.add_roles(section2Role)
-                            await adminChannel.send("Added the Section 2 Role to <@"+str(member.id)+">.")
-                        elif watID in stream8List:
-                            await member.add_roles(s8Role)
-                            await adminChannel.send("Added the Stream 8 role to <@"+str(member.id)+">.")
-                        else:
-                            await member.add_roles(section1Role)
-                            await adminChannel.send("Added the Section 1 Role to <@" + str(member.id) + ">.")
                         db_set(str(member.id)+".rolevalidated","true",guild)
 
                     else:
@@ -598,9 +575,7 @@ class Administrative(commands.Cog, name='Administrative'):
             embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
             embed.set_thumbnail(url=THUMBNAIL_LINK)
 
-            subscriberList = stream(messageAuthor.guild.members).filter(
-                lambda x: db_exists(str(x.id) + ".subscribed",guild)
-                          and db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
+            subscriberList = getSubscribers(guild)
             print(str(subscriberList))
             for page in paginate(map(str,subscriberList)):
                 print(str(page))

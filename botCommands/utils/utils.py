@@ -11,11 +11,15 @@ TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
 #Get all subscribed members to notifications
 def getSubscribers(guild):
-    return stream(guild.members).filter(lambda x: db_exists(str(x.id) + ".subscribed",guild) and db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
+    print(guild.members)
+    return stream(guild.members).filter(lambda x: db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
 
 #Send a subscriber message
 async def sendSubscriberMessage(message,guild):
+    print("ok1")
     subscriberList = getSubscribers(guild)
+    print(subscriberList)
+    print("ok2")
     message = message.replace("\\n", "\n")
     messageToEdit = await getChannel("admin-chat",guild).send(
         "Sending notifications to subscribed members. Status: [0/" + str(len(subscriberList)) + "]")
