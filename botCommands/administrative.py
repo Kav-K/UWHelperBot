@@ -593,7 +593,7 @@ class Administrative(commands.Cog, name='Administrative'):
         if (args[0] == "VIEW"):
             try:
                 configOption = ConfigObjects[args[1]]
-                await ctx.send("Value for :"+configOption+" is: "+getConfigurationValue(configOption,ctx.author.guild))
+                await ctx.send("Value for :"+str(configOption)+" is: "+getConfigurationValue(configOption,ctx.author.guild))
                 return
             except Exception as e:
                 await ctx.send("Invalid syntax or configuration object: "+str(e))

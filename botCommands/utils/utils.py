@@ -11,8 +11,7 @@ TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
 #Get all subscribed members to notifications
 def getSubscribers(guild):
-    for member in guild.members:
-        print(member.id)
+    print(guild.members)
     return stream(guild.members).filter(lambda x: db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
 
 #Send a subscriber message
