@@ -587,6 +587,20 @@ class Administrative(commands.Cog, name='Administrative'):
 #Toggle if a server should force name changes or not
     @commands.command()
     async def config(self,ctx, *args):
+        if not permittedAdmin(ctx.author):
+            return
+        #View a config object
+        if (args[0] == "VIEW"):
+            try:
+                configOption = ConfigObjects[args[1]]
+                await ctx.send("Value for :"+configOption+" is: "+getConfigurationValue(configOption,ctx.author.guild))
+                return
+            except Exception as e:
+                await ctx.send("Invalid syntax or configuration object: "+str(e))
+                return
+
+
+        #Set a config object
         try:
             configOption = ConfigObjects[args[0]]
             configValue = args[1]
