@@ -618,7 +618,7 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.command()
     async def announce(self, ctx,*args):
         #Restricted only to me (Kaveen) for now for important updates about the bot
-        if (ctx.author.id != 213045272048041984) or len(args[1:] <1):
+        if (ctx.author.id != 213045272048041984) or len(args[1:]) < 1:
             await ctx.send("No permission or invalid message.")
             return
         try:
