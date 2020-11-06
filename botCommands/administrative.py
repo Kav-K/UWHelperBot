@@ -554,6 +554,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 else:
                     if (messageAuthor.id not in awaitingSM):
                         message = " ".join(args)
+                        #To make formatting show up on the other end!
                         message = message.replace("\"","'")
                         await ctx.send(message.replace("\\n", "\n"))
                         await ctx.send("This is a preview of the message you are about to send. To send, please type `!sm confirm`")
@@ -598,8 +599,6 @@ class Administrative(commands.Cog, name='Administrative'):
             except Exception as e:
                 await ctx.send("Invalid syntax or configuration object: "+str(e))
                 return
-
-
         #Set a config object
         try:
             configOption = ConfigObjects[args[0]]
@@ -607,12 +606,36 @@ class Administrative(commands.Cog, name='Administrative'):
 
         except Exception as e:
             await ctx.send("Invalid syntax or configuration object: "+str(e))
-
+            return
         try:
             setConfigurationValue(configOption,configValue,ctx.author.guild)
             await ctx.send("Configuration value changed successfully")
         except Exception as e:
             await ctx.send("Internal error while changing configuration value: "+str(e))
+
+
+#Announce a message to a channel on all servers (Usually should be admin-chat or bot-alerts, or bot-updates)
+    @commands.command()
+    async def announce(self, ctx,*args):
+        #Restricted only to me (Kaveen) for now for important updates about the bot
+        if (ctx.author.id != 213045272048041984) or len(args[1:] <1):
+            await ctx.send("No permission or invalid message.")
+            return
+        try:
+            channelName = args[0]
+            message = " ".join(args[1:])
+            message = message.replace("\"", "'")
+            message = message.replace("\\n", "\n")
+        except Exception as e:
+            await ctx.send("Error while composing announcement: "+str(e))
+            return
+
+        for guild in self.bot.guilds:
+            try:
+                await getChannel(channelName,guild).send(message)
+                await ctx.send("Sent announcement to "+guild.name)
+            except Exception as e:
+                await ctx.send("Error while sending announcement to "+guild.name+": "+str(e))
 
 
 #https://api.github.com/repos/Kav-K/Stream4Bot/commits
