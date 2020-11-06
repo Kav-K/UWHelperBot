@@ -72,6 +72,7 @@ class Administrative(commands.Cog, name='Administrative'):
         except:
             pass
 
+
     @commands.command()
     async def lock(self,ctx):
         channel = ctx.channel
@@ -143,37 +144,69 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send(response)
                     return
 
-            # Mark
-            db_set(str(messageAuthor.id) + ".watid", user_id,guild)
-            db_set(str(messageAuthor.id) + ".verified", 0,guild)
-            db_set(str(messageAuthor) + ".name", name,guild)
-            db_set(str(messageAuthor.id) + ".name", name,guild)
+            #Check for verifications on another server
+            userInfo = search(messageAuthor.id, self.bot.guilds)
+            print(str(userInfo))
 
-            # Generate random code
-            code = random.randint(1000, 9999)
-            db_set(str(messageAuthor.id) + ".code", code,guild)
+            #Not verified on another server, run the normal process
+            if not userInfo["status"]:
+                # Mark
+                db_set(str(messageAuthor.id) + ".watid", user_id, guild)
+                db_set(str(messageAuthor.id) + ".verified", 0, guild)
+                db_set(str(messageAuthor) + ".name", name, guild)
+                db_set(str(messageAuthor.id) + ".name", name, guild)
 
-            mailMessage = Mail(
-                from_email='verification@kaveenk.com',
-                to_emails=email,
-                subject='UWaterloo Helper Discord Verification Code',
-                html_content='<strong>Your verification code is: ' + str(
-                    code) + '. Please go back into discord and type !confirm (your code)</strong>')
-            try:
-                sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                mailResponse = sg.send(mailMessage)
-                # TODO: Validate mail response
-            except Exception as e:
-                print(str(e))
-                await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
+                # Generate random code
+                code = random.randint(1000, 9999)
+                db_set(str(messageAuthor.id) + ".code", code, guild)
 
-            response = "<@" + str(
-                messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code" \
-                                                                                 " in your email and type `!confirm <code>` in discord to verify" \
-                                                                                 " your account. Please check your spam and junk folders."
-            db_set(str(messageAuthor.id) + ".request", 1,guild)
+                mailMessage = Mail(
+                    from_email='verification@kaveenk.com',
+                    to_emails=email,
+                    subject='UWaterloo Helper Discord Verification Code',
+                    html_content='<strong>Your verification code is: ' + str(
+                        code) + '. Please go back into discord and type !confirm (your code)</strong>')
+                try:
+                    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
+                    mailResponse = sg.send(mailMessage)
+                    # TODO: Validate mail response
+                except Exception as e:
+                    print(str(e))
+                    await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
 
-            await ctx.send(response)
+                response = "<@" + str(
+                    messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code" \
+                                                                                     " in your email and type `!confirm <code>` in discord to verify" \
+                                                                                     " your account. Please check your spam and junk folders."
+                db_set(str(messageAuthor.id) + ".request", 1, guild)
+
+                await ctx.send(response)
+
+            #Verified on another server, automatically verify them here without any action on their part!
+            elif userInfo["status"]:
+                # Set their records on the current server to the records provided by another server
+                db_set(str(messageAuthor.id) + ".verified", 1, guild)
+                db_set(userInfo["watID"], 1, guild)
+                db_set(str(messageAuthor.id) + ".watid", userInfo["watID"], guild)
+                db_set(str(messageAuthor) + ".name", userInfo["name"], guild)
+                db_set(str(messageAuthor.id) + ".name", userInfo["name"], guild)
+                await messageAuthor.edit(nick=str(userInfo["name"]))
+
+                # Add Verified role, attempt to remove Unverified Role
+                verifiedRole = getRole("Verified", guild)
+                await messageAuthor.add_roles(verifiedRole)
+                try:
+                    unverifiedRole = getRole("Unverified", guild)
+                    await messageAuthor.remove_roles(unverifiedRole)
+                except:
+                    pass
+
+                await send_dm(messageAuthor, "Hi there, "+userInfo["name"]+", you recently tried to verify on the discord server "+messageAuthor.guild.name+", but we found a previous verification for you on the server "+userInfo["guild"]+" so we have automatically verified your account this time :)")
+                response = "<@" + str(
+                    messageAuthor.id) + "> You have been automatically verified from another server"
+                await ctx.send(response)
+                return
+
         except Exception as e:
             print(e)
             response = "<@" + str(

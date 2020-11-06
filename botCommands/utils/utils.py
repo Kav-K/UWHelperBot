@@ -44,12 +44,13 @@ def isVerified(memberToCheck,guild):
 def getGuild():
     global GUILDS
     return GUILDS
+
+
 def setGuilds(inputGuilds):
     global GUILDS
     print("Got guilds set request to: "+str(inputGuilds))
     GUILDS = inputGuilds
     redisSetGuilds(GUILDS)
-
 
 #Get a category by identifier
 def getCategory(categoryIdentifier,guild):

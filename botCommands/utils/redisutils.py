@@ -8,6 +8,7 @@ DATABASE_HARD_LIMIT = 15
 database_instances = {}
 database_instances_identifier = {}
 
+
 def redisSetGuilds(GUILDS):
     for GUILD in GUILDS:
         for x in range(0, DATABASE_HARD_LIMIT):
@@ -20,6 +21,27 @@ def redisSetGuilds(GUILDS):
             except Exception as e:
                 print(str(e))
                 continue
+
+def search(userID, GUILDS):
+    userID = str(userID)
+    userInfo = {}
+    userInfo["status"] = False
+    for x in range(0,DATABASE_HARD_LIMIT):
+        try:
+            for _guild in GUILDS:
+                if db_exists(userID+".verified",_guild) and db_get(userID+".verified",_guild) == "1":
+                    userInfo["name"] = db_get(userID+".name",_guild)
+                    userInfo["watID"] = db_get(userID+".watid",_guild)
+                    userInfo["guild"] = _guild.name
+                    userInfo["status"] = True
+
+                    break
+        except Exception as e:
+            userInfo["status"] = False
+            print(str(e))
+    return userInfo
+
+
 def getCorrespondingDatabase(guild):
     return database_instances_identifier[guild.id]
 
