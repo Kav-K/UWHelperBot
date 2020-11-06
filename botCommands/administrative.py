@@ -190,7 +190,8 @@ class Administrative(commands.Cog, name='Administrative'):
                 db_set(str(messageAuthor.id) + ".watid", userInfo["watID"], guild)
                 db_set(str(messageAuthor) + ".name", userInfo["name"], guild)
                 db_set(str(messageAuthor.id) + ".name", userInfo["name"], guild)
-                await messageAuthor.edit(nick=str(userInfo["name"]))
+                if (forceName(guild)):
+                    await messageAuthor.edit(nick=str(userInfo["name"]))
 
                 # Add Verified role, attempt to remove Unverified Role
                 verifiedRole = getRole("Verified", guild)
@@ -231,8 +232,9 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send(response)
 
                     #Set user's nickname to real name on file
-                    nickname = db_get(str(messageAuthor.id) + ".name",guild)
-                    await messageAuthor.edit(nick=str(nickname))
+                    if (forceName(guild)):
+                        nickname = db_get(str(messageAuthor.id) + ".name", guild)
+                        await messageAuthor.edit(nick=str(nickname))
 
                     # Mark user and WatID as verified
                     db_set(str(messageAuthor.id) + ".verified", 1,guild)
@@ -585,8 +587,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 print(e)
                 await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
 
-
-
     @commands.command()
     async def subscribers(self,ctx):
         messageAuthor = ctx.author
@@ -601,12 +601,30 @@ class Administrative(commands.Cog, name='Administrative'):
             subscriberList = stream(messageAuthor.guild.members).filter(
                 lambda x: db_exists(str(x.id) + ".subscribed",guild)
                           and db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
-
+            print(str(subscriberList))
             for page in paginate(map(str,subscriberList)):
+                print(str(page))
                 embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)
 
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
+
+#Toggle if a server should force name changes or not
+    @commands.command()
+    async def config(self,ctx, *args):
+        try:
+            configOption = ConfigObjects[args[0]]
+            configValue = args[1]
+
+        except Exception as e:
+            await ctx.send("Invalid syntax or configuration object: "+str(e))
+
+        try:
+            setConfigurationValue(configOption,configValue,ctx.author.guild)
+            await ctx.send("Configuration value changed successfully")
+        except Exception as e:
+            await ctx.send("Internal error while changing configuration value: "+str(e))
+
 
 #https://api.github.com/repos/Kav-K/Stream4Bot/commits
     @commands.command()

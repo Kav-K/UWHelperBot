@@ -72,7 +72,11 @@ def db_purgeUser(member: discord.Member,guild):
 
 #Performs a get request and decodes
 def db_get(key,guild):
-    return database_instances[guild.id].get(key).decode('utf-8')
+    if (db_exists(key,guild)):
+        return database_instances[guild.id].get(key).decode('utf-8')
+    else:
+        print("Unable to find the database key: "+key+" for the guild "+guild.name)
+        return None
 
 #Sets a value in the redis db
 def db_set(key, value,guild):

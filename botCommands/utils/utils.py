@@ -2,6 +2,7 @@ import discord
 from lazy_streams import stream
 global GUILDS
 from botCommands.utils.redisutils import *
+from botCommands.utils.ConfigObjects import *
 GUILDS = []
 
 #TODO PUT THESE INTO A SETTINGS/CONFIG
@@ -96,6 +97,12 @@ def paginate(toPaginate, linesToPaginate=20):
 
     yield paginated
 
+#Check if a server has force-name-change on!
+def forceName(GUILD):
+    if getConfigurationValue(ConfigObjects.FORCE_NAME,GUILD) == "false":
+        return False
+    return True
+
 #Send a DM
 async def send_dm(member: discord.Member, content):
     channel = await member.create_dm()
@@ -112,4 +119,8 @@ def permittedStaff(user):
 #Get a configuration value from the database
 def getConfigurationValue(configObjectEnum,guild):
     return db_get(configObjectEnum.value,guild)
+
+#Set a configuration value in the database
+def setConfigurationValue(configObjectEnum,value, guild):
+    db_set(configObjectEnum.value,value,guild)
 

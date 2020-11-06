@@ -1,6 +1,6 @@
 from discord.ext import commands
 
-banned_channels = ["faculty-general", "public-discussion", "offtopic"]
+banned_channels = ["faculty-general", "public-discussion", "offtopic", "general"]
 
 
 def channel_check():
