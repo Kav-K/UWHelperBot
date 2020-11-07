@@ -79,7 +79,7 @@ class Regular(commands.Cog, name = 'Regular'):
         calendar = urllib.request.urlopen(
             getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild))
         gcal = Calendar.from_ical(calendar.read())
-        dateRangeEnd = datetime.now() + timedelta(days=7)
+        dateRangeEnd = datetime.now() + timedelta(days=7 if getConfigurationValue(ConfigObjects.UPCOMING_LENGTH,guild) == None else int(getConfigurationValue(ConfigObjects.UPCOMING_LENGTH,guild)))
 
         # Iterate through components inside of the calendar
         for component in gcal.walk():

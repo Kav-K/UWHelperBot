@@ -588,6 +588,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
+
 #Generate usage metrics for the bot
     @commands.command()
     async def metrics(self,ctx):
