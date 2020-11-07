@@ -595,7 +595,7 @@ class Administrative(commands.Cog, name='Administrative'):
             totalUsers = 0
             totalVerified = 0
             for guild in self.bot.guilds:
-                totalUsers += guild.members
+                totalUsers += len(guild.members)
                 verifiedRole = getRole("Verified",guild)
                 totalVerified += len(stream(guild.members).filter(lambda x: verifiedRole in x.roles).to_list())
             embed = discord.Embed(title="Usage Metrics",

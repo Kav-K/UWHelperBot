@@ -110,6 +110,8 @@ async def send_dm(member: discord.Member, content):
 
 #See if a user is a GLOBAL DEVELOPER for the bot
 def permittedDeveloper(user):
+    print(user.id)
+    print(os.getenv("DEVELOPERS").split(",")[0])
     return str(user.id) in os.getenv("DEVELOPERS").split(",")
 
 #See if a user is permitted to run an admin command
