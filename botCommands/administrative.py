@@ -20,6 +20,7 @@ daemonRunning = False
 WATERLOO_API_KEY = os.getenv("WATERLOO_API_KEY")
 WATERLOO_API_URL = os.getenv("WATERLOO_API_URL")
 
+#TODO Move these into configurables
 VERBOSE_CHANNEL_NAME = "bot-alerts"
 awaitingSM = {}
 THUMBNAIL_LINK = "https://i.imgur.com/Uusxfqa.png"
@@ -577,13 +578,33 @@ class Administrative(commands.Cog, name='Administrative'):
             embed.set_thumbnail(url=THUMBNAIL_LINK)
 
             subscriberList = getSubscribers(guild)
-            print(str(subscriberList))
+            if (len(subscriberList) <1):
+                await ctx.send("No subscribers")
+                return
+
             for page in paginate(map(str,subscriberList)):
                 print(str(page))
                 embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)
 
             await ctx.send(embed=embed)
             await ctx.send("Total subscribers: "+str(len(subscriberList)))
+#Generate usage metrics for the bot
+    @commands.command()
+    async def metrics(self,ctx):
+        if (permittedDeveloper(ctx.author)):
+            totalUsers = 0
+            totalVerified = 0
+            for guild in self.bot.guilds:
+                totalUsers += guild.members
+                verifiedRole = getRole("Verified",guild)
+                totalVerified += len(stream(guild.members).filter(lambda x: verifiedRole in x.roles).to_list())
+            embed = discord.Embed(title="Usage Metrics",
+                                  description="Here are some usage metrics for the UWaterloo Helper Bot",
+                                  color=0x800080)
+            embed.add_field(name="Total Users",value=totalUsers,inline=False)
+            embed.add_field(name="Total Verified Users",value=totalVerified,inline=False)
+            await ctx.send(embed=embed)
+
 
 #Toggle if a server should force name changes or not
     @commands.command()

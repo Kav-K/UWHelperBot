@@ -46,7 +46,8 @@ if __name__ == "__main__":
 	except KeyboardInterrupt:
 		print("Caught keyboard interrupt, killing and removing PID")
 		os.remove(pidfile)
-	except:
+	except Exception as e:
+		print(str(e))
 		print("Removing PID file")
 		os.remove(pidfile)
 	finally:

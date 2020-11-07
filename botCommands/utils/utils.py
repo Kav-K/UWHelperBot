@@ -5,19 +5,17 @@ from botCommands.utils.redisutils import *
 from botCommands.utils.ConfigObjects import *
 GUILDS = []
 
-#TODO PUT THESE INTO A SETTINGS/CONFIG
+#TODO PUT THESE INTO THE ENVIRONMENT FILE
 ADMIN_ROLE_NAME = "Admin"
 TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
 #Get all subscribed members to notifications
 def getSubscribers(guild):
-    print(guild.members)
     return stream(guild.members).filter(lambda x: db_get(str(x.id) + ".subscribed",guild) == "true").to_list()
 
 #Send a subscriber message
 async def sendSubscriberMessage(message,guild):
     subscriberList = getSubscribers(guild)
-    print(subscriberList)
     message = message.replace("\\n", "\n")
     messageToEdit = await getChannel("admin-chat",guild).send(
         "Sending notifications to subscribed members. Status: [0/" + str(len(subscriberList)) + "]")
@@ -109,6 +107,10 @@ def forceName(GUILD):
 async def send_dm(member: discord.Member, content):
     channel = await member.create_dm()
     await channel.send(content)
+
+#See if a user is a GLOBAL DEVELOPER for the bot
+def permittedDeveloper(user):
+    return str(user.id) in os.getenv("DEVELOPERS").split(",")
 
 #See if a user is permitted to run an admin command
 def permittedAdmin(user):
