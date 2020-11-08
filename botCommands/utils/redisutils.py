@@ -4,7 +4,7 @@ import redis
 
 redisClient = redis.Redis(host=os.getenv("REDIS_HOST"), port=os.getenv("REDIS_PORT"), db=0)
 #Creates an instance of the redis client
-DATABASE_HARD_LIMIT = 15
+DATABASE_HARD_LIMIT = 25
 database_instances = {}
 database_instances_identifier = {}
 

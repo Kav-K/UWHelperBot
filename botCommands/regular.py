@@ -198,7 +198,7 @@ class Regular(commands.Cog, name = 'Regular'):
                 await ctx.send(embed=embed)
             elif (selection == "250"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 250",
+                embed.add_field(name="ECE s250",
                                 value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 250",
                                 inline=False)
                 embed.set_image(url="https://api.kaveenk.com/bot/250schedule.png")
