@@ -1,6 +1,8 @@
 import discord
 from lazy_streams import stream
 global GUILDS
+import os
+import sys
 from botCommands.utils.redisutils import *
 from botCommands.utils.ConfigObjects import *
 GUILDS = []
@@ -8,6 +10,11 @@ GUILDS = []
 #TODO PUT THESE INTO THE ENVIRONMENT FILE
 ADMIN_ROLE_NAME = "Admin"
 TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
+
+#Clean and restart the bot
+def restart():
+    os.execv(__file__,sys.argv)
+
 
 #Get all subscribed members to notifications
 def getSubscribers(guild):

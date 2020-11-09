@@ -4,6 +4,8 @@ import requests
 import asyncio
 from datetime import datetime, timedelta
 from pytz import timezone
+import os
+import sys
 
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import Mail
@@ -658,6 +660,15 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send("Sent announcement to "+guild.name)
             except Exception as e:
                 await ctx.send("Error while sending announcement to "+guild.name+": "+str(e))
+
+    @commands.command()
+    async def reinstantiate(self, ctx):
+        if (permittedDeveloper(ctx.author)):
+            await ctx.send("The bot is now restarting all instances, the reboot process should take approximately 5-8 minutes.")
+
+
+
+
 
 
 #https://api.github.com/repos/Kav-K/Stream4Bot/commits
