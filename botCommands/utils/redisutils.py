@@ -93,7 +93,7 @@ def db_delete(key,guild):
 def db_disconnect(guild):
     database_instances[guild.id].quit()
 
-def db_disconnect_all(guild):
+def db_disconnect_all():
     for x in range(DATABASE_HARD_LIMIT):
         redisClient = redis.Redis(host='localhost', port=6379, db=x)
         try:

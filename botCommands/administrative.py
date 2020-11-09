@@ -16,15 +16,15 @@ from botCommands.utils.ConfigObjects import *
 
 import discord
 from discord.ext import commands
-global daemonRunning
-daemonRunning = False
+global daemon_running
+daemon_running = False
 
 WATERLOO_API_KEY = os.getenv("WATERLOO_API_KEY")
 WATERLOO_API_URL = os.getenv("WATERLOO_API_URL")
 
 #TODO Move these into configurables
 VERBOSE_CHANNEL_NAME = "bot-alerts"
-awaitingSM = {}
+awaiting_sm = {}
 THUMBNAIL_LINK = "https://i.imgur.com/Uusxfqa.png"
 
 
@@ -38,26 +38,27 @@ class Administrative(commands.Cog, name='Administrative'):
     async def on_member_remove(self, member):
         guild = member.guild
 
-        adminChannel = getChannel(VERBOSE_CHANNEL_NAME, guild)
-        await adminChannel.send("A user: <@"+str(member.id)+"> has left the server.")
+        getChannel(VERBOSE_CHANNEL_NAME, guild)
+        await getChannel(VERBOSE_CHANNEL_NAME, guild).send("A user: <@"+str(member.id)+"> has left the server.")
         db_purgeUser(member,guild)
-        adminChannel.send("User has been purged from the database successfully.")
+        getChannel(VERBOSE_CHANNEL_NAME, guild).send("User has been purged from the database successfully.")
 
     @commands.Cog.listener()
     async def on_ready(self):
         setGuilds(self.bot.guilds)
         print("Set the guilds to" + str(self.bot.guilds))
         print(f'{self.bot.user.name} has connected to Discord!')
-        global daemonRunning
-        if not daemonRunning:
-            daemonRunning = True
+        global daemon_running
+        if not daemon_running:
+            daemon_running = True
             for indv_guild in self.bot.guilds:
-                adminChannel = getChannel(VERBOSE_CHANNEL_NAME, indv_guild)
+                verbose_channel = getChannel(VERBOSE_CHANNEL_NAME, indv_guild)
                 asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
-                await adminChannel.send(str(indv_guild)+": The administrative daemon thread is now running.")
+                await verbose_channel.send(str(indv_guild)+": The administrative daemon thread is now running.")
+                await verbose_channel.send("Verification is now available.")
                 print('Admin thread start')
                 asyncio.get_event_loop().create_task(CommBroker(indv_guild))
-                await adminChannel.send(str(indv_guild)+": The communications broker thread is now running.")
+                await verbose_channel.send(str(indv_guild)+": The communications broker thread is now running.")
                 print('Communications broker thread start')
 
 
@@ -543,25 +544,25 @@ class Administrative(commands.Cog, name='Administrative'):
         if permittedAdmin(messageAuthor):
             try:
                 if (args[0].lower() == 'confirm'):
-                    if (messageAuthor.id in awaitingSM):
-                        await sendSubscriberMessage(awaitingSM[messageAuthor.id],guild)
-                        del awaitingSM[messageAuthor.id]
+                    if (messageAuthor.id in awaiting_sm):
+                        await sendSubscriberMessage(awaiting_sm[messageAuthor.id], guild)
+                        del awaiting_sm[messageAuthor.id]
                     else:
                         await ctx.send("You do not have a pending subscriber message to send out.")
                 elif (args[0].lower() == 'cancel'):
-                    if (messageAuthor.id in awaitingSM):
-                        del awaitingSM[messageAuthor.id]
+                    if (messageAuthor.id in awaiting_sm):
+                        del awaiting_sm[messageAuthor.id]
                         await ctx.send("Deleted your pending subscriber message request")
                     else:
                         await ctx.send("You do not have a pending subscriber message to cancel.")
                 else:
-                    if (messageAuthor.id not in awaitingSM):
+                    if (messageAuthor.id not in awaiting_sm):
                         message = " ".join(args)
                         #To make formatting show up on the other end!
                         message = message.replace("\"","'")
                         await ctx.send(message.replace("\\n", "\n"))
                         await ctx.send("This is a preview of the message you are about to send. To send, please type `!sm confirm`")
-                        awaitingSM[messageAuthor.id] = message
+                        awaiting_sm[messageAuthor.id] = message
                     else:
                         await ctx.send("You already have a pending subscriber message request. Please `!sm confirm` or `!sm cancel`")
             except Exception as e:
@@ -664,7 +665,12 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.command()
     async def reinstantiate(self, ctx):
         if (permittedDeveloper(ctx.author)):
-            await ctx.send("The bot is now restarting all instances, the reboot process should take approximately 5-8 minutes.")
+            for guild in self.bot.guilds:
+                await getChannel("admin-chat",guild).send("The bot is now restarting all instances, the reboot process should take approximately 5-8 minutes. During this time, bot functions may not be available, or faulty.")
+                await getChannel("admin-chat",guild).send("Verification currently unavailable for the next 10 minutes.")
+
+            db_disconnect_all()
+            restart()
 
 
 

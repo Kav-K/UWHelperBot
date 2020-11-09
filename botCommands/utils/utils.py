@@ -13,8 +13,9 @@ TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
 #Clean and restart the bot
 def restart():
+    pidfile = os.getenv("PID_FILE")
+    os.remove(pidfile)
     os.execv(__file__,sys.argv)
-
 
 #Get all subscribed members to notifications
 def getSubscribers(guild):
