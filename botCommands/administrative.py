@@ -106,7 +106,7 @@ class Administrative(commands.Cog, name='Administrative'):
             if (db_exists(str(messageAuthor) + ".request",guild) or db_exists(str(messageAuthor.id) + ".request",guild)):
                 response = "<@" + str(
                     messageAuthor.id) + "> There is already a pending verification request for your WatID," \
-                                        " please use `!confirm <code>` or do `!cancelverification`"
+                                        " please use `!confirm <code>` or do `!cancelverification` to cancel the pending verification."
                 await ctx.send(response)
                 return
 
@@ -153,11 +153,13 @@ class Administrative(commands.Cog, name='Administrative'):
             print(str(userInfo))
 
             #Not verified on another server, run the normal process
+            #V2 deprecation changes means that we can't worry about the user's name in this section.
             if not userInfo["status"]:
                 # Mark
                 db_set(str(messageAuthor.id) + ".watid", watid, guild)
                 db_set(str(messageAuthor.id) + ".verified", 0, guild)
 
+                #No more name information is stored currently for a brand new verification.
                 # db_set(str(messageAuthor) + ".name", name, guild)
                 # db_set(str(messageAuthor.id) + ".name", name, guild)
 
@@ -165,15 +167,18 @@ class Administrative(commands.Cog, name='Administrative'):
                 code = random.randint(1000, 9999)
                 db_set(str(messageAuthor.id) + ".code", code, guild)
 
+
                 mailMessage = Mail(
                     from_email='verification@kaveenk.com',
                     to_emails=watid+"@uwaterloo.ca",
                     subject='UWaterloo Helper Discord Verification Code',
                     html_content='<strong>Your verification code is: ' + str(
                         code) + '. Please go back into discord and type !confirm (your code)</strong>')
+
+
                 try:
                     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                    mailResponse = sg.send(mailMessage)
+                    sg.send(mailMessage)
                     # TODO: Validate mail response
                 except Exception as e:
                     print(str(e))
@@ -182,24 +187,27 @@ class Administrative(commands.Cog, name='Administrative'):
                 response = "<@" + str(
                     messageAuthor.id) + "> I sent a verification code to " + watid+"@uwaterloo.ca" + ". Find the code" \
                                                                                      " in your email and type `!confirm <code>` in discord to verify" \
-                                                                                     " your account. Please check your spam and junk folders."
+                                                                                     " your account. Please check your spam and junk folders. If you dont receive an email in 5 minutes, please verify that the WatID you entered is correct!"
                 db_set(str(messageAuthor.id) + ".request", 1, guild)
 
                 await ctx.send(response)
 
             #Verified on another server, automatically verify them here without any action on their part!
+            #With v2 deprecation changes, only worry about the name in this section.
             elif userInfo["status"]:
                 # Set their records on the current server to the records provided by another server
                 db_set(str(messageAuthor.id) + ".verified", 1, guild)
                 db_set(userInfo["watID"], 1, guild)
                 db_set(str(messageAuthor.id) + ".watid", userInfo["watID"], guild)
 
-                #Temporarily remove the force name change until an alternative system is found.
-                # db_set(str(messageAuthor) + ".name", userInfo["name"], guild)
-                # db_set(str(messageAuthor.id) + ".name", userInfo["name"], guild)
-                #
-                # if (forceName(guild)):
-                #     await messageAuthor.edit(nick=str(userInfo["name"]))
+                #v2 deprecation changes
+                if (userInfo["name"] != "Unavailable"):
+                    db_set(str(messageAuthor) + ".name", userInfo["name"], guild)
+                    db_set(str(messageAuthor.id) + ".name", userInfo["name"], guild)
+
+                    if (forceName(guild)):
+                        await messageAuthor.edit(nick=str(userInfo["name"]))
+
 
                 # Add Verified role, attempt to remove Unverified Role
                 verifiedRole = getRole("Verified", guild)
@@ -210,9 +218,21 @@ class Administrative(commands.Cog, name='Administrative'):
                 except:
                     pass
 
-                await send_dm(messageAuthor, "Hi there, "+userInfo["name"]+", you recently tried to verify on the discord server "+messageAuthor.guild.name+", but we found a previous verification for you on the server "+userInfo["guild"]+" so we have automatically verified your account this time :)")
+
+                #Send a DM based on if they have a name active or not
+                if (userInfo["name"] != "Unavailable"):
+                    await send_dm(messageAuthor, "Hi there, "+userInfo["name"]+", you recently tried to verify on the discord server "+messageAuthor.guild.name+", but we found a previous verification for you on the server "+userInfo["guild"]+" so we have automatically verified your account this time :)")
+
+                else:
+                    await send_dm(messageAuthor, "Hi there, you recently tried to verify on the discord server " + messageAuthor.guild.name + ", but we found a previous verification for you on the server " +
+                              userInfo["guild"] + " so we have automatically verified your account this time :)")
+
+
+
                 response = "<@" + str(
                     messageAuthor.id) + "> You have been automatically verified from another server"
+
+
                 await ctx.send(response)
                 return
 
@@ -221,7 +241,7 @@ class Administrative(commands.Cog, name='Administrative'):
             response = "<@" + str(
                 messageAuthor.id) + "> No WatID provided or invalid watID, please use `!verify <watid>`." \
                                     " Your WatID is the username in your original email, for example, in " \
-                                    " k5kumara@edu.uwaterloo.ca, the watID is k5kumara."
+                                    " k5kumara@uwaterloo.ca, the watID is k5kumara."
             await ctx.send(response)
 
     @commands.command()
@@ -239,10 +259,13 @@ class Administrative(commands.Cog, name='Administrative'):
                     response = "<@" + str(messageAuthor.id) + "> You were successfully verified."
                     await ctx.send(response)
 
-                    #Temporarily disable the forcing of a user's name
-                    # if (forceName(guild)):
-                    #     nickname = db_get(str(messageAuthor.id) + ".name", guild)
-                    #     await messageAuthor.edit(nick=str(nickname))
+                    #Wrap this in a try-catch to make it function after deprecation but still work for pre-v2
+                    try:
+                        if (forceName(guild)):
+                            nickname = db_get(str(messageAuthor.id) + ".name", guild)
+                            await messageAuthor.edit(nick=str(nickname))
+                    except:
+                        pass
 
                     # Mark user and WatID as verified
                     db_set(str(messageAuthor.id) + ".verified", 1,guild)

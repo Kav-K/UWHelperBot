@@ -30,7 +30,11 @@ def search(userID, GUILDS):
         try:
             for _guild in GUILDS:
                 if db_exists(userID+".verified",_guild) and db_get(userID+".verified",_guild) == "1":
-                    userInfo["name"] = db_get(userID+".name",_guild)
+                    try:
+                        userInfo["name"] = db_get(userID+".name",_guild)
+                    except:
+                        userInfo["name"] = "Unavailable"
+
                     userInfo["watID"] = db_get(userID+".watid",_guild)
                     userInfo["guild"] = _guild.name
                     userInfo["status"] = True
