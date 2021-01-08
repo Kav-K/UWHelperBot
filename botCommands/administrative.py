@@ -392,18 +392,13 @@ class Administrative(commands.Cog, name='Administrative'):
     async def lookup(self, ctx, *args):
 
         messageAuthor = ctx.author
-        guild = messageAuthor.guild
 
         if (permittedAdmin(messageAuthor) or permittedStaff(messageAuthor)):
             try:
 
-                if ("@" in args[0]):
+                discordID = str(ctx.message.mentions[0].id)
 
-                    # Find user's discord tag
-                    for member in ctx.message.mentions:
-                        discordID = str(member.id)
-                        watid = db_get(discordID + ".watid",guild)
-                        break
+                userInfo = search(discordID, self.bot.guilds)
 
                 embed = discord.Embed(title="User Lookup",
                                       description="Here is a local user lookup from our redis cluster.",
@@ -411,10 +406,13 @@ class Administrative(commands.Cog, name='Administrative'):
                 embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
                 embed.set_thumbnail(url=THUMBNAIL_LINK)
                 embed.add_field(name="Full Name",
-                                value=db_get(str(messageAuthor.id) + ".name", guild),
+                                value=userInfo["name"],
                                 inline=False)
                 embed.add_field(name="WatID",
-                                value=db_get(str(messageAuthor.id) + ".watid", guild),
+                                value=userInfo["watID"],
+                                inline=False)
+                embed.add_field(name="Original Verification Guild",
+                                value=userInfo["guild"],
                                 inline=False)
 
                 await ctx.send(embed=embed)
