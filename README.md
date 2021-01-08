@@ -1,7 +1,18 @@
 
 # Stream4Bot
 
-A user verification system and online instruction utility for the University of Waterloo
+A user verification system and online instruction utility for the University of Waterloo. Used by 5,000+ students and various official courses.
+
+
+# UWaterloo API V2 Deprecation Notice and Changes
+
+As of the end of 2020, the UWaterloo API v2 was meant to be deprecated. This deprecation means that the user directory feature will not work. The bot will not be able to retrieve a full name, verify a WatID, or retrieve departments/email addresses from UWaterloo.
+
+The bot has been adjusted for these changes and a v3 version is ready to merge as soon as the v2 api fully shuts down. Verification will still be seamless and automatic, but the bot will not be able to verify that input WatIDs are correct, so users are encouraged to pay attention to their verification process and make sure they enter the correct WatID.
+
+Apart from the latter, most other bot features remain unchanged (with the exception of !ldaplookup and the ability to automatically change someone's discord nickname to their full name).
+
+I've tried my best to create a solution that retains as many features from before the deprecation as possible, and the bot will still fully support the v2 features up until the day the endpoint is shut down.
 
 # Overview
 

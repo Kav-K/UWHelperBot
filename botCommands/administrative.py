@@ -96,7 +96,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send("This channel has been locked. Sending messages is disabled.")
 
     @commands.command()
-    async def verifyv2(self, ctx, *args):
+    async def verify(self, ctx, *args):
         try:
             messageAuthor = ctx.author
             guild = messageAuthor.guild
@@ -110,25 +110,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send(response)
                 return
 
-            # We cannot ask the UW API for information anymore.. We have to trust the user to enter their WatID correctly
-            # through more information sharing.
-
-            # apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
-            # email = apiResponse['data']['email_addresses'][0]
-            # name = apiResponse['data']['full_name']
-            # user_id = apiResponse['data']['user_id']
-
-            #We cannot ensure if anybody is a faculty member or not anymore..
-
-            # if (len(apiResponse['data']['telephone_numbers']) > 0):
-            #     response = "<@" + str(
-            #         messageAuthor.id) + "> You are a faculty member, and faculty members" \
-            #                             " require manual validation by an administrative team member." \
-            #                             " Please contact the administration team by messaging them directly," \
-            #                             " or send an email to k5kumara@uwaterloo.ca."
-            #     await ctx.send(response)
-            #     return
-
             #Check if the user has already been verified
             try:
                 if (db_exists(str(messageAuthor) + ".verified",guild) or db_exists(str(messageAuthor.id) + ".verified",guild)):
@@ -138,7 +119,6 @@ class Administrative(commands.Cog, name='Administrative'):
                         return
             except:
                 pass
-
 
             #Check if the attempted WatID has already been verified.
             if (db_exists(str(watid),guild)):
@@ -158,10 +138,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 # Mark
                 db_set(str(messageAuthor.id) + ".watid", watid, guild)
                 db_set(str(messageAuthor.id) + ".verified", 0, guild)
-
-                #No more name information is stored currently for a brand new verification.
-                # db_set(str(messageAuthor) + ".name", name, guild)
-                # db_set(str(messageAuthor.id) + ".name", name, guild)
 
                 # Generate random code
                 code = random.randint(1000, 9999)
@@ -227,7 +203,6 @@ class Administrative(commands.Cog, name='Administrative'):
                               userInfo["guild"] + " so we have automatically verified your account this time :)")
 
 
-
                 response = "<@" + str(
                     messageAuthor.id) + "> You have been automatically verified from another server"
 
@@ -244,7 +219,7 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(response)
 
     @commands.command()
-    async def confirmv2(self, ctx, *args):
+    async def confirm(self, ctx, *args):
         try:
             messageAuthor = ctx.author
             guild = messageAuthor.guild
@@ -290,14 +265,6 @@ class Administrative(commands.Cog, name='Administrative'):
                         adminChannel = getChannel(VERBOSE_CHANNEL_NAME, guild)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
 
-                        #This is only for the BUGS server, add a verified-science role if they are in science!  Temporarily disabled
-                        # if (str(guild.id) == "707632982961160282"):
-                        #     apiResponse = requests.get(WATERLOO_API_URL + watID + ".json?key=" + WATERLOO_API_KEY).json()
-                        #     if (apiResponse['data']['department'] == "SCI/Science"):
-                        #         await messageAuthor.add_roles(getRole("Verified-Science",guild))
-                        #         await adminChannel.send("Added the Verified-Science Role to <@" + str(messageAuthor.id) + ">.")
-
-
                     except Exception as e:
                         print(str(e))
                         await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
@@ -318,7 +285,7 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(response)
 
     @commands.command()
-    async def cancelverificationv2(self, ctx):
+    async def cancelverification(self, ctx):
 
         messageAuthor = ctx.author
         guild = messageAuthor.guild
@@ -333,7 +300,7 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(response)
 
     @commands.command()
-    async def devalidatev2(self, ctx, *args):
+    async def devalidate(self, ctx, *args):
 
         messageAuthor = ctx.author
         guild = messageAuthor.guild
@@ -361,8 +328,9 @@ class Administrative(commands.Cog, name='Administrative'):
     async def lockdown(self,ctx, *args):
         print("TODO: TO BE REWRITTEN")
 
+#New correlations after v2 will not be able to retrieve the name, email address, department, etc..
     @commands.command()
-    async def correlatev2(self, ctx, *args):
+    async def correlate(self, ctx, *args):
 
         messageAuthor = ctx.author
         guild = messageAuthor.guild
@@ -378,14 +346,6 @@ class Administrative(commands.Cog, name='Administrative'):
                     await ctx.send("No ranks supplied, not applying any ranks.")
                     ranks = ""
 
-                #Temporarily disable the use of the API for correlate :(
-                # try:
-                #     apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
-                #     name = apiResponse['data']['full_name']
-                # except:
-                #     await ctx.send("Invalid WatID: " + watid)
-                #     return
-
                 db_set(str(user.id) + ".watid", watid,guild)
                 await ctx.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
 
@@ -397,19 +357,11 @@ class Administrative(commands.Cog, name='Administrative'):
                         pass
                     await ctx.send("<@" + str(user.id) + "> has been set to Verified status")
 
-                # db_set(str(user) + ".name", name,guild)
-                # await user.edit(nick=name)
-                # await ctx.send(
-                #     "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
-
-
-                db_set(watid, 1,guild)
                 db_set(watid, 1,guild)
                 await ctx.send(
                     "The WatID " + watid + " has been marked for no further verifications.")
 
                 # Set ranks
-
                 if (permittedStaff(user)):
                     if ("Verified" in ranks or "Guest" in ranks):
                         await ctx.send(
@@ -435,16 +387,15 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send("<@" + str(
                     messageAuthor.id) + "> You have entered invalid syntax, or the user you are trying to correlate is invalid. `!correlate <USER MENTION> <WatID>`")
 
+   #Lookups after v2 can only lookup by discord tag, not WatID.
     @commands.command()
-    async def ldaplookup(self, ctx, *args):
+    async def lookup(self, ctx, *args):
 
         messageAuthor = ctx.author
         guild = messageAuthor.guild
 
         if (permittedAdmin(messageAuthor) or permittedStaff(messageAuthor)):
             try:
-
-                watid = args[0]
 
                 if ("@" in args[0]):
 
@@ -454,52 +405,18 @@ class Administrative(commands.Cog, name='Administrative'):
                         watid = db_get(discordID + ".watid",guild)
                         break
 
-                apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
-
-                embed = discord.Embed(title="LDAP Lookup",
-                                      description="Here is an internal lookup by the University of Waterloo",
+                embed = discord.Embed(title="User Lookup",
+                                      description="Here is a local user lookup from our redis cluster.",
                                       color=0x800080)
                 embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
                 embed.set_thumbnail(url=THUMBNAIL_LINK)
-                embed.add_field(name="Status",
-                                value=apiResponse['meta']['message'],
-                                inline=False)
                 embed.add_field(name="Full Name",
-                                value=apiResponse['data'][
-                                    'full_name'],
+                                value=db_get(str(messageAuthor.id) + ".name", guild),
                                 inline=False)
-                embed.add_field(name="Department",
-                                value=apiResponse['data']['department'],
-                                inline=False)
-                embed.add_field(name="Common Names",
-                                value=str(
-                                    apiResponse['data']['common_names']),
-                                inline=False)
-                embed.add_field(name="Emails",
-                                value=str(
-                                    apiResponse['data']['email_addresses']),
-                                inline=False)
-                embed.add_field(name="Offices",
-                                value=str(
-                                    apiResponse['data']['offices']),
-                                inline=False)
-                embed.add_field(name="Phone Numbers",
-                                value=str(
-                                    apiResponse['data']['telephone_numbers']),
+                embed.add_field(name="WatID",
+                                value=db_get(str(messageAuthor.id) + ".watid", guild),
                                 inline=False)
 
-                if (apiResponse['data']['department'] == "ENG/Electrical and Computer"):
-                    embed.add_field(name="Student Status",
-                                    value="ECE Student",
-                                    inline=False)
-                else:
-                    embed.add_field(name="Student Status",
-                                    value="Not an ECE Student",
-                                    inline=False)
-                if (len(apiResponse['data']['telephone_numbers']) > 0):
-                    embed.add_field(name="Student Status",
-                                    value="NOT A STUDENT. MANUAL VALIDATION REQUIRED",
-                                    inline=False)
                 await ctx.send(embed=embed)
             except Exception as e:
                 response = "Invalid WatID or no WatID provided"
@@ -534,8 +451,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 try:
                     if (db_exists(str(member.id)+".watid",guild)):
-                        # if (db_exists(str(member.id) + ".rolevalidated",guild)):
-                        #     continue
 
                         await adminChannel.send("Analyzing user <@"+str(member.id)+">")
                         watID = db_get(str(member.id) + ".watid",guild)
@@ -555,9 +470,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 except:
                     await adminChannel.send("<@&706658128409657366> There was an error retrieving the WatID for: <@"+str(member.id)+"> please investigate.")
-
-
-
 
             await ctx.send("All role validations completed successfully.")
 
@@ -702,10 +614,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
             db_disconnect_all()
             restart()
-
-
-
-
 
 
 #https://api.github.com/repos/Kav-K/Stream4Bot/commits
