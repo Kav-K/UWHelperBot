@@ -277,6 +277,7 @@ class Regular(commands.Cog, name = 'Regular'):
         except:
             await ctx.send("<@" + str(messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `240`, `250`, `204`, `205`, `109`, and `222`")
 
+    #These functions are primarily for ECE 2024, they will be made configurable later for global use easily.
     @checks.channel_check()
     @commands.command()
     async def assignments(self, ctx, *args):
@@ -468,8 +469,6 @@ class Regular(commands.Cog, name = 'Regular'):
         totalDead = all_status[len(all_status) - 1]["Deaths"]
         totalRecovered = all_status[len(all_status) - 1]["Recovered"]
         totalActive = all_status[len(all_status) - 1]["Active"]
-
-        
 
         embed = discord.Embed(title="COVID19 Information Canada", color=0x800080)
         embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
