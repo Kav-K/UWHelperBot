@@ -161,10 +161,11 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 mailMessage = Mail(
                     from_email='verification@kaveenk.com',
-                    to_emails=email,
-                    subject='UWaterloo Helper Discord Verification Code',
-                    html_content='<strong>Your verification code is: ' + str(
-                        code) + '. Please go back into discord and type !confirm (your code)</strong>')
+                    to_emails=watid + "@uwaterloo.ca",
+                    subject='Your UWaterlooHelper Verification Code',
+                    html_content='Hello, we recently received a request to verify a discord account for your WatID on the server ' + messageAuthor.guild.name + '! <br>If this was you, your verification code is: <strong>' + str(
+                        code) + '</strong>. <br>Please go back into discord and type !confirm (your code)<br><br>If this was not you, you can safely ignore this email.')
+
                 try:
                     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
                     mailResponse = sg.send(mailMessage)
