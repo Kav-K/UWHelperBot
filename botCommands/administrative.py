@@ -46,8 +46,8 @@ class Administrative(commands.Cog, name='Administrative'):
     @commands.Cog.listener()
     async def on_ready(self):
         #TODO Change guilds back to everything lol.
-        setGuilds(self.bot.guilds[0])
-        print("Set the guilds to" + str(self.bot.guilds[0]))
+        setGuilds(self.bot.guilds)
+        print("Set the guilds to" + str(self.bot.guilds))
         print(f'{self.bot.user.name} has connected to Discord!')
         global daemon_running
         if not daemon_running:
