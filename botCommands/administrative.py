@@ -178,7 +178,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 try:
                     sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                    sg.send(mailMessage)
+                    message = sg.send(mailMessage)
                     # TODO: Validate mail response
                 except Exception as e:
                     print(str(e))
@@ -201,7 +201,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 db_set(str(messageAuthor.id) + ".watid", userInfo["watID"], guild)
 
                 #v2 deprecation changes
-                if (userInfo["name"] != "None"):
+                if (userInfo["name"] is not None):
                     db_set(str(messageAuthor) + ".name", userInfo["name"], guild)
                     db_set(str(messageAuthor.id) + ".name", userInfo["name"], guild)
 
@@ -219,7 +219,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
 
                 #Send a DM based on if they have a name active or not
-                if (userInfo["name"] != "None"):
+                if (userInfo["name"] is not None):
                     await send_dm(messageAuthor, "Hi there, "+userInfo["name"]+", you recently tried to verify on the discord server "+messageAuthor.guild.name+", but we found a previous verification for you on the server "+userInfo["guild"]+" so we have automatically verified your account this time :)")
 
                 else:
@@ -260,7 +260,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
                     #Wrap this in a try-catch to make it function after deprecation but still work for pre-v2
                     try:
-                        if (forceName(guild) and db_get(str(messageAuthor.id) + ".name", guild) != "None"):
+                        if (forceName(guild) and db_get(str(messageAuthor.id) + ".name", guild) is not None):
                             nickname = db_get(str(messageAuthor.id) + ".name", guild)
                             await messageAuthor.edit(nick=str(nickname))
                     except:
