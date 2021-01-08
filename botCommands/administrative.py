@@ -96,7 +96,7 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send("This channel has been locked. Sending messages is disabled.")
 
     @commands.command()
-    async def verify(self, ctx, *args):
+    async def verifyv2(self, ctx, *args):
         try:
             messageAuthor = ctx.author
             guild = messageAuthor.guild
@@ -225,7 +225,7 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(response)
 
     @commands.command()
-    async def confirm(self, ctx, *args):
+    async def confirmv2(self, ctx, *args):
         try:
             messageAuthor = ctx.author
             guild = messageAuthor.guild
@@ -296,7 +296,7 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(response)
 
     @commands.command()
-    async def cancelverification(self, ctx):
+    async def cancelverificationv2(self, ctx):
 
         messageAuthor = ctx.author
         guild = messageAuthor.guild
@@ -311,7 +311,7 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(response)
 
     @commands.command()
-    async def devalidate(self, ctx, *args):
+    async def devalidatev2(self, ctx, *args):
 
         messageAuthor = ctx.author
         guild = messageAuthor.guild
@@ -340,7 +340,7 @@ class Administrative(commands.Cog, name='Administrative'):
         print("TODO: TO BE REWRITTEN")
 
     @commands.command()
-    async def correlate(self, ctx, *args):
+    async def correlatev2(self, ctx, *args):
 
         messageAuthor = ctx.author
         guild = messageAuthor.guild
