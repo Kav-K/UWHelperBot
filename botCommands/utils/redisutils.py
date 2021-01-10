@@ -22,6 +22,8 @@ def redisSetGuilds(GUILDS):
                 print(str(e))
                 continue
 
+
+
 def search(userID, GUILDS):
     userID = str(userID)
     userInfo = {}
@@ -29,9 +31,13 @@ def search(userID, GUILDS):
     for x in range(0,DATABASE_HARD_LIMIT):
         try:
             for _guild in GUILDS:
-                if db_exists(userID+".verified",_guild) and db_get(userID+".verified",_guild) == "1":
-                    userInfo["name"] = db_get(userID+".name",_guild)
-                    userInfo["watID"] = db_get(userID+".watid",_guild)
+                if db_exists("USER." + userID + ".verified",_guild) and db_get("USER." + userID + ".verified",_guild) == "1":
+                    userInfo["firstName"] = db_get("USER." + userID + ".firstname",_guild)
+                    userInfo["lastName"] = db_get("USER." + userID + ".lastname", _guild)
+                    userInfo["department"] = db_get("USER." + userID + ".department", _guild)
+                    userInfo["commonNames"] = db_get("USER." + userID + ".commonnames", _guild)
+                    userInfo["emails"] = db_get("USER." + userID + ".emails", _guild)
+                    userInfo["watID"] = db_get("USER." + userID + ".watid", _guild)
                     userInfo["guild"] = _guild.name
                     userInfo["status"] = True
 
@@ -49,22 +55,47 @@ def getCorrespondingDatabase(guild):
 def db_get_pubsub(guild):
     return database_instances[guild.id].pubsub()
 
-#Unmark a WatID
-def db_unmarkWatID(watid,guild):
-    database_instances[guild.id].delete(watid)
+def db_set_watid_info(watID, guild, firstName, lastName, department, commonNames, emails, verifiedonguild):
+    db_set("WATID." + watID + ".firstname", firstName, guild)
+    db_set("WATID." + watID + ".lastname", lastName, guild)
+    db_set("WATID." + watID + ".department", department, guild)
+    db_set("WATID." + watID + ".commonnames", commonNames, guild)
+    db_set("WATID." + watID + ".emails", emails, guild)
+    db_set("WATID." + watID + ".verifiedonguild", verifiedonguild, guild)
+
+def db_set_user_info(userID, guild, watID, firstName, lastName, department, commonNames, emails, verified):
+    db_set("USER." + userID + ".watid", watID, guild)
+    db_set("USER." + userID + ".firstname", firstName, guild)
+    db_set("USER." + userID + ".lastname", lastName, guild)
+    db_set("USER." + userID + ".department", department, guild)
+    db_set("USER." + userID + ".commonnames", commonNames, guild)
+    db_set("USER." + userID + ".emails", emails, guild)
+    db_set("USER." + userID + ".verified", verified, guild)
+
 
 #Purge a user from database completely
 def db_purgeUser(member: discord.Member,guild):
     try:
-        watid = database_instances[guild.id].get(str(member.id) + ".watid").decode('utf-8')
-        database_instances[guild.id].delete(watid)
-        database_instances[guild.id].delete(str(member) + ".watid")
-        database_instances[guild.id].delete(str(member.id) + ".watid")
-        database_instances[guild.id].delete(str(member.id) + ".verified")
-        database_instances[guild.id].delete(str(member) + ".verified")
-        database_instances[guild.id].delete(str(member) + ".name")
-        database_instances[guild.id].delete(str(member.id) + ".name")
-        database_instances[guild.id].delete(str(member))
+        watid = database_instances[guild.id].get("USER." + str(member.id) + ".watid").decode('utf-8')
+
+        #Delete User Data
+        database_instances[guild.id].delete("USER." + str(member.id) + ".watid")
+        database_instances[guild.id].delete("USER." + str(member.id) + ".firstname")
+        database_instances[guild.id].delete("USER." + str(member.id) + ".lastname")
+        database_instances[guild.id].delete("USER." + str(member.id) + ".department")
+        database_instances[guild.id].delete("USER." + str(member.id) + ".commonnames")
+        database_instances[guild.id].delete("USER." + str(member.id) + ".emails")
+        database_instances[guild.id].delete("USER." + str(member.id) + ".verified")
+
+        #Delete WatID Datta
+        database_instances[guild.id].delete("WATID." + watid + ".firstname")
+        database_instances[guild.id].delete("WATID." + watid + ".lastname")
+        database_instances[guild.id].delete("WATID." + watid + ".department")
+        database_instances[guild.id].delete("WATID." + watid + ".commonnames")
+        database_instances[guild.id].delete("WATID." + watid + ".emails")
+        database_instances[guild.id].delete("WATID." + watid + ".verifiedonguild")
+
+
         database_instances[guild.id].delete(str(member.id) + ".request")
     except Exception as e:
         print(str(e))

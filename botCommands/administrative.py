@@ -71,7 +71,6 @@ class Administrative(commands.Cog, name='Administrative'):
         except:
             pass
 
-
     @commands.command()
     async def lock(self,ctx):
         channel = ctx.channel
@@ -113,6 +112,9 @@ class Administrative(commands.Cog, name='Administrative'):
             email = apiResponse['data']['email_addresses'][0]
             name = apiResponse['data']['full_name']
             user_id = apiResponse['data']['user_id']
+            emails = str(apiResponse["data"]["email_addresses"])
+            department = apiResponse["data"]["department"]
+            commonNames = apiResponse["data"]["common_names"][0]
 
             #If a WatID has a phone number associated with it, they are most likely a member of faculty. Deny auto-verification in that case.
             if (len(apiResponse['data']['telephone_numbers']) > 0):
@@ -126,18 +128,17 @@ class Administrative(commands.Cog, name='Administrative'):
 
             #Check if the user has already been verified
             try:
-                if (db_exists(str(messageAuthor) + ".verified",guild) or db_exists(str(messageAuthor.id) + ".verified",guild)):
-                    if (int(db_get(str(messageAuthor) + ".verified",guild)) == 1 or int(db_get(str(messageAuthor.id) + ".verified",guild)) == 1):
+                if (db_exists("USER."+str(messageAuthor.id)+".verified",guild)):
+                    if (int(db_get("USER."+str(messageAuthor.id)+".verified",guild)) == 1):
                         response = "<@" + str(messageAuthor.id) + "> You have already been verified"
                         await ctx.send(response)
                         return
             except:
                 pass
 
-
             #Check if the attempted WatID has already been verified.
-            if (db_exists(str(user_id),guild)):
-                if (int(db_get(str(user_id),guild)) == 1):
+            if (db_exists("WATID." + user_id + ".verifiedonguild",guild)):
+                if (int(db_get("WATID." + user_id + ".verifiedonguild",guild)) == 1):
                     response = "<@" + str(
                         messageAuthor.id) + "> This user_id has already been verified. Not you? Contact an admin."
                     await ctx.send(response)
@@ -145,15 +146,18 @@ class Administrative(commands.Cog, name='Administrative'):
 
             #Check for verifications on another server
             userInfo = search(messageAuthor.id, self.bot.guilds)
-            print(str(userInfo))
 
             #Not verified on another server, run the normal process
             if not userInfo["status"]:
-                # Mark
-                db_set(str(messageAuthor.id) + ".watid", user_id, guild)
-                db_set(str(messageAuthor.id) + ".verified", 0, guild)
-                db_set(str(messageAuthor) + ".name", name, guild)
-                db_set(str(messageAuthor.id) + ".name", name, guild)
+
+                # Mark the user for the beginning steps of verification
+
+                firstName = name.split(" ")[0]
+                lastName = name.split(" ")[len(name.split(" "))-1]
+
+                db_set_watid_info(user_id,guild,firstName,lastName,department,commonNames,emails,0)
+                db_set_user_info(str(messageAuthor.id), guild, user_id,firstName,lastName,department,commonNames,emails,0)
+
 
                 # Generate random code
                 code = random.randint(1000, 9999)
@@ -178,6 +182,7 @@ class Administrative(commands.Cog, name='Administrative'):
                     messageAuthor.id) + "> I sent a verification code to " + email + ". Find the code" \
                                                                                      " in your email and type `!confirm <code>` in discord to verify" \
                                                                                      " your account. Please check your spam and junk folders."
+                #Mark as a user with a pending request.
                 db_set(str(messageAuthor.id) + ".request", 1, guild)
 
                 await ctx.send(response)
@@ -185,13 +190,12 @@ class Administrative(commands.Cog, name='Administrative'):
             #Verified on another server, automatically verify them here without any action on their part!
             elif userInfo["status"]:
                 # Set their records on the current server to the records provided by another server
-                db_set(str(messageAuthor.id) + ".verified", 1, guild)
-                db_set(userInfo["watID"], 1, guild)
-                db_set(str(messageAuthor.id) + ".watid", userInfo["watID"], guild)
-                db_set(str(messageAuthor) + ".name", userInfo["name"], guild)
-                db_set(str(messageAuthor.id) + ".name", userInfo["name"], guild)
+
+                db_set_watid_info(userInfo["watID"],guild,userInfo["firstName"],userInfo["lastName"],userInfo["department"],userInfo["commonNames"],userInfo["emails"],1)
+                db_set_user_info(str(messageAuthor.id), guild, userInfo["watID"],userInfo["firstName"], userInfo["lastName"],userInfo["department"], userInfo["commonNames"], userInfo["emails"], 1)
+
                 if (forceName(guild)):
-                    await messageAuthor.edit(nick=str(userInfo["name"]))
+                    await messageAuthor.edit(nick=str(userInfo["firstName"] + " "+ userInfo["lastName"]))
 
                 # Add Verified role, attempt to remove Unverified Role
                 verifiedRole = getRole("Verified", guild)
@@ -202,7 +206,8 @@ class Administrative(commands.Cog, name='Administrative'):
                 except:
                     pass
 
-                await send_dm(messageAuthor, "Hi there, "+userInfo["name"]+", you recently tried to verify on the discord server "+messageAuthor.guild.name+", but we found a previous verification for you on the server "+userInfo["guild"]+" so we have automatically verified your account this time :)")
+                #Send a DM to tell them what just happened
+                await send_dm(messageAuthor, "Hi there, "+userInfo["firstName"]+", you recently tried to verify on the discord server "+messageAuthor.guild.name+", but we found a previous verification for you on the server "+userInfo["guild"]+" so we have automatically verified your account this time :)")
                 response = "<@" + str(
                     messageAuthor.id) + "> You have been automatically verified from another server"
                 await ctx.send(response)
@@ -233,12 +238,12 @@ class Administrative(commands.Cog, name='Administrative'):
 
                     #Set user's nickname to real name on file
                     if (forceName(guild)):
-                        nickname = db_get(str(messageAuthor.id) + ".name", guild)
+                        nickname = db_get("USER." + str(messageAuthor.id) + ".firstname", guild) + " " + db_get("USER." + str(messageAuthor.id) + ".lastname", guild)
                         await messageAuthor.edit(nick=str(nickname))
 
                     # Mark user and WatID as verified
-                    db_set(str(messageAuthor.id) + ".verified", 1,guild)
-                    db_set(str(db_get(str(messageAuthor.id) + ".watid",guild)), 1,guild)
+                    db_set("USER." + str(messageAuthor.id) + ".verified", 1,guild)
+                    db_set("WATIO."+db_get("USER." + str(messageAuthor.id) + ".watid",guild)+".verifiedonguild", 1,guild)
 
                     #Unmark them as in-progress
                     if (db_exists(str(messageAuthor.id),guild)): db_delete(str(messageAuthor.id) + ".request",guild)
@@ -255,10 +260,7 @@ class Administrative(commands.Cog, name='Administrative'):
 
                     try:
 
-                        sec2Role = getRole("Section 2",guild)
-                        sec1Role = getRole("Section 1",guild)
-                        stream8Role = getRole("Stream 8",guild)
-                        watID = db_get(str(messageAuthor.id) + ".watid",guild)
+                        watID = db_get("USER." + str(messageAuthor.id) + ".watid",guild)
 
                         adminChannel = getChannel(VERBOSE_CHANNEL_NAME, guild)
                         await adminChannel.send("New verification on member join, the WatID for user <@" + str(messageAuthor.id) + "> is " + watID)
@@ -318,21 +320,14 @@ class Administrative(commands.Cog, name='Administrative'):
                     db_purgeUser(user,guild)
                     await ctx.send("Purged user from database successfully.")
 
-                elif (selection == "watid"):
-                    watid = args[1]
-                    db_unmarkWatID(watid,guild)
-                    await ctx.send("Unmarked WatID " + watid)
                 else:
                     await ctx.send("<@" + str(
-                        messageAuthor.id) + "> Invalid selection! You can choose to devalidate a user or a WatID.")
+                        messageAuthor.id) + "> Invalid selection! You can choose to devalidate a user currently.")
 
             except Exception as e:
-                ctx.send("<@" + str(
+                await ctx.send("<@" + str(
                     messageAuthor.id) + "> Invalid syntax or selection: `!devalidate <select 'user' or 'watid'> <value>`")
 
-    @commands.command()
-    async def lockdown(self,ctx, *args):
-        print("TODO: TO BE REWRITTEN")
 
     @commands.command()
     async def correlate(self, ctx, *args):
@@ -354,12 +349,20 @@ class Administrative(commands.Cog, name='Administrative'):
                 try:
                     apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
                     name = apiResponse['data']['full_name']
+                    firstName = name.split(" ")[0]
+                    lastName = name.split(" ")[len(name.split(" "))-1]
+                    department = apiResponse["data"]["department"]
+                    commonNames = apiResponse["data"]["common_names"][0]
+                    emails = str(apiResponse["data"]["email_addresses"])
+                    watID = apiResponse["data"]["user_id"]
+                    db_set_watid_info(watID,guild, firstName, lastName, department, commonNames, emails, 1)
+                    db_set_user_info(str(messageAuthor.id),guild,watID,firstName,lastName,department,commonNames,emails,1)
+
+                    await ctx.send("WatID " + watID + " has been validated and correlated to <@" + str(user.id) + ">")
+
                 except:
                     await ctx.send("Invalid WatID: " + watid)
                     return
-
-                db_set(str(user.id) + ".watid", watid,guild)
-                await ctx.send("WatID " + watid + " has been validated and correlated to <@" + str(user.id) + ">")
 
                 if ("Verified" in ranks):
                     db_set(str(user) + ".verified", 1,guild)
@@ -369,15 +372,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         pass
                     await ctx.send("<@" + str(user.id) + "> has been set to Verified status")
 
-                db_set(str(user) + ".name", name,guild)
-                await user.edit(nick=name)
-                await ctx.send(
-                    "Name " + name + " has been validated and correlated to <@" + str(user.id) + ">")
-                db_set(watid, 1,guild)
-                db_set(watid, 1,guild)
-                await ctx.send(
-                    "The WatID " + watid + " has been marked for no further verifications.")
-
+                await user.edit(nick=db_get("USER."+str(messageAuthor.id)+".firstname",guild)+" "+db_get("USER."+str(messageAuthor.id)+".lastname",guild))
                 # Set ranks
 
                 if (permittedStaff(user)):
@@ -421,10 +416,25 @@ class Administrative(commands.Cog, name='Administrative'):
                     # Find user's discord tag
                     for member in ctx.message.mentions:
                         discordID = str(member.id)
-                        watid = db_get(discordID + ".watid",guild)
                         break
 
-                apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
+                    userInfo = search(discordID, self.bot.guilds)
+                    if (userInfo["status"]):
+                        firstName = userInfo["firstName"]
+                        lastName = userInfo["lastName"]
+                        department = userInfo["department"]
+                        commonNames = userInfo["commonNames"]
+                        emails = userInfo["emails"]
+                        watID = userInfo["watID"]
+                else:
+
+                    apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
+                    firstName = apiResponse["data"]["given_name"]
+                    lastName = apiResponse["data"]["last_name"]
+                    department = apiResponse["data"]["department"]
+                    commonNames = apiResponse["data"]["common_names"][0]
+                    emails = str(apiResponse["data"]["email_addresses"])
+                    watID = apiResponse["data"]["user_id"]
 
                 embed = discord.Embed(title="LDAP Lookup",
                                       description="Here is an internal lookup by the University of Waterloo",
@@ -432,44 +442,24 @@ class Administrative(commands.Cog, name='Administrative'):
                 embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
                 embed.set_thumbnail(url=THUMBNAIL_LINK)
                 embed.add_field(name="Status",
-                                value=apiResponse['meta']['message'],
+                                value="OK",
                                 inline=False)
                 embed.add_field(name="Full Name",
-                                value=apiResponse['data'][
-                                    'full_name'],
+                                value=firstName +" "+lastName,
                                 inline=False)
                 embed.add_field(name="Department",
-                                value=apiResponse['data']['department'],
+                                value=department,
                                 inline=False)
                 embed.add_field(name="Common Names",
-                                value=str(
-                                    apiResponse['data']['common_names']),
+                                value=commonNames,
                                 inline=False)
                 embed.add_field(name="Emails",
-                                value=str(
-                                    apiResponse['data']['email_addresses']),
+                                value=emails,
                                 inline=False)
-                embed.add_field(name="Offices",
-                                value=str(
-                                    apiResponse['data']['offices']),
-                                inline=False)
-                embed.add_field(name="Phone Numbers",
-                                value=str(
-                                    apiResponse['data']['telephone_numbers']),
+                embed.add_field(name="WatID",
+                                value=watID,
                                 inline=False)
 
-                if (apiResponse['data']['department'] == "ENG/Electrical and Computer"):
-                    embed.add_field(name="Student Status",
-                                    value="ECE Student",
-                                    inline=False)
-                else:
-                    embed.add_field(name="Student Status",
-                                    value="Not an ECE Student",
-                                    inline=False)
-                if (len(apiResponse['data']['telephone_numbers']) > 0):
-                    embed.add_field(name="Student Status",
-                                    value="NOT A STUDENT. MANUAL VALIDATION REQUIRED",
-                                    inline=False)
                 await ctx.send(embed=embed)
             except Exception as e:
                 response = "Invalid WatID or no WatID provided"
@@ -525,8 +515,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 except:
                     await adminChannel.send("<@&706658128409657366> There was an error retrieving the WatID for: <@"+str(member.id)+"> please investigate.")
-
-
 
 
             await ctx.send("All role validations completed successfully.")
@@ -674,10 +662,6 @@ class Administrative(commands.Cog, name='Administrative'):
             restart()
 
 
-
-
-
-
 #https://api.github.com/repos/Kav-K/Stream4Bot/commits
     @commands.command()
     async def dev(self,ctx):
@@ -706,56 +690,4 @@ class Administrative(commands.Cog, name='Administrative'):
                             value=commitMessage,
                             inline=False)
             await ctx.send(embed=embed)
-
-
-    @commands.command()
-    async def reformat(self,ctx):
-        #apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
-        totalMembers = 0
-        for guild in self.bot.guilds:
-            totalMembers = totalMembers + len(guild.members)
-
-        await ctx.send("Reformatting roughly "+str(totalMembers)+" members")
-
-
-        currentMember = 0
-        for guild in self.bot.guilds:
-            for member in guild.members:
-                if db_exists(str(member.id)+".verified",guild) and db_get(str(member.id)+".verified",guild) == "1":
-                    try:
-                        watid = db_get(str(member.id)+".watid", guild)
-                        apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
-                        firstName = apiResponse["data"]["given_name"]
-                        lastName = apiResponse["data"]["last_name"]
-                        department = apiResponse["data"]["department"]
-                        commonName = apiResponse["data"]["common_names"][0]
-                        emails = ",".join(str(x) for x in apiResponse["data"]["email_addresses"])
-
-
-                        db_set("WATID."+watid+".firstname",firstName, guild)
-                        db_set("WATID." + watid + ".lastname", lastName, guild)
-                        db_set("WATID." + watid + ".department", department, guild)
-                        db_set("WATID." + watid + ".commonnames", commonName, guild)
-                        db_set("WATID." + watid + ".emails", emails, guild)
-                        db_set("WATID." + watid + ".verifiedonguild", "1", guild)
-
-
-                        db_set("USER." + str(member.id) + ".watid", watid, guild)
-                        db_set("USER."+str(member.id)+".firstname",firstName,guild)
-                        db_set("USER." + str(member.id) + ".lastname", lastName, guild)
-                        db_set("USER." + str(member.id) + ".department", department, guild)
-                        db_set("USER." + str(member.id) + ".commonnames", commonName, guild)
-                        db_set("USER." + str(member.id) + ".emails", emails, guild)
-                        db_set("USER." + str(member.id) + ".verified", "1", guild)
-
-                        currentMember = currentMember + 1
-                        print("Current member: "+str(currentMember))
-
-
-                    except Exception as e:
-                        print(str(e))
-
-
-
-
 
