@@ -708,4 +708,54 @@ class Administrative(commands.Cog, name='Administrative'):
             await ctx.send(embed=embed)
 
 
+    @commands.command()
+    async def reformat(self,ctx):
+        #apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
+        totalMembers = 0
+        for guild in self.bot.guilds:
+            totalMembers = totalMembers + len(guild.members)
+
+        await ctx.send("Reformatting roughly "+str(totalMembers)+" members")
+
+
+        currentMember = 0
+        for guild in self.bot.guilds:
+            for member in guild.members:
+                if db_exists(str(member.id)+".verified",guild) and db_get(str(member.id)+".verified",guild) == "1":
+                    try:
+                        watid = db_get(str(member.id)+".watid", guild)
+                        apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
+                        firstName = apiResponse["data"]["given_name"]
+                        lastName = apiResponse["data"]["last_name"]
+                        department = apiResponse["data"]["department"]
+                        commonName = apiResponse["data"]["common_names"][0]
+                        emails = ",".join(str(x) for x in apiResponse["data"]["email_addresses"])
+
+
+                        db_set("WATID."+watid+".firstname",firstName, guild)
+                        db_set("WATID." + watid + ".lastname", lastName, guild)
+                        db_set("WATID." + watid + ".department", department, guild)
+                        db_set("WATID." + watid + ".commonnames", commonName, guild)
+                        db_set("WATID." + watid + ".emails", emails, guild)
+                        db_set("WATID." + watid + ".verifiedonguild", "1", guild)
+
+
+                        db_set("USER." + str(member.id) + ".watid", watid, guild)
+                        db_set("USER."+str(member.id)+".firstname",firstName,guild)
+                        db_set("USER." + str(member.id) + ".lastname", lastName, guild)
+                        db_set("USER." + str(member.id) + ".department", department, guild)
+                        db_set("USER." + str(member.id) + ".commonnames", commonName, guild)
+                        db_set("USER." + str(member.id) + ".emails", emails, guild)
+                        db_set("USER." + str(member.id) + ".verified", "1", guild)
+
+                        currentMember = currentMember + 1
+                        print("Current member: "+str(currentMember))
+
+
+                    except Exception as e:
+                        print(str(e))
+
+
+
+
 
