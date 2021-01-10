@@ -426,6 +426,7 @@ class Administrative(commands.Cog, name='Administrative'):
                         commonNames = userInfo["commonNames"]
                         emails = userInfo["emails"]
                         watID = userInfo["watID"]
+                        originalGuild = userInfo["guild"]
                 else:
 
                     apiResponse = requests.get(WATERLOO_API_URL + watid + ".json?key=" + WATERLOO_API_KEY).json()
@@ -458,6 +459,9 @@ class Administrative(commands.Cog, name='Administrative'):
                                 inline=False)
                 embed.add_field(name="WatID",
                                 value=watID,
+                                inline=False)
+                embed.add_field(name="Original Verification Guild",
+                                value=originalGuild,
                                 inline=False)
 
                 await ctx.send(embed=embed)
