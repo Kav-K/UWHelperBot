@@ -410,6 +410,7 @@ class Administrative(commands.Cog, name='Administrative'):
             try:
 
                 watid = args[0]
+                originalGuild = None
 
                 if ("@" in args[0]):
 
@@ -461,7 +462,7 @@ class Administrative(commands.Cog, name='Administrative'):
                                 value=watID,
                                 inline=False)
                 embed.add_field(name="Original Verification Guild",
-                                value=originalGuild,
+                                value="Unavailable" if originalGuild is None else originalGuild,
                                 inline=False)
 
                 await ctx.send(embed=embed)
