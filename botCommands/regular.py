@@ -228,6 +228,10 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="iCal Link",
                                 value=ical_link,
                                 inline=False)
+            if not gcal_link and not ical_link:
+                embed = discord.Embed(title="Class Schedule",
+                                      description="There is no class schedule for this Discord server",
+                                      color=0x800080)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -371,6 +375,12 @@ class Regular(commands.Cog, name = 'Regular'):
             embed.add_field(name="iCal Link",
                             value=ical_link,
                             inline=False)
+
+        if not gcal_link and not ical_link:
+            embed = discord.Embed(title="Due/Important Dates",
+                                  description="There are no important dates for this Discord server",
+                                  color=0x800080)
+
         await ctx.send(embed=embed)
 
     @commands.command()
