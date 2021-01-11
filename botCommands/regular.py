@@ -218,12 +218,16 @@ class Regular(commands.Cog, name = 'Regular'):
                                   color=0x800080)
             embed.set_footer(text="https://github.com/Kav-K/UWHelperBot")
             embed.set_thumbnail(url=THUMBNAIL_LINK)
-            embed.add_field(name="GCal Link",
-                            value=getConfigurationValue(ConfigObjects.SCHEDULE_LINK,messageAuthor.guild),
-                            inline=False)
-            embed.add_field(name="iCal Link",
-                            value=getConfigurationValue(ConfigObjects.SCHEDULE_ICAL_LINK, messageAuthor.guild),
-                            inline=False)
+            gcal_link = getConfigurationValue(ConfigObjects.SCHEDULE_LINK, messageAuthor.guild)
+            ical_link = getConfigurationValue(ConfigObjects.SCHEDULE_ICAL_LINK, messageAuthor.guild)
+            if gcal_link:
+                embed.add_field(name="GCal Link",
+                                value=gcal_link,
+                                inline=False)
+            if ical_link:
+                embed.add_field(name="iCal Link",
+                                value=ical_link,
+                                inline=False)
             await ctx.send(embed=embed)
 
     @commands.command()
@@ -357,12 +361,16 @@ class Regular(commands.Cog, name = 'Regular'):
                               color=0x800080)
         embed.set_footer(text="https://github.com/Kav-K/UWHelperBot")
         embed.set_thumbnail(url=THUMBNAIL_LINK)
-        embed.add_field(name="GCal Link",
-                        value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild),
-                        inline=False)
-        embed.add_field(name="iCal Link",
-                        value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_ICAL_LINK,guild),
-                        inline=False)
+        gcal_link = getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild)
+        ical_link = getConfigurationValue(ConfigObjects.IMPORTANT_DATES_ICAL_LINK,guild)
+        if gcal_link:
+            embed.add_field(name="GCal Link",
+                            value=gcal_link,
+                            inline=False)
+        if ical_link:
+            embed.add_field(name="iCal Link",
+                            value=ical_link,
+                            inline=False)
         await ctx.send(embed=embed)
 
     @commands.command()
