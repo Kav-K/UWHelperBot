@@ -62,8 +62,8 @@ class Administrative(commands.Cog, name='Administrative'):
                 print('Communications broker thread start')
 
                 # Wellness Stuff for ECE 2024
-                if indiv_guild.id == "706657592578932797":
-                    aysincio.get_event_loop().create_task(WellnessFriend(indiv_guild))
+                if indv_guild.id == "706657592578932797":
+                    asyncio.get_event_loop().create_task(WellnessFriend(indv_guild))
 
 
     @commands.Cog.listener()
