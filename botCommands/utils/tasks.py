@@ -162,14 +162,14 @@ async def WellnessFriend(guild):
         while True:
             messagesArray = requests.get("https://type.fit/api/quotes").json()
             selectedMessage = messagesArray[random.randint(0, len(messagesArray))]
-            inspirationalMessage = selectedMessage["text"] + " - " + selectedMessage["author"]
+            inspirationalMessage = selectedMessage["text"] + "\n - " + selectedMessage["author"]
 
             #Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
             finalExamDate = datetime.strptime("2021-04-26", "%Y-%m-%d")
             encouragingMessage =  "Don't forget, we've got " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
 
             wellnessMessage = "Hey ECE peeps!!\n\nHere's your inspirational QOTD: \n" + inspirationalMessage + \
-                "\n\n Please know that if you need any support, people are there for you: \n" \
+                "\n\nPlease know that if you need any support, people are there for you: \n" \
                 "Counselling Services - 519-888-4567 ext. 32655\n"\
                 "Mates - mates@wusa.ca\n"\
                 "Here 24/7 - 1-844-437-3247\n"\
@@ -177,7 +177,7 @@ async def WellnessFriend(guild):
                 "Grand River Hospital - 519-749-4300\n"\
                 "St. Mary's Hospital - 519-744-3311\n"\
                 "Good2Talk - 1-866-925-5454\n"\
-                "Crisis Services Canada - 1-833-456-4566 or by text 45645\n\n\n"\
+                "Crisis Services Canada - 1-833-456-4566 or by text 45645\n\n"\
             
             await getChannel("wellness",guild).send(wellnessMessage + encouragingMessage)
 
