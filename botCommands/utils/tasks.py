@@ -178,7 +178,7 @@ async def WellnessFriend(guild):
             "Good2Talk - 1-866-925-5454\n"\
             "Crisis Services Canada - 1-833-456-4566 or by text 45645\n\n\n"\
         
-        await getChannel("private-study-text",guild).send(wellnessMessage + encouragingMessage)
+        await getChannel("wellness",guild).send(wellnessMessage + encouragingMessage)
 
         # Interval in seconds
         if db_get("WELLNESS_INTERVAL", guild) is not None:
