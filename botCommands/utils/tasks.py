@@ -160,7 +160,7 @@ async def WellnessFriend(guild):
 
     try:
         messagesArray = requests.get("https://type.fit/api/quotes").json()
-        selectedMessage = messagesArray[random.randint(0, len(messagesArray))]["text"]
+        selectedMessage = messagesArray[random.randint(0, len(messagesArray))]
         inspirationalMessage = selectedMessage["text"] + " - " + selectedMessage["author"]
 
         #Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
