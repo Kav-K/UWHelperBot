@@ -1,5 +1,6 @@
 import os
 import sys
+import logging
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -15,6 +16,9 @@ from botCommands.studyrooms import StudyRooms
 # Write PID
 pid = str(os.getpid())
 pidfile = os.getenv("PID_FILE")
+
+# Logfile customization
+logging.basicConfig(filename='bot.log', filemode='w', format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
 
 def writePID():
@@ -47,6 +51,7 @@ if __name__ == "__main__":
 		print("Caught keyboard interrupt, killing and removing PID")
 		os.remove(pidfile)
 	except Exception as e:
+		logging.error(str(e))
 		print(str(e))
 		print("Removing PID file")
 		os.remove(pidfile)
