@@ -161,14 +161,14 @@ async def WellnessFriend(guild):
     try:
         while True:
             messagesArray = requests.get("https://type.fit/api/quotes").json()
-            selectedMessage = messagesArray[random.randint(0, len(messagesArray))]
-            inspirationalMessage = selectedMessage["text"] + "\n - " + selectedMessage["author"]
+            selectedMessage = messagesArray[random.randint(0, len(messagesArray) - 1)]
+            inspirationalMessage = str(selectedMessage["text"]) + "\n - " + str(selectedMessage["author"])
 
             #Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
             finalExamDate = datetime.strptime("2021-04-26", "%Y-%m-%d")
             encouragingMessage =  "Don't forget, we've got " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
 
-            wellnessMessage = "Hey ECE peeps!!\n\nHere's your inspirational QOTD: \n" + inspirationalMessage + \
+            wellnessMessage = "Hey ECE peeps!!\n\nHere's your inspirational QOTD: \n\n" + "" if inspirationalMessage is None else inspirationalMessage + \
                 "\n\nPlease know that if you need any support, people are there for you: \n" \
                 "Counselling Services - 519-888-4567 ext. 32655\n"\
                 "Mates - mates@wusa.ca\n"\
