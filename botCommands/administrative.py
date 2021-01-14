@@ -61,6 +61,10 @@ class Administrative(commands.Cog, name='Administrative'):
                 await verbose_channel.send(str(indv_guild)+": The communications broker thread is now running.")
                 print('Communications broker thread start')
 
+                # Wellness Stuff for ECE 2024
+                if indiv_guild.id == "706657592578932797":
+                    aysincio.get_event_loop().create_task(WellnessFriend(indiv_guild))
+
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
