@@ -348,7 +348,7 @@ class Regular(commands.Cog, name = 'Regular'):
             await ctx.send("<@" + str(
                 messageAuthor.id) + "> You must enter a course to view assignment sets for, `240`, `250`, `204`, `205`, `109`, and `222`")
 
-    @commands.channel_check()
+    @checks.channel_check()
     @commands.command()
     async def piazza(self, ctx):
         embed = discord.Embed(title="Piazza Links", description="Here are our relevant piazza links.", color=0x800080)
@@ -357,7 +357,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.add_field(name="ECE 205", value="https://piazza.com/class/kjlvbxfnh1f361", inline=False)
         await ctx.send(embed=embed)
 
-    @commands.channel_check()
+    @checks.channel_check()
     @commands.command()
     async def importantdates(self, ctx):
         guild = ctx.author.guild
