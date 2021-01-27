@@ -60,6 +60,9 @@ class Administrative(commands.Cog, name='Administrative'):
                 asyncio.get_event_loop().create_task(CommBroker(indv_guild))
                 await verbose_channel.send(str(indv_guild)+": The communications broker thread is now running.")
                 print('Communications broker thread start')
+                # Wellness Stuff for ECE 2024
+                if indv_guild.id == 706657592578932797:
+                    asyncio.get_event_loop().create_task(WellnessFriend(indv_guild))
 
 
     @commands.Cog.listener()
