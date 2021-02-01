@@ -253,7 +253,7 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="ECE 204",
                                 value="Here is a marking scheme breakdown for ECE 204",
                                 inline=False)
-                # embed.set_image(url="https://api.kaveenk.com/bot/204breakdown.png")
+                embed.set_image(url="https://i.imgur.com/LTeT043.png")
                 await ctx.send(embed=embed)
             elif (selection == "109"):
                 embed = discord.Embed()
