@@ -165,7 +165,7 @@ async def WellnessFriend(guild):
             inspirationalMessage = str(selectedMessage["text"]) + "\n - " + str(selectedMessage["author"])
 
             # Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
-            finalExamDate = datetime.strptime("2021-04-26", "%Y-%m-%d")
+            finalExamDate = datetime.strptime("2021-08-16", "%Y-%m-%d")
             encouragingMessage = "Don't forget, we've got " + str(
                 (finalExamDate - datetime.now()).days) + " days until this is all over."
 
