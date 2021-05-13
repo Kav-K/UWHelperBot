@@ -458,11 +458,6 @@ class Regular(commands.Cog, name = 'Regular'):
         await ctx.send(embed=embed)
 
     @commands.command()
-    async def shitwebsite(self,ctx):
-        if (ctx.author.guild.id == 706657592578932797):
-            await ctx.send("https://ece.uwaterloo.ca/~cgebotys/NEW/ECE222/")
-
-    @commands.command()
     async def covid(self,ctx):
         URL_COUNTRY_ALL_STATUS = "https://api.covid19api.com/total/country/canada"
         URL_CANADA_TRACKER = "https://api.covid19tracker.ca/summary"
