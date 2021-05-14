@@ -118,7 +118,6 @@ class StudyRooms(commands.Cog, name='Study Room Commands'):
                 await channel.send(
                     f"Created {room_name}-text and {room_name}-voice\nReserved for {time} min")
 
-                print((datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"))
                 assert (isinstance((datetime.now() + timedelta(minutes=time)).strftime("%Y-%m-%dT%H:%M:%S.%fZ"), str))
 
                 study_room_data = {
@@ -139,7 +138,6 @@ class StudyRooms(commands.Cog, name='Study Room Commands'):
                     room_list[room_name] = f"{author.id}-study-room"
                     redisClient.hmset('room_list', room_list)
                 except Exception as e:
-                    print(e)
                     await text_channel.delete()
                     await voice_channel.delete()
                     await member_role.delete()

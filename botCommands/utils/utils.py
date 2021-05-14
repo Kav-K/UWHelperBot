@@ -57,7 +57,6 @@ def getGuild():
 
 def setGuilds(inputGuilds):
     global GUILDS
-    print("Got guilds set request to: "+str(inputGuilds))
     GUILDS = inputGuilds
     redisSetGuilds(GUILDS)
 
@@ -118,8 +117,6 @@ async def send_dm(member: discord.Member, content):
 
 #See if a user is a GLOBAL DEVELOPER for the bot
 def permittedDeveloper(user):
-    print(user.id)
-    print(os.getenv("DEVELOPERS").split(",")[0])
     return str(user.id) in os.getenv("DEVELOPERS").split(",")
 
 #See if a user is permitted to run an admin command
@@ -138,16 +135,6 @@ def getConfigurationValue(configObjectEnum,guild):
 def setConfigurationValue(configObjectEnum,value, guild):
     db_set(configObjectEnum.value,value,guild)
 
-def log(guild, message, error=False):
-    logging_channel = "admin-chat"
-    try:
-        logging_channel = getConfigurationValue(ConfigObjects.LOGGING_CHANNEL_NAME,guild)
-    except:
-        pass
-    if not error:
-        getChannel(logging_channel, guild).send(f"[INFO] {message}")
-    else:
-        getChannel(logging_channel, guild).send(f"[ERROR] {message}")
 
 
 

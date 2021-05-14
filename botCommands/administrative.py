@@ -53,7 +53,7 @@ class Administrative(commands.Cog, name='Administrative'):
             daemon_running = True
             for indv_guild in self.bot.guilds:
                 asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
-                await log(indv_guild,"Verification is now available")
+                print("Started an Administrative thread")
                 asyncio.get_event_loop().create_task(CommBroker(indv_guild))
                 # Wellness Stuff for ECE 2024
                 if indv_guild.id == 706657592578932797:
@@ -152,7 +152,6 @@ class Administrative(commands.Cog, name='Administrative'):
                     mailResponse = sg.send(mailMessage)
                     # TODO: Validate mail response
                 except Exception as e:
-                    print(str(e))
                     await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
 
                 response = "<@" + str(
@@ -243,7 +242,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
 
                     except Exception as e:
-                        print(str(e))
                         await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
 
                 else:
@@ -255,7 +253,6 @@ class Administrative(commands.Cog, name='Administrative'):
                                         "please use `!verify <WATID>` to start."
                 await ctx.send(response)
         except Exception as e:
-            print(e)
             await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: <@&706658128409657366>: " + str(e))
             response = "<@" + str(
                 messageAuthor.id) + "> There was an error while verifying your user, or your code was invalid."
@@ -354,7 +351,6 @@ class Administrative(commands.Cog, name='Administrative'):
 
                 await ctx.send("All tasks completed successfully")
             except Exception as e:
-                print(str(e))
                 await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
                 await ctx.send("<@" + str(
                     messageAuthor.id) + "> You have entered invalid syntax, or the user you are trying to correlate is invalid. `!correlate <USER MENTION> <WatID>`")
@@ -416,7 +412,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 await ctx.send(embed=embed)
             except Exception as e:
                 response = "Invalid WatID or no WatID provided"
-                print(str(e))
                 await ctx.send(response)
         else:
             response = "You are not allowed to use this command. Local Directory Access Protocol Lookups are restricted to Administrators"
@@ -508,7 +503,6 @@ class Administrative(commands.Cog, name='Administrative'):
                     else:
                         await ctx.send("You already have a pending subscriber message request. Please `!sm confirm` or `!sm cancel`")
             except Exception as e:
-                print(e)
                 await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
 
     @commands.command()
@@ -528,7 +522,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 return
 
             for page in paginate(map(str,subscriberList)):
-                print(str(page))
                 embed.add_field(name="Subscribed Members",value="\n".join(map(str,page)), inline=False)
 
             await ctx.send(embed=embed)

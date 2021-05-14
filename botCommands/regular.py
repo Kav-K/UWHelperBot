@@ -85,7 +85,6 @@ class Regular(commands.Cog, name = 'Regular'):
             else:
                 raise Exception("Default calendar selection")
         except Exception as e:
-            await log(guild,str(e))
             calendar = urllib.request.urlopen(
                 getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK, guild))
 
