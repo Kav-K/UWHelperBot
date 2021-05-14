@@ -147,9 +147,9 @@ def log(guild, message, error=False):
         pass
 
     if not error:
-        await discord.utils.get(guild.channels,name=logging_channel).send(f"[INFO] {message}")
+        print("test")
     else:
-        await discord.utils.get(guild.channels,name=logging_channel).send(f"[INFO] {message}")
+        print("test2")
 
 
 
