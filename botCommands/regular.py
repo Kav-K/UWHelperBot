@@ -158,10 +158,10 @@ class Regular(commands.Cog, name = 'Regular'):
 
         try:
             selection = args[0]
-            if (selection == "205"):
+            if (selection == "203"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 205",
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 205",
+                embed.add_field(name="ECE 203",
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 203",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/NnpJGma.png")
                 await ctx.send(embed=embed)
@@ -245,55 +245,76 @@ class Regular(commands.Cog, name = 'Regular'):
         messageAuthor = ctx.author
         try:
             selection = args[0]
-            if (selection == "205"):
+            if (selection == "203"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 205",
-                                value="Here is a marking scheme breakdown for ECE 205",
+                embed.add_field(name="ECE 203",
+                                value="Here is a marking scheme breakdown for ECE 203",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/liVurz0.png")
+                embed.set_image(url="https://i.imgur.com/l49CkwW.png")
                 await ctx.send(embed=embed)
-            elif (selection == "240"):
+            elif (selection == "207"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 240",
-                                value="Here is a marking scheme breakdown for ECE 240",
+                embed.add_field(name="ECE 207",
+                                value="Here is a marking scheme breakdown for ECE 207",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/6LZxaop.png")
+                embed.set_image(url="https://i.imgur.com/qX3b6Fp.png")
                 await ctx.send(embed=embed)
-            elif (selection == "204"):
+            elif (selection == "224"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 204",
-                                value="Here is a marking scheme breakdown for ECE 204",
+                embed.add_field(name="ECE 224",
+                                value="Here is a marking scheme breakdown for ECE 224",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/LTeT043.png")
+                embed.set_image(url="https://i.imgur.com/gtsQboR.png")
                 await ctx.send(embed=embed)
-            elif (selection == "109"):
+            elif (selection == "298"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 109",
-                                value="Here is a marking scheme breakdown for ECE 109",
+                embed.add_field(name="ECE 298",
+                                value="Here is a marking scheme breakdown for ECE 298",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/LpZRcm8.png")
+                embed.set_image(url="https://i.imgur.com/Rgit8J3.png")
                 await ctx.send(embed=embed)
-            elif (selection == "250"):
+            elif (selection == "252"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 250",
-                                value="Here is a marking scheme breakdown for ECE 250",
+                embed.add_field(name="ECE 252",
+                                value="Here is a marking scheme breakdown for ECE 252",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/eFaKY6a.png")
+                embed.set_image(url="https://i.imgur.com/aUjjpQa.png")
                 await ctx.send(embed=embed)
-            elif (selection == "222"):
+            elif (selection == "208"):
                 embed = discord.Embed()
-                embed.add_field(name="MATH 222",
-                                value="Here is a marking scheme breakdown for ECE 222",
+                embed.add_field(name="ECE 208",
+                                value="Here is a marking scheme breakdown for ECE 208",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/2HiUZeR.png")
+                embed.set_image(url="https://i.imgur.com/pK7zkYD.png")
+                await ctx.send(embed=embed)
+            elif (selection == "206"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 206",
+                                value="Here is a marking scheme breakdown for ECE 206",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/MihMd18.png")
+                await ctx.send(embed=embed)
+            elif (selection == "260"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 260",
+                                value="Here is a marking scheme breakdown for ECE 260",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/bHXkemC.png")
+                await ctx.send(embed=embed)
+            elif (selection == "231"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 231",
+                                value="Here is a marking scheme breakdown for ECE 231",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/dqqbE6g.png")
                 await ctx.send(embed=embed)
             else:
 
                 await ctx.send("<@" + str(
-                    messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `240`, `250`, `204`, `205`, `109`, and `222`")
+                    messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `252`, `298`, `224`, `207`, `203`, `206`, `260`, `231`, and `208`")
         except:
             await ctx.send("<@" + str(
-                messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `240`, `250`, `204`, `205`, `109`, and `222`")
+                messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `252`, `298`, `224`, `207`, `203`, `206`, `260`, `231`, and `208`")
 
     @checks.channel_check()
     @commands.command()
