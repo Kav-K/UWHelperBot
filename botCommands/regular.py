@@ -526,7 +526,7 @@ class Regular(commands.Cog, name = 'Regular'):
         if ceRole not in ctx.author.roles:
 
             await ctx.author.add_roles(eeRole)
-            await ctx.send("<@"+str(ctx.author.id)+"> You have been given the Stream 8 role!")
+            await ctx.send("<@"+str(ctx.author.id)+"> You have been given the EE role!")
         else:
             await ctx.send("<@" + str(ctx.author.id) + "> You cannot be granted this role, you are already in CE.")
 
