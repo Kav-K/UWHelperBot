@@ -239,7 +239,7 @@ class Regular(commands.Cog, name = 'Regular'):
             embed.set_footer(text="https://github.com/Kav-K/UWHelperBot")
             embed.set_thumbnail(url=THUMBNAIL_LINK)
             gcal_link_ce = getConfigurationValue(ConfigObjects.SCHEDULE_LINK, messageAuthor.guild)
-            ical_link_ce = getConfigurationValue(ConfigObjects.SCHEDULE_ICAL_LINK, messageAuthor.guild)
+            ical_link_ce = getConfigurationValue(ConfigObjects.SCHEDULE_LINK_ICAL, messageAuthor.guild)
             gcal_link_ee = getConfigurationValue(ConfigObjects.SCHEDULE_LINK_ALT, messageAuthor.guild)
             ical_link_ee = getConfigurationValue(ConfigObjects.SCHEDULE_LINK_ALT_ICAL, messageAuthor.guild)
             if gcal_link_ce:
