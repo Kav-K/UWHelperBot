@@ -145,9 +145,9 @@ def log(guild, message, error=False):
     except:
         pass
     if not error:
-        await getChannel(logging_channel,guild).send(f"[INFO] {message}")
+        await getChannel(logging_channel, guild).send("[INFO] "+str(message))
     else:
-        await getChannel(logging_channel, guild).send(f"[ERROR] {message}")
+        await getChannel(logging_channel, guild).send("[ERROR] "+str(message))
 
 
 
