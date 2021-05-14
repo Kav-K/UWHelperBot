@@ -50,7 +50,7 @@ jobs:
           cd /home/bot
           kill -9 $(cat bot.pid)
           rm bot.pid
-          screen -d -m -S bot python3 bot.py
+          screen -dmS Bot python3 bot.py
           logout
           exit
         host: bot.kaveenk.com
