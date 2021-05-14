@@ -53,7 +53,7 @@ class Administrative(commands.Cog, name='Administrative'):
             daemon_running = True
             for indv_guild in self.bot.guilds:
                 asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
-                log(indv_guild,"Verification is now available")
+                await log(indv_guild,"Verification is now available")
                 asyncio.get_event_loop().create_task(CommBroker(indv_guild))
                 # Wellness Stuff for ECE 2024
                 if indv_guild.id == 706657592578932797:
