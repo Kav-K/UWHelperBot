@@ -140,14 +140,16 @@ def setConfigurationValue(configObjectEnum,value, guild):
 
 def log(guild, message, error=False):
     logging_channel = "admin-chat"
+
     try:
         logging_channel = getConfigurationValue(ConfigObjects.LOGGING_CHANNEL_NAME,guild)
     except:
         pass
+
     if not error:
-        await getChannel(logging_channel, guild).send("[INFO] "+str(message))
+        await discord.utils.get(guild.channels,name=logging_channel).send(f"[INFO] {message}")
     else:
-        await getChannel(logging_channel, guild).send("[ERROR] "+str(message))
+        await discord.utils.get(guild.channels,name=logging_channel).send(f"[INFO] {message}")
 
 
 
