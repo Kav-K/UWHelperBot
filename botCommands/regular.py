@@ -158,69 +158,79 @@ class Regular(commands.Cog, name = 'Regular'):
 
         try:
             selection = args[0]
-            if (selection == "203"):
+            if (selection == "252"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 252",
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 252",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/xJ6PyvM.png")
+                await ctx.send(embed=embed)
+
+            elif (selection == "298"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 298",
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 298",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/8wL6e4L.png")
+                await ctx.send(embed=embed)
+
+            elif (selection == "224"):
+
+                embed = discord.Embed()
+
+                embed.add_field(name="ECE 224",
+
+                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 224",
+
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/W895GA6.png")
+
+                await ctx.send(embed=embed)
+            elif (selection == "207"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 207",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 207",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/hIPEvER.png")
+                await ctx.send(embed=embed)
+            elif (selection == "203"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 203",
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 203",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 203",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/NnpJGma.png")
+                embed.set_image(url="https://i.imgur.com/9vsRdLx.png")
                 await ctx.send(embed=embed)
-                embed2 = discord.Embed()
-                embed2.set_image(url="https://i.imgur.com/hfWWTyH.png")
-                await ctx.send(embed=embed2)
-                embed3 = discord.Embed()
-                embed3.set_image(url="https://i.imgur.com/y1msEyZ.png")
-                await ctx.send(embed=embed3)
-
-            elif (selection == "240"):
+            elif (selection == "208"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 240",
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 240",
+                embed.add_field(name="ECE 208",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 208",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/t4JfgF1.png")
+                embed.set_image(url="https://i.imgur.com/Nu6EboE.png")
                 await ctx.send(embed=embed)
-
-            elif (selection == "204"):
-
+            elif (selection == "206"):
                 embed = discord.Embed()
-
-                embed.add_field(name="ECE 204",
-
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 204",
-
+                embed.add_field(name="ECE 206",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 206",
                                 inline=False)
-
+                embed.set_image(url="https://i.imgur.com/CPKSoKY.png")
                 await ctx.send(embed=embed)
-            elif (selection == "109"):
+            elif (selection == "260"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 109",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 109",
+                embed.add_field(name="ECE 260",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 260",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/LA3u8IJ.png")
+                embed.set_image(url="https://i.imgur.com/S2UwB2K.png")
                 await ctx.send(embed=embed)
-            elif (selection == "250"):
+            elif (selection == "231"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 250",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 250",
+                embed.add_field(name="ECE 231",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 231",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/Wm4VztM.png")
-                await ctx.send(embed=embed)
-                embed2 = discord.Embed()
-                embed2.set_image(url="https://i.imgur.com/pltdo8g.png")
-                await ctx.send(embed=embed2)
-                embed3 = discord.Embed()
-                embed3.set_image(url="https://i.imgur.com/jVVGvXF.png")
-                await ctx.send(embed=embed3)
-            elif (selection == "222"):
-                embed = discord.Embed()
-                embed.add_field(name="ECE 222",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 222",
-                                inline=False)
-                embed.set_image(url="https://i.imgur.com/PHiGakI.png")
+                embed.set_image(url="https://i.imgur.com/LQsnVZN.png")
                 await ctx.send(embed=embed)
             else:
                 await ctx.send("<@" + str(
-                    messageAuthor.id) + "> You must enter a valid course to view a specific course schedule, valid entries are valid entries are `240`, `250`, `204`, `205`, `109`, and `222`. Type the command without any options to get a lecture and live session calendar.")
+                    messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `252`, `298`, `224`, `207`, `203`, `206`, `260`, `231`, and `208`")
 
         except:
             embed = discord.Embed(title="Class Schedule",
@@ -228,15 +238,25 @@ class Regular(commands.Cog, name = 'Regular'):
                                   color=0x800080)
             embed.set_footer(text="https://github.com/Kav-K/UWHelperBot")
             embed.set_thumbnail(url=THUMBNAIL_LINK)
-            gcal_link = getConfigurationValue(ConfigObjects.SCHEDULE_LINK, messageAuthor.guild)
-            ical_link = getConfigurationValue(ConfigObjects.SCHEDULE_ICAL_LINK, messageAuthor.guild)
-            if gcal_link:
-                embed.add_field(name="GCal Link",
-                                value=gcal_link,
+            gcal_link_ce = getConfigurationValue(ConfigObjects.SCHEDULE_LINK, messageAuthor.guild)
+            ical_link_ce = getConfigurationValue(ConfigObjects.SCHEDULE_ICAL_LINK, messageAuthor.guild)
+            gcal_link_ee = getConfigurationValue(ConfigObjects.SCHEDULE_LINK_ALT, messageAuthor.guild)
+            ical_link_ee = getConfigurationValue(ConfigObjects.SCHEDULE_LINK_ALT_ICAL, messageAuthor.guild)
+            if gcal_link_ce:
+                embed.add_field(name="GCal Link (CE)",
+                                value=gcal_link_ce,
                                 inline=False)
-            if ical_link:
-                embed.add_field(name="iCal Link",
-                                value=ical_link,
+            if ical_link_ce:
+                embed.add_field(name="iCal Link (CE)",
+                                value=ical_link_ce,
+                                inline=False)
+            if gcal_link_ee:
+                embed.add_field(name="GCal Link (EE)",
+                                value=gcal_link_ee,
+                                inline=False)
+            if ical_link_ee:
+                embed.add_field(name="iCal Link (EE)",
+                                value=ical_link_ee,
                                 inline=False)
             await ctx.send(embed=embed)
 
@@ -321,6 +341,9 @@ class Regular(commands.Cog, name = 'Regular'):
     async def assignments(self, ctx, *args):
         messageAuthor = ctx.author
 
+        await ctx.send("Currently unavailable")
+        return
+        #Temp
         try:
             selection = args[0]
 
@@ -398,8 +421,11 @@ class Regular(commands.Cog, name = 'Regular'):
                               color=0x800080)
         embed.set_footer(text="https://github.com/Kav-K/Stream4Bot")
         embed.set_thumbnail(url=THUMBNAIL_LINK)
-        embed.add_field(name="Link",
-                        value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild),
+        embed.add_field(name="Link for CE",
+                        value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK_CE,guild),
+                        inline=False)
+        embed.add_field(name="Link for EE",
+                        value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK_EE,guild),
                         inline=False)
         await ctx.send(embed=embed)
 
@@ -471,9 +497,42 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def s8(self,ctx):
         s8Role = getRole("Stream 8",ctx.author.guild)
+        s1Role = getRole("Section 1", ctx.author.guild)
+        s2Role = getRole("Section 2", ctx.author.guild)
 
-        await ctx.author.add_roles(s8Role)
-        await ctx.send("<@"+str(ctx.author.id)+"> You have been given the Stream 8 role!")
+        if s1Role not in ctx.author.roles and s2Role not in ctx.author.roles:
+            await ctx.author.add_roles(s8Role)
+            await ctx.send("<@"+str(ctx.author.id)+"> You have been given the Stream 8 role!")
+        else:
+            await ctx.send("<@" + str(ctx.author.id) + "> You cannot be granted this role, you are already in Stream 4.")
+
+
+    @commands.command()
+    async def ce(self,ctx):
+        ceRole = getRole("CE",ctx.author.guild)
+        eeRole = getRole("EE", ctx.author.guild)
+
+        if eeRole not in ctx.author.roles:
+            await ctx.author.add_roles(ceRole)
+            await ctx.send("<@"+str(ctx.author.id)+"> You have been given the CE role!")
+        else:
+            await ctx.send("<@"+str(ctx.author.id)+"> You cannot be granted this role, you are already in EE.")
+
+    @commands.command()
+    async def ee(self,ctx):
+        eeRole = getRole("EE",ctx.author.guild)
+        ceRole = getRole("CE", ctx.author.guild)
+
+        if ceRole not in ctx.author.roles:
+
+            await ctx.author.add_roles(eeRole)
+            await ctx.send("<@"+str(ctx.author.id)+"> You have been given the Stream 8 role!")
+        else:
+            await ctx.send("<@" + str(ctx.author.id) + "> You cannot be granted this role, you are already in CE.")
+
+
+
+
     @commands.command()
     async def examinfo(self, ctx):
         embed = discord.Embed(title="Exam Information", color=0x800080)
