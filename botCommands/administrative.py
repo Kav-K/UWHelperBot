@@ -52,14 +52,9 @@ class Administrative(commands.Cog, name='Administrative'):
         if not daemon_running:
             daemon_running = True
             for indv_guild in self.bot.guilds:
-                verbose_channel = getChannel(VERBOSE_CHANNEL_NAME, indv_guild)
                 asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
-                await verbose_channel.send(str(indv_guild)+": The administrative daemon thread is now running.")
-                await verbose_channel.send("Verification is now available.")
-                print('Admin thread start')
+                log(indv_guild,"Verification is now available")
                 asyncio.get_event_loop().create_task(CommBroker(indv_guild))
-                await verbose_channel.send(str(indv_guild)+": The communications broker thread is now running.")
-                print('Communications broker thread start')
                 # Wellness Stuff for ECE 2024
                 if indv_guild.id == 706657592578932797:
                     asyncio.get_event_loop().create_task(WellnessFriend(indv_guild))
@@ -196,7 +191,6 @@ class Administrative(commands.Cog, name='Administrative'):
                 return
 
         except Exception as e:
-            print(e)
             response = "<@" + str(
                 messageAuthor.id) + "> No WatID provided or invalid watID, please use `!verify <watid>`." \
                                     " Your WatID is the username in your original email, for example, in " \

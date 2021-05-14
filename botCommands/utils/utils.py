@@ -138,3 +138,18 @@ def getConfigurationValue(configObjectEnum,guild):
 def setConfigurationValue(configObjectEnum,value, guild):
     db_set(configObjectEnum.value,value,guild)
 
+def log(guild, message, error=False):
+    logging_channel = "admin-chat"
+    try:
+        logging_channel = getConfigurationValue(ConfigObjects.LOGGING_CHANNEL_NAME,guild)
+    except:
+        pass
+    if not error:
+        await getChannel(logging_channel,guild).send(f"[INFO] {message}")
+    else:
+        await getChannel(logging_channel, guild).send(f"[ERROR] {message}")
+
+
+
+
+

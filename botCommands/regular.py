@@ -65,18 +65,30 @@ class Regular(commands.Cog, name = 'Regular'):
                         inline=False)
         await ctx.send(embed=embed)
 
-    #TODO Currently, I'm using python workarounds to account for things like full-day events, no end dates, timezones, etc, TODO is to
-    # figure out how to use inbuilt iCal features to do this and to shorten this code.
+
     @checks.channel_check()
     @commands.command()
-    async def upcoming(self, ctx):
+    async def upcoming(self, ctx, *args):
         dateMap = {}
         dateList = []
         guild = ctx.author.guild
 
-        # Opens the URL
-        calendar = urllib.request.urlopen(
-            getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK,guild))
+        calendar = None
+        try:
+            selection = str(args[0])
+            if (selection.lower() == "ee"):
+                calendar = urllib.request.urlopen(
+                    getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK_EE, guild))
+            elif (selection.lower() == "ce"):
+                calendar = urllib.request.urlopen(
+                    getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK_CE, guild))
+            else:
+                raise Exception("Default calendar selection")
+        except Exception as e:
+            log(guild,str(e))
+            calendar = urllib.request.urlopen(
+                getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK, guild))
+
         gcal = Calendar.from_ical(calendar.read())
         dateRangeEnd = datetime.now() + timedelta(days=7 if getConfigurationValue(ConfigObjects.UPCOMING_LENGTH,guild) == None else int(getConfigurationValue(ConfigObjects.UPCOMING_LENGTH,guild)))
 
