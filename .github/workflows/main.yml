@@ -51,7 +51,7 @@ jobs:
           kill -9 $(cat bot.pid)
           rm bot.pid
           echo "test"
-          screen -d -m -S bot python3 bot.py
+          screen -d -m python3 bot.py
           echo "test"
           logout
           exit
