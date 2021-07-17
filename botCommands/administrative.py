@@ -542,6 +542,7 @@ class Administrative(commands.Cog, name='Administrative'):
                                   color=0x800080)
             embed.add_field(name="Total Users",value=totalUsers,inline=False)
             embed.add_field(name="Total Verified Users",value=totalVerified,inline=False)
+            embed.add_field(name="Registered Servers", value=len(self.bot.guilds), inline=False)
             await ctx.send(embed=embed)
 
 
