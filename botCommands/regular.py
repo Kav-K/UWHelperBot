@@ -296,7 +296,7 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.set_image(url="https://i.imgur.com/EOrCjqx.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 224 (Part 2)", inline=False)
+                embed.add_field(name="ECE 224", inline=False, value="Part 2")
                 embed.set_image(url="https://i.imgur.com/M0XVi1Q.png")
                 await ctx.send(embed=embed)
             elif (selection == "298"):
@@ -429,7 +429,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.add_field(name="ECE 298", value="https://piazza.com/class/ksuvfdzadys4gi", inline=False)
         embed.add_field(name="ECE 252", value="https://piazza.com/class/ksxmygvlx5q1yu", inline=False)
         embed.add_field(name="ECE 208", value="https://www.piazza.com/uwaterloo.ca/fall2021/ece208", inline=False)
-        embed.add_field(name="ECE 206", value="Currently Unavailable (please contact us if found)", inline=False)
+        embed.add_field(name="ECE 206", value="https://piazza.com/class/kt7oku67m1g1ua", inline=False)
         embed.add_field(name="ECE 260", value="Currently Unavailable (please contact us if found)", inline=False)
         embed.add_field(name="ECE 231", value="Currently Unavailable (please contact us if found)", inline=False)
         await ctx.send(embed=embed)
