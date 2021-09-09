@@ -200,17 +200,17 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.set_image(url="https://i.imgur.com/JRHKlIZ.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203 (Part 2)", value="",
+                embed.add_field(name="ECE 203", value="Part 2",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/zVQxAEj.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203 (Part 3)", value="",
+                embed.add_field(name="ECE 203", value="Part 3",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/GdL4nzO.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203 (Part 4)", value="",
+                embed.add_field(name="ECE 203", value="Part 4",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/X7JWN4u.png")
                 await ctx.send(embed=embed)
@@ -321,7 +321,7 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.set_image(url="https://i.imgur.com/18Euzsx.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 208", value="",
+                embed.add_field(name="ECE 208", value="Part 2",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/QMUYUvw.png")
                 await ctx.send(embed=embed)
@@ -345,7 +345,8 @@ class Regular(commands.Cog, name = 'Regular'):
 
                 await ctx.send("<@" + str(
                     messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `252`, `298`, `224`, `207`, `203`, `206`, `260`, `231`, and `208`")
-        except:
+        except Exception as e:
+            print(str(e))
             await ctx.send("<@" + str(
                 messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `252`, `298`, `224`, `207`, `203`, `206`, `260`, `231`, and `208`")
 
