@@ -200,17 +200,17 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.set_image(url="https://i.imgur.com/JRHKlIZ.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203 (Part 2)",
+                embed.add_field(name="ECE 203 (Part 2)", value="",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/zVQxAEj.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203 (Part 3)",
+                embed.add_field(name="ECE 203 (Part 3)", value="",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/GdL4nzO.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203 (Part 4)",
+                embed.add_field(name="ECE 203 (Part 4)", value="",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/X7JWN4u.png")
                 await ctx.send(embed=embed)
@@ -321,7 +321,7 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.set_image(url="https://i.imgur.com/18Euzsx.png")
                 await ctx.send(embed=embed)
                 embed = discord.Embed()
-                embed.add_field(name="ECE 208",
+                embed.add_field(name="ECE 208", value="",
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/QMUYUvw.png")
                 await ctx.send(embed=embed)
