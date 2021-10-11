@@ -337,7 +337,7 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="ECE 260",
                                 value="Here is a marking scheme breakdown for ECE 260",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/XrPSilt.png")
+                embed.set_image(url="https://i.imgur.com/cghFK6k.png")
                 await ctx.send(embed=embed)
             elif (selection == "231"):
                 await ctx.send("Unavailable")
