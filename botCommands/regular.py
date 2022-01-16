@@ -492,7 +492,7 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def fml(self, ctx):
          #Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
-        finalExamDate = datetime.strptime("2021-12-23", "%Y-%m-%d")
+        finalExamDate = datetime.strptime("2022-04-26", "%Y-%m-%d")
         encouragingMessage =  "Hang in there! You've got about " + str((finalExamDate - datetime.now()).days) + " days until this is all over."
         await ctx.send(encouragingMessage)
     @commands.command()
