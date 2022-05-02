@@ -148,9 +148,16 @@ class Administrative(commands.Cog, name='Administrative'):
                         code) + '</strong>. <br>Please go back into discord and type !confirm (your code)<br><br>If this was not you, you can safely ignore this email.')
 
                 try:
-                    sg = SendGridAPIClient(os.getenv("SENDGRID_API_KEY"))
-                    mailResponse = sg.send(mailMessage)
-                    # TODO: Validate mail response
+                    response = requests.post(
+                        "https://api.mailgun.net/v3/kaveenk.com/messages",
+                        auth=("api", os.getenv("MAILGUN_API_KEY")),
+                        data={"from": "UW HelperBot Verification <verify@kaveenk.com>",
+                              "to": [watid + "@uwaterloo.ca"],
+                              "subject": "Your UWHelperBot Verification Code",
+                              "html": 'Hello, we recently received a request to verify a discord account for your WatID on the server ' + messageAuthor.guild.name + '! <br>If this was you, your verification code is: <strong>' + str(
+                        code) + '</strong>. <br>Please go back into discord and type !confirm (your code)<br><br>If this was not you, you can safely ignore this email.'})
+                    if response.status_code != 200:
+                        raise Exception('Failed to dispatch an email to ' + watid + "@uwaterloo.ca")
                 except Exception as e:
                     await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
 
