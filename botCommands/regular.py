@@ -295,6 +295,9 @@ class Regular(commands.Cog, name = 'Regular'):
                                 inline=False)
                 embed.set_image(url="https://i.imgur.com/iCGugP6.png")
                 await ctx.send(embed=embed)
+                embed2 = discord.Embed()
+                embed2.set_image(url="https://i.imgur.com/jgBYaHb.png")
+                await ctx.send(embed=embed2)
             elif (selection == "380"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 380",
