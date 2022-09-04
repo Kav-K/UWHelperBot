@@ -154,6 +154,8 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def schedule(self, ctx, *args):
         messageAuthor = ctx.author
+        await ctx.send("Currently unavailable -- will be updated when the term begins!")
+        return
 
         try:
             selection = args[0]
@@ -272,6 +274,9 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def breakdown(self, ctx, *args):
         messageAuthor = ctx.author
+
+        await ctx.send("Currently unavailable -- will be updated when the term begins!")
+        return
         try:
             selection = args[0]
             if (selection == "350"):
@@ -322,7 +327,7 @@ class Regular(commands.Cog, name = 'Regular'):
     async def assignments(self, ctx, *args):
         messageAuthor = ctx.author
 
-        await ctx.send("Currently unavailable")
+        await ctx.send("Currently unavailable -- will be updated when the term begins!")
         return
         #Temp
         try:
@@ -390,7 +395,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed = discord.Embed(title="Piazza Links", description="Here are our relevant piazza links.", color=0x800080)
         embed.set_footer(text="https://github.com/Kav-K/UWHelperBot")
         embed.set_thumbnail(url=THUMBNAIL_LINK)
-        embed.add_field(name="ECE 203", value="https://piazza.com/uwaterloo.ca/fall2021/ece20", inline=False)
+        embed.add_field(name="NONE AVAILABLE", value="Piazza links will be updated when the term starts.", inline=False)
         await ctx.send(embed=embed)
 
     @checks.channel_check()

@@ -481,6 +481,39 @@ class Administrative(commands.Cog, name='Administrative'):
             message = " ".join(args)
             await ctx.send(message.replace("\\n","\n"))
 
+    # Check that each member in the ECE 2024 guild has at least 5 roles, if not, shoot them a message saying that
+    # one might be missing
+    async def validaterolecount(self, ctx, *args):
+        #ONLY FOR USE ON THE ECE 2024 SERVER!
+        if (str(ctx.author.guild.id) != "706657592578932797"):
+            return
+
+        messageAuthor = ctx.author
+        guild = messageAuthor.guild
+        adminChannel = getChannel(VERBOSE_CHANNEL_NAME, guild)
+        verifiedRole = getRole("Verified", guild)
+        teachingRole = getRole("Teaching Staff", guild) # TODO make these constants lol. wtf.
+        bot = getRole("Bot", guild)
+
+        if not permittedAdmin(messageAuthor):
+            return
+
+        # Iterate through all verified members on the guild
+        courses = ["ece-313", "ece-320", "ece-331", "ece-351", "ece-356", "ece-358", "ece-360", "ece-373","sci-238",
+                   "earth-123", "earth-121", "syde-556", "econ-101" ]
+        course_roles = [getRole(course, guild) for course in courses]
+
+        for member in stream(ctx.author.guild.members) \
+                .filter(lambda x: teachingRole not in x.roles and verifiedRole in x.roles and bot not in x.roles). \
+                to_list():
+            role_count = sum([1 for role in member.roles if role in course_roles])
+            if role_count < 5:
+                # Send a DM using send_dm to the member
+                await send_dm(member, "You currently have < 5 course roles in the ECE 2024 Discord Server."
+                                      "Please visit #get-roles to add more roles to your account so that you can be"
+                                      "properly notified for course events.")
+
+
     @commands.command()
     async def sm(self,ctx,*args):
         messageAuthor = ctx.author
