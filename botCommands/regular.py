@@ -269,9 +269,8 @@ class Regular(commands.Cog, name = 'Regular'):
                 embed.add_field(name="ECE 307",
                                 value="Here is a marking scheme breakdown for ECE 307",
                                 inline=False)
-                file = discord.File("/home/bot/outlines/307.png", filename="307.png")
-                embed.set_image(url="attachment://307.png")
-                await ctx.send(file=file, embed=embed)
+                embed.set_image(url="https://i.imgur.com/UC37tLS.png")
+                await ctx.send(embed=embed)
             elif (selection == "358"):
                 embed = discord.Embed()
                 embed.add_field(name="ECE 358",
