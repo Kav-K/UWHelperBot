@@ -154,94 +154,81 @@ class Regular(commands.Cog, name = 'Regular'):
     @commands.command()
     async def schedule(self, ctx, *args):
         messageAuthor = ctx.author
-        await ctx.send("Currently unavailable -- will be updated when the term begins!")
-        return
+
 
         try:
             selection = args[0]
-            if (selection == "350"):
+            if (selection == "307"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 252",
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 252",
+                embed.add_field(name="ECE 307",
+                                value="View more details on UWFlow: https://uwflow.com/course/ece307",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/vRtlXO5.png")
+                embed.set_image(url="https://i.imgur.com/KNgX4nD.png")
                 await ctx.send(embed=embed)
 
-            elif (selection == "298"):
+            elif (selection == "358"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 298",
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 298",
+                embed.add_field(name="ECE 358",
+                                value="View more details on UWFlow: https://uwflow.com/course/ece358",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/jvbsbhv.png")
+                embed.set_image(url="https://i.imgur.com/5SuLsS0.png")
+                await ctx.send(embed=embed)
+                embed = discord.Embed()
+                embed.add_field(name="ECE 358", value="Part 2",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/LGeAWGi.png")
                 await ctx.send(embed=embed)
 
-            elif (selection == "224"):
+            elif (selection == "356"):
 
                 embed = discord.Embed()
 
-                embed.add_field(name="ECE 224",
+                embed.add_field(name="ECE 356",
 
-                                value="Here is a schedule of topics, tests, quizzes, and assignments for ECE 224",
+                                value="View more details on UWFlow: https://uwflow.com/course/ece356",
 
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/phV5bNz.png")
+                embed.set_image(url="https://i.imgur.com/OUcUOlX.png")
 
                 await ctx.send(embed=embed)
-            elif (selection == "207"):
+            elif (selection == "351"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 207",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 207",
+                embed.add_field(name="ECE 351",
+                                value="View more details on UWFlow: https://uwflow.com/course/ece351",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/DJBRWtj.png")
+                embed.set_image(url="https://i.imgur.com/vI4H2TB.png")
                 await ctx.send(embed=embed)
-            elif (selection == "203"):
+            elif (selection == "320"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 203",
+                embed.add_field(name="ECE 320",
+                                value="View more details on UWFlow: https://uwflow.com/course/ece320",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/JRHKlIZ.png")
+                embed.set_image(url="https://i.imgur.com/ohriek8.png")
                 await ctx.send(embed=embed)
+            elif (selection == "313"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203", value="Part 2",
+                embed.add_field(name="ECE 313",
+                                value="View more details on UWFlow: https://uwflow.com/course/ece313",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/zVQxAEj.png")
+                embed.set_image(url="https://i.imgur.com/F8OuLDQ.png")
                 await ctx.send(embed=embed)
+            elif (selection == "360"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203", value="Part 3",
+                embed.add_field(name="ECE 360",
+                                value="View more details on UWFlow: https://uwflow.com/course/ece360",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/GdL4nzO.png")
+                embed.set_image(url="https://i.imgur.com/hHRDH9z.png")
                 await ctx.send(embed=embed)
+            elif (selection == "373"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 203", value="Part 4",
+                embed.add_field(name="ECE 373",
+                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 373",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/X7JWN4u.png")
+                embed.set_image(url="https://i.imgur.com/ekFWAfo.png")
                 await ctx.send(embed=embed)
-            elif (selection == "208"):
-                embed = discord.Embed()
-                embed.add_field(name="ECE 208",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 208",
-                                inline=False)
-                embed.set_image(url="https://i.imgur.com/px1SgEJ.png")
-                await ctx.send(embed=embed)
-            elif (selection == "206"):
-                embed = discord.Embed()
-                embed.add_field(name="ECE 206",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 206",
-                                inline=False)
-                embed.set_image(url="https://i.imgur.com/WvIQ0S5.png")
-                await ctx.send(embed=embed)
-            elif (selection == "260"):
-                embed = discord.Embed()
-                embed.add_field(name="ECE 260",
-                                value="Here is a schedule of topics, labs, tests, quizzes, and assignments for ECE 260",
-                                inline=False)
-                embed.set_image(url="https://i.imgur.com/2GB2l4u.png")
-                await ctx.send(embed=embed)
-            elif (selection == "231"):
-                await ctx.send("Unavailable")
             else:
                 await ctx.send("<@" + str(
-                    messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `252`, `298`, `224`, `207`, `203`, `206`, `260`, `231`, and `208`")
+                    messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `307`, `358`, `356`, `351`, `320`, `313`, `360`, `373`")
 
         except:
             embed = discord.Embed(title="Class Schedule",
@@ -275,59 +262,79 @@ class Regular(commands.Cog, name = 'Regular'):
     async def breakdown(self, ctx, *args):
         messageAuthor = ctx.author
 
-        await ctx.send("Currently unavailable -- will be updated when the term begins!")
-        return
         try:
             selection = args[0]
-            if (selection == "350"):
+            if (selection == "307"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 350",
-                                value="Here is a marking scheme breakdown for ECE 350",
+                embed.add_field(name="ECE 307",
+                                value="Here is a marking scheme breakdown for ECE 307",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/aosmDV2.png")
+                embed.set_image(url="https://i.imgur.com/UC37tLS.png")
                 await ctx.send(embed=embed)
-            elif (selection == "327"):
+            elif (selection == "358"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 327",
-                                value="Here is a marking scheme breakdown for ECE 327",
+                embed.add_field(name="ECE 358",
+                                value="Here is a marking scheme breakdown for ECE 358",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/XepmaG5.png")
+                embed.set_image(url="https://i.imgur.com/ROSPuRa.png")
                 await ctx.send(embed=embed)
-            elif (selection == "318"):
+            elif (selection == "356"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 318",
-                                value="Here is a marking scheme breakdown for ECE 318",
+                embed.add_field(name="ECE 356",
+                                value="Here is a marking scheme breakdown for ECE 356",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/iCGugP6.png")
+                embed.set_image(url="https://i.imgur.com/UFzdMvZ.png")
                 await ctx.send(embed=embed)
-                embed2 = discord.Embed()
-                embed2.set_image(url="https://i.imgur.com/jgBYaHb.png")
-                await ctx.send(embed=embed2)
-            elif (selection == "380"):
+            elif (selection == "351"):
                 embed = discord.Embed()
-                embed.add_field(name="ECE 380",
-                                value="Here is a marking scheme breakdown for ECE 380",
+                embed.add_field(name="ECE 351",
+                                value="Here is a marking scheme breakdown for ECE 351",
                                 inline=False)
-                embed.set_image(url="https://i.imgur.com/AtEHvh3.png")
+                embed.set_image(url="https://i.imgur.com/LwtM99W.png")
                 await ctx.send(embed=embed)
-                embed2 = discord.Embed()
-                embed2.set_image(url="https://i.imgur.com/GMXL1r5.png")
-                await ctx.send(embed=embed2)
+            elif (selection == "320"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 320",
+                                value="Here is a marking scheme breakdown for ECE 320",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/LrE33un.png")
+                await ctx.send(embed=embed)
+            elif (selection == "313"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 313",
+                                value="Here is a marking scheme breakdown for ECE 313",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/RygWlXB.png")
+                await ctx.send(embed=embed)
+            elif (selection == "360"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 360",
+                                value="Here is a marking scheme breakdown for ECE 360",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/DxFDYnZ.png")
+                await ctx.send(embed=embed)
+            elif (selection == "373"):
+                embed = discord.Embed()
+                embed.add_field(name="ECE 373",
+                                value="Here is a marking scheme breakdown for ECE 373",
+                                inline=False)
+                embed.set_image(url="https://i.imgur.com/AP7o9nK.png")
+                await ctx.send(embed=embed)
             else:
 
                 await ctx.send("<@" + str(
-                    messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `318`, `380`, `350`, `327`")
+                    messageAuthor.id) + "> You must enter a valid course to view a course marking scheme breakdown, valid entries are `307`, `358`, `356`, `351`, `320`, `313`, `360`, and `373`")
         except Exception as e:
             print(str(e))
             await ctx.send("<@" + str(
-                messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `318`, `380`, `350`, `327`")
+                messageAuthor.id) + "> You must enter a course to view a course marking scheme breakdown, valid entries are `307`, `358`, `356`, `351`, `320`, `313`, `360`, and `373`")
 
     @checks.channel_check()
     @commands.command()
     async def assignments(self, ctx, *args):
         messageAuthor = ctx.author
 
-        await ctx.send("Currently unavailable -- will be updated when the term begins!")
+        await ctx.send("This feature is unavailable due to a lack of cohesion in the courses this term in regards to assignments.")
         return
         #Temp
         try:
@@ -395,7 +402,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed = discord.Embed(title="Piazza Links", description="Here are our relevant piazza links.", color=0x800080)
         embed.set_footer(text="https://github.com/Kav-K/UWHelperBot")
         embed.set_thumbnail(url=THUMBNAIL_LINK)
-        embed.add_field(name="NONE AVAILABLE", value="Piazza links will be updated when the term starts.", inline=False)
+        embed.add_field(name="NONE AVAILABLE", value="You should automatically be enrolled, just go to piazza.com!", inline=False)
         await ctx.send(embed=embed)
 
     @checks.channel_check()
