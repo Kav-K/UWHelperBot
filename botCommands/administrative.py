@@ -618,7 +618,7 @@ class Administrative(commands.Cog, name='Administrative'):
             try:
                 configOption = ConfigObjects[args[1]]
                 value = args[2]
-                appendConfigurationValue(configOption,ctx.author.guild,value)
+                appendConfigurationValue(configOption,value,ctx.author.guild)
                 await ctx.send("Value for :"+str(configOption)+" is: "+getConfigurationValue(configOption,ctx.author.guild))
                 return
             except Exception as e:
@@ -628,7 +628,7 @@ class Administrative(commands.Cog, name='Administrative'):
             try:
                 configOption = ConfigObjects[args[1]]
                 value = args[2]
-                setConfigurationValue(configOption,ctx.author.guild,value)
+                setConfigurationValue(configOption,value, ctx.author.guild)
                 await ctx.send("Value for :"+str(configOption)+" is set to: "+getConfigurationValue(configOption,ctx.author.guild))
                 return
             except Exception as e:
