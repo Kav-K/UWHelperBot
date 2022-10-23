@@ -72,9 +72,16 @@ class Administrative(commands.Cog, name='Administrative'):
     # A reaction listener that will prevent specific users from reacting to messages.
     @commands.Cog.listener()
     async def on_reaction_add(self, reaction, user):
-        disallowed_user_ids = [697188761397756035]
-        if user.id in disallowed_user_ids:
+        # Retrieve the REACTIONLESS_USERS list from the database
+        reactionless_users = getConfigurationValue(ConfigObjects.REACTIONLESS_USERS, reaction.message.guild)
+
+        # Transform into a set of ints
+        reactionless_users = set([int(x) for x in reactionless_users])
+
+        # If the user is in the set, remove the reaction
+        if user.id in reactionless_users:
             await reaction.remove(user)
+
 
     @commands.command()
     async def lock(self,ctx):
@@ -598,7 +605,7 @@ class Administrative(commands.Cog, name='Administrative'):
     async def config(self,ctx, *args):
         if not permittedAdmin(ctx.author):
             return
-        #View a config object
+
         if (args[0] == "VIEW"):
             try:
                 configOption = ConfigObjects[args[1]]
@@ -607,19 +614,26 @@ class Administrative(commands.Cog, name='Administrative'):
             except Exception as e:
                 await ctx.send("Invalid syntax or configuration object: "+str(e))
                 return
-        #Set a config object
-        try:
-            configOption = ConfigObjects[args[0]]
-            configValue = args[1]
-
-        except Exception as e:
-            await ctx.send("Invalid syntax or configuration object: "+str(e))
-            return
-        try:
-            setConfigurationValue(configOption,configValue,ctx.author.guild)
-            await ctx.send("Configuration value changed successfully")
-        except Exception as e:
-            await ctx.send("Internal error while changing configuration value: "+str(e))
+        elif (args[0] == "APPEND"):
+            try:
+                configOption = ConfigObjects[args[1]]
+                value = args[2]
+                appendConfigurationValue(configOption,ctx.author.guild,value)
+                await ctx.send("Value for :"+str(configOption)+" is: "+getConfigurationValue(configOption,ctx.author.guild))
+                return
+            except Exception as e:
+                await ctx.send("Invalid syntax or configuration object: "+str(e))
+                return
+        elif (args[0] == "SET"):
+            try:
+                configOption = ConfigObjects[args[1]]
+                value = args[2]
+                setConfigurationValue(configOption,ctx.author.guild,value)
+                await ctx.send("Value for :"+str(configOption)+" is set to: "+getConfigurationValue(configOption,ctx.author.guild))
+                return
+            except Exception as e:
+                await ctx.send("Invalid syntax or configuration object: "+str(e))
+                return
 
 
 #Announce a message to a channel on all servers (Usually should be admin-chat or bot-alerts, or bot-updates)

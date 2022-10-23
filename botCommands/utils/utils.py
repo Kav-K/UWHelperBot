@@ -135,6 +135,10 @@ def getConfigurationValue(configObjectEnum,guild):
 def setConfigurationValue(configObjectEnum,value, guild):
     db_set(configObjectEnum.value,value,guild)
 
+# Append a value to an existing configuration value in the database
+def appendConfigurationValue(configObjectEnum, value, guild):
+    db_append(configObjectEnum.value, value, guild)
+
 
 
 

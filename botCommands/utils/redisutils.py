@@ -113,6 +113,14 @@ def db_get(key,guild):
 def db_set(key, value,guild):
     database_instances[guild.id].set(key, value)
 
+# Append a value to a key in the database, comma separated
+def db_append(key, value,guild):
+    if db_exists(key, guild):
+        previous_value = db_get(key, guild)
+        db_set(key, previous_value + "," + value,guild)
+    else:
+        db_set(key, value,guild)
+
 #Checks a value exists in the redis db
 def db_exists(key,guild):
     return database_instances[guild.id].exists(key)
