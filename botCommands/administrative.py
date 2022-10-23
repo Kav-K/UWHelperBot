@@ -75,8 +75,8 @@ class Administrative(commands.Cog, name='Administrative'):
         # Retrieve the REACTIONLESS_USERS list from the database
         reactionless_users = getConfigurationValue(ConfigObjects.REACTIONLESS_USERS, reaction.message.guild)
 
-        # Transform into a set of ints
-        reactionless_users = set([int(x) for x in reactionless_users])
+        # Transform into a set split by comma
+        reactionless_users = set([int(x) for x in reactionless_users.split(",")])
 
         # If the user is in the set, remove the reaction
         if user.id in reactionless_users:
