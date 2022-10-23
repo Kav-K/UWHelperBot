@@ -69,6 +69,13 @@ class Administrative(commands.Cog, name='Administrative'):
         except:
             pass
 
+    # A reaction listener that will prevent specific users from reacting to messages.
+    @commands.Cog.listener()
+    async def on_reaction_add(self, reaction, user):
+        disallowed_user_ids = [697188761397756035]
+        if user.id in disallowed_user_ids:
+            await reaction.remove(user)
+
     @commands.command()
     async def lock(self,ctx):
         channel = ctx.channel

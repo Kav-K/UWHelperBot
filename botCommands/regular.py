@@ -2,6 +2,8 @@
 # Some of them will be made configurable at a later time :)
 #
 import os
+from random import random
+
 import pytz
 import requests
 import urllib.request
@@ -417,6 +419,7 @@ class Regular(commands.Cog, name = 'Regular'):
         embed.add_field(name="Link for CE and EE (Combined)",
                         value=getConfigurationValue(ConfigObjects.IMPORTANT_DATES_LINK_CE,guild),
                         inline=False)
+
         await ctx.send(embed=embed)
 
     @commands.command()
