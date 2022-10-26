@@ -140,4 +140,12 @@ def db_disconnect_all():
         except:
             pass
 
+def db_list_append(list, value, guild):
+    database_instances[guild.id].rpush(list, value)
+
+def db_list_remove(list, value, guild):
+    database_instances[guild.id].lrem(list, 0, value)
+
+def db_list_get(list, guild):
+    return database_instances[guild.id].lrange(list, 0, -1)
 

@@ -1,6 +1,8 @@
 
 import asyncio
 from datetime import datetime, timedelta
+
+from discord.ext import commands
 from pytz import timezone
 
 from botCommands.utils.utils import *
@@ -12,6 +14,47 @@ import discord
 
 ADMIN_THREAD_SLEEP = 10
 STUDYROOMS_SLEEP = 10
+REVOKATION_SLEEP = 10
+
+# Periodically check if the users in the guild are temporarily revoked, if their revokation time has passed,
+# give them access back again
+async def RevokationService(guild):
+    while True:
+
+        # Retrieve the list of revoked user IDs for this guild
+        revoked = db_list_get("revoked", guild)
+
+        # For every member of the guild, check if the member has a active revokation
+        for revoked_id in revoked:
+            if int(db_get("USER." + revoked_id + ".revoked", guild)) != 1:
+                continue
+
+            # If the revokation is active, check if the revokation time has passed
+            revokation_time = int(db_get("USER." + revoked_id + ".revoked_expiry", guild))
+
+            # Compare the current time timestamp to the revokation time
+            if int(datetime.now().timestamp()) > int(revokation_time):
+                # If the revokation time has passed, give the user access back
+                db_set("USER." + revoked_id + ".revoked", 0, guild)
+                db_set("USER." + revoked_id + ".revoked_expiry", 0, guild)
+                await getChannel("admin-chat", guild).send("Revoked user <@" + revoked_id + "> has been given access back.")
+
+                # Get the member object using the MemberConverter and the revoked_id
+                member = await commands.MemberConverter().convert(guild, revoked_id)
+
+                # Give the user access back
+                await member.add_roles(getRole("Verified", guild))
+                await member.remove_roles(getRole("access-revoked-temp", guild))
+
+                # Send a DM to the user
+                await member.send("Your access to the server has been restored. Please read the rules and follow them.")
+
+                # Remove the ID from the list of revoked users
+                db_list_remove("revoked", revoked_id, guild)
+
+        await asyncio.sleep(REVOKATION_SLEEP)
+
+
 
 async def AdministrativeThread(guild):
 

@@ -59,6 +59,9 @@ class Administrative(commands.Cog, name='Administrative'):
                     asyncio.get_event_loop().create_task(StudyRooms(indv_guild))
                     print("Started a Study Room thread for the ECE 2024 server")
 
+                    asyncio.get_event_loop().create_task(RevokationService(indv_guild))
+                    print("Started a Revokation Service thread for the ECE 2024 server")
+
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
@@ -284,6 +287,66 @@ class Administrative(commands.Cog, name='Administrative'):
             response = "<@" + str(
                 messageAuthor.id) + "> There was an error while verifying your user, or your code was invalid."
             await ctx.send(response)
+
+    """
+    Revoke the "Verified" role from a user, and give them the "access-revoked-temp" role. The arguments for 
+    this command should be the Mention of a user to revoke and a time in "AdBhCmDs" format.
+    """
+    @commands.command()
+    @commands.has_role("Admin")
+    async def revoke(self, ctx, *args):
+        author = ctx.author
+        guild = author.guild
+
+        try:
+            revokee = args[0]
+            time = args[1]
+            revokee = await commands.MemberConverter().convert(ctx, revokee)
+            revokee_expiry = getRole("Verified", guild)
+            await revokee.remove_roles(revokee_expiry)
+            revokee_expiry = getRole("access-revoked-temp", guild)
+
+            await revokee.add_roles(revokee_expiry)
+            await getChannel("admin-chat", guild).send("Access revoked for <@" + str(revokee.id) + "> for " + time)
+
+            # Parse the time string in "AdBhCmDs" format and convert it to seconds, each time unit type can be optional, for
+            # example, "1d" is 1 day, "1h" is 1 hour, "1d1h" is 1 day and 1 hour, "1d1h1m" is 1 day, 1 hour and 1 minute, etc.
+            time = time.lower()
+            time = time.replace(" ", "")
+            time = time.replace("d", "d ")
+            time = time.replace("h", "h ")
+            time = time.replace("m", "m ")
+            time = time.replace("s", "s ")
+            time = time.split(" ")
+            time = [x for x in time if x != ""]
+
+            seconds = 0
+            for t in time:
+                if "d" in t:
+                    seconds += int(t.replace("d", "")) * 86400
+                elif "h" in t:
+                    seconds += int(t.replace("h", "")) * 3600
+                elif "m" in t:
+                    seconds += int(t.replace("m", "")) * 60
+                elif "s" in t:
+                    seconds += int(t.replace("s", ""))
+
+
+            # Add the user to the redis database
+            db_set("USER." + str(revokee.id) + ".revoked", 1, guild)
+
+            # Add the seconds to the current timestamp and save the revokee expiry time in the database for the user
+            revokee_expiry = int((datetime.now() + timedelta(seconds=seconds)).timestamp())
+            db_set("USER." + str(revokee.id) + ".revoked_expiry", revokee_expiry, guild)
+
+            # Add the revoked ID to a redis list for easy access
+            db_list_append("revoked", str(revokee.id), guild)
+
+
+
+        except Exception as e:
+            await getChannel(VERBOSE_CHANNEL_NAME, guild).send("ERROR: " + str(e))
+
 
     @commands.command()
     async def cancelverification(self, ctx):
