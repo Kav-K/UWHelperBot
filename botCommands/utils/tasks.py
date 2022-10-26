@@ -19,40 +19,46 @@ REVOKATION_SLEEP = 10
 # Periodically check if the users in the guild are temporarily revoked, if their revokation time has passed,
 # give them access back again
 async def RevokationService(guild):
-    while True:
+    try:
+        while True:
 
-        # Retrieve the list of revoked user IDs for this guild
-        revoked = db_list_get("revoked", guild)
+            # Retrieve the list of revoked user IDs for this guild
+            revoked = db_list_get("revoked", guild)
 
-        # For every member of the guild, check if the member has a active revokation
-        for revoked_id in revoked:
-            if int(db_get("USER." + revoked_id + ".revoked", guild)) != 1:
-                continue
+            # For every member of the guild, check if the member has a active revokation
+            for revoked_id in revoked:
+                revoked_status = int(db_get("USER." + str(revoked_id) + ".revoked", guild).decode("utf-8"))
 
-            # If the revokation is active, check if the revokation time has passed
-            revokation_time = int(db_get("USER." + revoked_id + ".revoked_expiry", guild))
+                if revoked_status is None or revoked_status != 1:
+                    continue
 
-            # Compare the current time timestamp to the revokation time
-            if int(datetime.now().timestamp()) > int(revokation_time):
-                # If the revokation time has passed, give the user access back
-                db_set("USER." + revoked_id + ".revoked", 0, guild)
-                db_set("USER." + revoked_id + ".revoked_expiry", 0, guild)
-                await getChannel("admin-chat", guild).send("Revoked user <@" + revoked_id + "> has been given access back.")
+                # If the revokation is active, check if the revokation time has passed
+                revokation_time = int(db_get("USER." + revoked_id + ".revoked_expiry", guild))
 
-                # Get the member object using the MemberConverter and the revoked_id
-                member = await commands.MemberConverter().convert(guild, revoked_id)
+                # Compare the current time timestamp to the revokation time
+                if int(datetime.now().timestamp()) > int(revokation_time):
+                    # If the revokation time has passed, give the user access back
+                    db_set("USER." + revoked_id + ".revoked", 0, guild)
+                    db_set("USER." + revoked_id + ".revoked_expiry", 0, guild)
+                    await getChannel("admin-chat", guild).send("Revoked user <@" + revoked_id + "> has been given access back.")
 
-                # Give the user access back
-                await member.add_roles(getRole("Verified", guild))
-                await member.remove_roles(getRole("access-revoked-temp", guild))
+                    # Get the member object using the MemberConverter and the revoked_id
+                    member = await commands.MemberConverter().convert(guild, revoked_id)
 
-                # Send a DM to the user
-                await member.send("Your access to the server has been restored. Please read the rules and follow them.")
+                    # Give the user access back
+                    await member.add_roles(getRole("Verified", guild))
+                    await member.remove_roles(getRole("access-revoked-temp", guild))
 
-                # Remove the ID from the list of revoked users
-                db_list_remove("revoked", revoked_id, guild)
+                    # Send a DM to the user
+                    await member.send("Your access to the server has been restored. Please read the rules and follow them.")
 
-        await asyncio.sleep(REVOKATION_SLEEP)
+                    # Remove the ID from the list of revoked users
+                    db_list_remove("revoked", revoked_id, guild)
+
+            await asyncio.sleep(REVOKATION_SLEEP)
+    except Exception as e:
+        print("Error in RevokationService: " + str(e))
+        await getChannel("admin-chat", guild).send("Error in RevokationService: " + str(e))
 
 
 
