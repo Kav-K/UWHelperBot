@@ -52,12 +52,12 @@ class Administrative(commands.Cog, name='Administrative'):
         if not daemon_running:
             daemon_running = True
             for indv_guild in self.bot.guilds:
-                asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
-                print("Started an Administrative thread")
-                asyncio.get_event_loop().create_task(CommBroker(indv_guild))
-                # Wellness Stuff for ECE 2024
                 if indv_guild.id == 706657592578932797:
-                    asyncio.get_event_loop().create_task(WellnessFriend(indv_guild))
+                    asyncio.get_event_loop().create_task(AdministrativeThread(indv_guild))
+                    print("Started an Administrative thread for the ECE 2024 server")
+
+                    asyncio.get_event_loop().create_task(StudyRooms(indv_guild))
+                    print("Started a Study Room thread for the ECE 2024 server")
 
 
     @commands.Cog.listener()
@@ -494,6 +494,13 @@ class Administrative(commands.Cog, name='Administrative'):
         if permittedAdmin(messageAuthor):
             message = " ".join(args)
             await ctx.send(message.replace("\\n","\n"))
+
+    """
+    Temporarily revoke the "Verified" role from a user for a specified amount of time 
+    """
+    @commands.command()
+    async def revoke(self, ctx, *args):
+
 
     # Check that each member in the ECE 2024 guild has at least 5 roles, if not, shoot them a message saying that
     # one might be missing

@@ -10,53 +10,59 @@ import random
 
 import discord
 
-ADMIN_THREAD_SLEEP = 5
-COMM_THREAD_SLEEP = 1
-
-# THESE FUNCTIONALITIES ARE A WORK IN PROGRESS CURRENTLY!
-async def CommBroker(guild):
-    print("Comm Broker started successfully.")
-
-    #Get the subscriber message queue
-    smSubscriber = db_get_pubsub(guild)
-    smSubscriber.subscribe("smQueue")
-
-    while True:
-        db_set("totalUsers",len(guild.members),guild)
-        db_set("totalOnline",len(stream(guild.members).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
-        adminRole = getRole("Admin",guild)
-        facultyRole = getRole("Teaching Staff",guild)
-        botRole = getRole("Bot",guild)
-
-        db_set("facultyOnline",len(stream(guild.members).filter(lambda x: facultyRole in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
-        db_set("adminOnline", len(stream(guild.members).filter(lambda x: adminRole in x.roles and botRole not in x.roles).filter(lambda x: x.status != discord.Status.offline).to_list()),guild)
-        try:
-            db_set("openTickets", len(getCategory("Open Tickets",guild).text_channels),guild)
-        except Exception as e:
-            pass
-
-
-        for textChannel in guild.channels:
-            if (db_exists(textChannel.name+".pendingMessages",guild)):
-                messageToSend = db_get(textChannel.name+".pendingMessages",guild)
-                db_delete(textChannel.name+".pendingMessages",guild)
-                await textChannel.send(messageToSend)
-
-        try:
-            messageToBroadcast = smSubscriber.get_message()['data'].decode('utf-8')
-            print(messageToBroadcast)
-            await sendSubscriberMessage(messageToBroadcast,guild)
-        except Exception as e:
-            pass
-
-
-
-        await asyncio.sleep(COMM_THREAD_SLEEP)
+ADMIN_THREAD_SLEEP = 10
+STUDYROOMS_SLEEP = 10
 
 async def AdministrativeThread(guild):
-    # ONLY FOR THE ECE 2024 SERVER!
-    if (str(guild.id) != "706657592578932797"):
-        return
+
+    try:
+        guestRole = getRole("Guest",guild)
+        verifiedRole = getRole("Verified",guild)
+        sec2Role = getRole("Section 2",guild)
+        sec1Role = getRole("Section 1",guild)
+        s8Role = getRole("Stream 8",guild)
+        adminChannel = getChannel("admin-chat",guild)
+
+        while True:
+            est = timezone('US/Eastern')
+            currentTime = datetime.now().astimezone(est)
+
+            #Remove verified role for professors!
+            for member in guild.members:
+                if (hasRoles(member, ["Teaching Staff","Verified"],guild)):
+                    await member.remove_roles(verifiedRole)
+                    await adminChannel.send("WARNING: The user <@"+str(member.id)+"> is teaching faculty and was found to have the Verified role. It has been removed.")
+
+
+            #Remove section roles for guests, remove double section ranks.
+            for member in guild.members:
+                if (hasRoles(member,["Section 1","Stream 8"],guild) or hasRoles(member,["Section 2","Stream 8"],guild)):
+
+                    await member.remove_roles(s8Role)
+                    await adminChannel.send("WARNING: The user <@" + str(
+                        member.id) + "> has duplicate roles. The user has been reset to the section 1 or 2 role. Stream 8 role has been removed.")
+
+
+                if (hasRoles(member,["Section 1","Section 2"],guild)):
+                    await member.remove_roles(sec1Role)
+                    await adminChannel.send("WARNING: The user <@" + str(
+                        member.id) + "> has duplicate roles. The user has been reset to the section 2 role. Section 1 role has been removed.")
+
+
+                if (hasRoles(member,["Guest","Section 2"],guild) or hasRoles(member,["Guest","Section 1"],guild)):
+                    print("Yeet")
+                    await member.remove_roles(sec2Role) if sec2Role in member.roles else await member.remove_roles(sec1Role)
+                    await adminChannel.send("WARNING: The user <@" + str(
+                        member.id) + "> is a guest and was found to have a sectional rank. It has been removed.")
+
+            await asyncio.sleep(ADMIN_THREAD_SLEEP)
+
+    except Exception as e:
+        print("Error in AdministrativeThread: " + str(e))
+        await getChannel("admin-chat",guild).send("Error in AdministrativeThread: " + str(e))
+
+
+async def StudyRooms(guild):
 
     try:
         guestRole = getRole("Guest",guild)
@@ -148,43 +154,8 @@ async def AdministrativeThread(guild):
                 except Exception as e:
                     print(e)
 
-            await asyncio.sleep(ADMIN_THREAD_SLEEP)
+            await asyncio.sleep(STUDYROOMS_SLEEP)
     except Exception as e:
         print(str(e))
         await getChannel("admin-chat",guild).send("ERROR: " + str(e))
 
-
-async def WellnessFriend(guild):
-    if (str(guild.id) != "706657592578932797"):
-        return
-
-    try:
-        while True:
-            messagesArray = requests.get("https://type.fit/api/quotes").json()
-            selectedMessage = messagesArray[random.randint(0, len(messagesArray) - 1)]
-            inspirationalMessage = str(selectedMessage["text"]) + "\n - " + str(selectedMessage["author"])
-
-            # Using this as a reference: https://uwaterloo.ca/registrar/important-dates/entry?id=180
-            finalExamDate = datetime.strptime("2022-04-26", "%Y-%m-%d")
-            encouragingMessage = "Don't forget, we've got " + str(
-                (finalExamDate - datetime.now()).days) + " days until this is all over."
-
-            wellnessMessage = "Hey ECE peeps!!\n\nHere's your inspirational QOTD: \n\n" + "" if inspirationalMessage is None else inspirationalMessage + \
-                                                                                                                                  "\n\nPlease know that if you need any support, people are there for you: \n" \
-                                                                                                                                  "Counselling Services - 519-888-4567 ext. 32655\n" \
-                                                                                                                                  "Mates - mates@wusa.ca\n" \
-                                                                                                                                  "Here 24/7 - 1-844-437-3247\n" \
-                                                                                                                                  "Health Services - Student Medical Clinic - 519-888-4096\n" \
-                                                                                                                                  "Grand River Hospital - 519-749-4300\n" \
-                                                                                                                                  "St. Mary's Hospital - 519-744-3311\n" \
-                                                                                                                                  "Good2Talk - 1-866-925-5454\n" \
-                                                                                                                                  "Crisis Services Canada - 1-833-456-4566 or by text 45645\n\n"
-            await getChannel("wellness", guild).send(wellnessMessage + encouragingMessage)
-
-            # Interval in seconds
-            if db_get("WELLNESS_INTERVAL", guild) is not None:
-                await asyncio.sleep(int(db_get("WELLNESS_INTERVAL", guild)))
-
-    except Exception as e:
-        print(str(e))
-        await getChannel("admin-chat", guild).send("ERROR: " + str(e))
