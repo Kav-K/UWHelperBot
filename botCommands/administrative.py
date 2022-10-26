@@ -495,11 +495,6 @@ class Administrative(commands.Cog, name='Administrative'):
             message = " ".join(args)
             await ctx.send(message.replace("\\n","\n"))
 
-    """
-    Temporarily revoke the "Verified" role from a user for a specified amount of time 
-    """
-    @commands.command()
-    async def revoke(self, ctx, *args):
 
 
     # Check that each member in the ECE 2024 guild has at least 5 roles, if not, shoot them a message saying that
