@@ -7,6 +7,7 @@ A user verification system and online instruction utility for the University of 
 
 The Stream4Bot (Now renamed to UWaterloo Helper) was originally created as a way to verify Discord users with the University of Waterloo. The bot takes in a WatID and will connect to the UWaterloo Open Data Initiative to obtain information about the WatID, send a verification email to the email belonging to the WatID, and when the user types the verification code back into discord, they will be verified and given access to all of the channels, and their discord name will be changed to the one on file by the University of Waterloo
 
+
 The bot was also created with more features in mind, such as a system for showing students upcoming due dates and live lectures (using google calendars), a reminder and announcement system that people can subscribe to, and features that provide students with information about course syllabi and assignments, making this a fully fledged online instruction tool for Discord.
 
 # User Commands
