@@ -2,3 +2,4 @@ venv/
 .idea/
 bot.pid
 .env
+__pycache__

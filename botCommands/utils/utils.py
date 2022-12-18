@@ -11,11 +11,9 @@ GUILDS = []
 ADMIN_ROLE_NAME = "Admin"
 TEACHING_STAFF_ROLE_NAME = "Teaching Staff"
 
-#Clean and restart the bot
+#Restart the bot
 def restart():
-    pidfile = os.getenv("PID_FILE")
-    os.remove(pidfile)
-    os.execv(__file__,sys.argv)
+    os.execl(sys.executable, os.path.abspath(__file__), *sys.argv) 
 
 #Get all subscribed members to notifications
 def getSubscribers(guild):
@@ -117,7 +115,8 @@ async def send_dm(member: discord.Member, content):
 
 #See if a user is a GLOBAL DEVELOPER for the bot
 def permittedDeveloper(user):
-    return str(user.id) in os.getenv("DEVELOPERS").split(",")
+    if os.getenv("DEVELOPER_ID") is None: return ""
+    return str(user.id) in os.getenv("DEVELOPER_ID").split(",")
 
 #See if a user is permitted to run an admin command
 def permittedAdmin(user):
