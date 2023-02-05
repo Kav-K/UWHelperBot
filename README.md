@@ -119,5 +119,3 @@ The links for textbooks, the important dates calendar (which feeds into !upcomin
 We still have work underway to make this much more configurable and easy to start without any major code refactoring, and this repository will be updated when that is done.
 
 In the meanwhile, if you are interested in using this bot on your own server, I can allocate a partition on my own host and set it up for you on your server for free, just reach out to me on Discord (Kaveen#0001) or by email at k5kumara@uwaterloo.ca
-
-  
