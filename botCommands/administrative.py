@@ -464,12 +464,12 @@ class Administrative(commands.Cog, name='Administrative'):
 
                     userInfo = search(discordID, self.bot.guilds)
                     if (userInfo["status"]):
-                        firstName = "Unavailable" if userInfo["firstName"] is "" else userInfo["firstName"]
-                        lastName = "Unavailable" if userInfo["lastName"] is "" else userInfo["lastName"]
-                        department = "Unavailable" if userInfo["department"] is "" else userInfo["department"]
-                        commonNames = "Unavailable" if userInfo["commonNames"] is "" else userInfo["commonNames"]
-                        emails = "Unavailable" if userInfo["emails"] is "" else userInfo["emails"]
-                        watID = "Unavailable" if userInfo["watID"] is "" else userInfo["watID"]
+                        firstName = "Unavailable" if userInfo["firstName"] == "" else userInfo["firstName"]
+                        lastName = "Unavailable" if userInfo["lastName"] == "" else userInfo["lastName"]
+                        department = "Unavailable" if userInfo["department"] == "" else userInfo["department"]
+                        commonNames = "Unavailable" if userInfo["commonNames"] == "" else userInfo["commonNames"]
+                        emails = "Unavailable" if userInfo["emails"] == "" else userInfo["emails"]
+                        watID = "Unavailable" if userInfo["watID"] == "" else userInfo["watID"]
                 else:
 
                     await ctx.send("User not found")
